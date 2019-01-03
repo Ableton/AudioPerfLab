@@ -31,12 +31,21 @@ void ParallelSineBank::process(const int threadIndex, const int numFrames)
   std::fill_n(stereoBuffer[0].begin(), numFrames, 0.0f);
   std::fill_n(stereoBuffer[1].begin(), numFrames, 0.0f);
 
-  int partialIndex = 0;
-  while ((partialIndex = mNumTakenPartials++) < int(mPartials.size()))
+  // Process partials in chunks to avoid contention on the mNumTakenPartials atomic
+  int partialStartIndex = 0;
+  while ((partialStartIndex = mNumTakenPartials.fetch_add(kNumPartialsPerProcessingChunk))
+         < int(mPartials.size()))
   {
-    auto& partial = mPartials[partialIndex];
-    partial.targetAmp = partialIndex < mNumActivePartials ? partial.ampWhenActive : 0.0f;
-    processPartial(partial, numFrames, stereoBuffer);
+    const int partialEndIndex =
+      std::min(partialStartIndex + kNumPartialsPerProcessingChunk, int(mPartials.size()));
+    for (int partialIndex = partialStartIndex; partialIndex < partialEndIndex;
+         ++partialIndex)
+    {
+      auto& partial = mPartials[partialIndex];
+      partial.targetAmp =
+        partialIndex < mNumActivePartials ? partial.ampWhenActive : 0.0f;
+      processPartial(partial, numFrames, stereoBuffer);
+    }
   }
 }
 
