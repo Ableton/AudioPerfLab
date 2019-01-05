@@ -68,14 +68,15 @@ class ViewController: UITableViewController {
       coreActivityStackView.addArrangedSubview(rowForCore)
     }
 
-    updateAllControls()
+    initalizeControls()
     updateActivityViewState()
   }
 
-  private func updateAllControls() {
+  private func initalizeControls() {
     bufferSizeStepper.value = log2(Double(engine.preferredBufferSize))
     bufferSizeField.text = String(engine.preferredBufferSize)
     numSinesSlider.value = Float(engine.numSines)
+    numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
     numThreadsSlider.value = Float(engine.numWorkerThreads + 1)
