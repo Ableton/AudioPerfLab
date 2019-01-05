@@ -54,7 +54,7 @@ std::vector<Partial> generateChord(
 
     const auto amp = 1.0f / (noteNumbers.size() * 5);
     appendPartials(amp, -1.0f, -2.0f);
-    appendPartials(amp, 0.5f, -1.0f);
+    appendPartials(amp, -0.5f, -1.0f);
     appendPartials(amp, 0.0f, 0.0f);
     appendPartials(amp, 0.5f, 1.0f);
     appendPartials(amp, 1.0f, 2.0f);
