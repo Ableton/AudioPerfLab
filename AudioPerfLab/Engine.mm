@@ -300,11 +300,11 @@ private:
   std::atomic<float> mSineBurstDuration{0.0f};
   int mNumSineBurstSamplesRemaining{0};
 
-  std::atomic<bool> mAreWorkerThreadsActive{true};
+  std::atomic<bool> mAreWorkerThreadsActive{false};
   std::vector<std::thread> mWorkerThreads;
   std::array<std::atomic<int>, MAX_NUM_THREADS> mCpuNumbers;
 
-  std::atomic<bool> mAreBusyThreadsActive{true};
+  std::atomic<bool> mAreBusyThreadsActive{false};
   std::vector<std::thread> mBusyThreads;
 
   std::atomic<double> mMinimumLoad{0.0};
