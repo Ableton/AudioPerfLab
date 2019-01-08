@@ -69,7 +69,6 @@ class ViewController: UITableViewController {
     }
 
     initalizeControls()
-    updateActivityViewState()
   }
 
   private func initalizeControls() {
@@ -88,10 +87,6 @@ class ViewController: UITableViewController {
 
   private func updateWorkIntervalEnabledState() {
     isWorkIntervalOnSwitch.isEnabled = engine.numWorkerThreads > 0
-  }
-
-  @IBAction private func activityViewsEnabledChanged(_ sender: Any) {
-    updateActivityViewState()
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
@@ -122,10 +117,6 @@ class ViewController: UITableViewController {
 
   @IBAction private func playSineBurst(_ sender: Any) {
     engine.playSineBurst(for: 0.25, additionalSines: Int32(numBurstSinesSlider.value))
-  }
-
-  private func updateActivityViewState() {
-    displayLink!.isPaused = activityViewsEnabledSwitch.isOn == false
   }
 
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
@@ -174,13 +165,15 @@ class ViewController: UITableViewController {
   @objc private func displayLinkStep(displayLink: CADisplayLink) {
     fetchDriveMeasurements()
 
-    let activityViewStartTime = displayLink.timestamp -
-      ViewController.activityViewDuration - ViewController.activityViewLatency
-    driveDurationsView.startTime = activityViewStartTime
-    driveDurationsView.setNeedsDisplay()
-    for coreActivityView in coreActivityViews {
-      coreActivityView.startTime = activityViewStartTime
-      coreActivityView.setNeedsDisplay()
+    if activityViewsEnabledSwitch.isOn {
+      let activityViewStartTime = displayLink.timestamp -
+        ViewController.activityViewDuration - ViewController.activityViewLatency
+      driveDurationsView.startTime = activityViewStartTime
+      driveDurationsView.setNeedsDisplay()
+      for coreActivityView in coreActivityViews {
+        coreActivityView.startTime = activityViewStartTime
+        coreActivityView.setNeedsDisplay()
+      }
     }
   }
 }
