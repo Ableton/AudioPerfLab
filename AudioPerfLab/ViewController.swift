@@ -5,7 +5,7 @@ import os
 
 class ViewController: UITableViewController {
   private var engine = Engine()
-  private var displayLink: CADisplayLink!
+  private var displayLink: CADisplayLink?
   private var coreActivityViews: [ActivityView] = []
   private var lastNumFrames: Int32?
 
@@ -41,7 +41,7 @@ class ViewController: UITableViewController {
     minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
 
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
-    displayLink.add(to: .main, forMode: RunLoop.Mode.common)
+    displayLink!.add(to: .main, forMode: RunLoop.Mode.common)
 
     let extraBufferingDuration = ViewController.activityViewLatency * 2
     driveDurationsView.duration = ViewController.activityViewDuration
@@ -124,7 +124,7 @@ class ViewController: UITableViewController {
   }
 
   private func updateActivityViewState() {
-    displayLink.isPaused = activityViewsEnabledSwitch.isOn == false
+    displayLink!.isPaused = activityViewsEnabledSwitch.isOn == false
   }
 
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
@@ -170,7 +170,7 @@ class ViewController: UITableViewController {
     })
   }
 
-  @objc private func displayLinkStep(displaylink: CADisplayLink) {
+  @objc private func displayLinkStep(displayLink: CADisplayLink) {
     fetchDriveMeasurements()
 
     let activityViewStartTime = displayLink.timestamp -
