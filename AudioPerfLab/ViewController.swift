@@ -23,7 +23,7 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
   @IBOutlet weak private var numBurstSinesSlider: SliderWithValue!
-  @IBOutlet weak private var numThreadsSlider: SliderWithValue!
+  @IBOutlet weak private var numProcessingThreadsSlider: SliderWithValue!
   @IBOutlet weak private var minimumLoadSlider: SliderWithValue!
   @IBOutlet weak private var numBusyThreadsSlider: SliderWithValue!
   @IBOutlet weak private var processInDriverThreadControl: UISegmentedControl!
@@ -92,7 +92,7 @@ class ViewController: UITableViewController {
     numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numThreadsSlider.value =
+    numProcessingThreadsSlider.value =
       Float(engine.numWorkerThreads + (engine.processInDriverThread ? 1 : 0))
     minimumLoadSlider.value = Float(engine.minimumLoad)
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
@@ -108,7 +108,7 @@ class ViewController: UITableViewController {
 
   private func updateNumEngineWorkerThreads() {
     engine.numWorkerThreads =
-      Int32(numThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
+      Int32(numProcessingThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
     updateWorkIntervalEnabledState()
   }
 
@@ -121,7 +121,7 @@ class ViewController: UITableViewController {
     engine.numSines = Int32(numSinesSlider!.value)
   }
 
-  @IBAction private func numThreadsChanged(_ sender: Any) {
+  @IBAction private func numProcessingThreadsChanged(_ sender: Any) {
     updateNumEngineWorkerThreads()
   }
 
