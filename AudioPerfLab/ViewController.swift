@@ -141,7 +141,7 @@ class ViewController: UITableViewController {
   }
 
   private func fetchDriveMeasurements() {
-    engine.fetchMeasurements({(measurement: DriveMeasurement) in
+    engine.fetchMeasurements({ measurement in
       if measurement.numFrames != self.lastNumFrames {
         os_log("Actual Buffer Size: %d", measurement.numFrames)
         self.lastNumFrames = measurement.numFrames
