@@ -58,10 +58,10 @@ class ActivityView: UIView {
     duration sampleDuration: Double,
     value: Double,
     color: UIColor) {
-    if endTime != nil {
-      let missingTimeInPoints = timeToPosition(time - endTime!)
+    if let endTime = endTime {
+      let missingTimeInPoints = timeToPosition(time - endTime)
       if missingTimeInPoints >= 0.1 {
-        addPoints(position: timeToPosition(endTime!),
+        addPoints(position: timeToPosition(endTime),
                     length: missingTimeInPoints,
                      value: 1.0,
                      color: missingTimeColor)
@@ -79,14 +79,13 @@ class ActivityView: UIView {
   }
 
   override func draw(_ rect: CGRect) {
-    guard !points.isEmpty else { return }
-    guard endTime != nil else { return }
+    guard let endTime = endTime, !points.isEmpty else { return }
 
     let path = UIBezierPath()
     path.move(to: CGPoint(x: 0.0, y: self.frame.height))
 
     let startPosition = timeToPosition(startTime)
-    let endPosition = timeToPosition(min(startTime + duration, endTime!))
+    let endPosition = timeToPosition(min(startTime + duration, endTime))
     let drawWidth = max(0.0, endPosition - startPosition)
     let readIndex =
       Int(startPosition.truncatingRemainder(dividingBy: Double(points.count)))
