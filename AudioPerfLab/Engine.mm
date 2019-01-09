@@ -226,8 +226,6 @@ private:
     }
     mCpuNumbers[0] = cpuNumber();
 
-    // Wait for worker threads to finish to avoid a race if a slow worker hasn't started
-    // processing yet (e.g. is still clearing its output buffer).
     for (size_t i = 0; i < mWorkerThreads.size(); ++i)
     {
       mFinishedWorkSemaphore.wait();
