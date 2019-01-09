@@ -4,7 +4,7 @@ import UIKit
 import os
 
 class ViewController: UITableViewController {
-  private var engine: Engine!
+  private var engine = Engine()
   private var displayLink: CADisplayLink!
   private var coreActivityViews: [ActivityView] = []
   private var lastNumFrames: Int32?
@@ -68,7 +68,6 @@ class ViewController: UITableViewController {
       coreActivityStackView.addArrangedSubview(rowForCore)
     }
 
-    engine = Engine()
     updateAllControls()
     updateActivityViewState()
   }
