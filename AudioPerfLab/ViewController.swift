@@ -130,13 +130,12 @@ class ViewController: UITableViewController {
 
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
     var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
-    var threadIndex = 0
-    for reflectedCpuNum in Mirror(reflecting: measurement.cpuNumbers).children {
+    for (threadIndex, reflectedCpuNum) in
+      Mirror(reflecting: measurement.cpuNumbers).children.enumerated() {
       let cpuNum = Int(reflectedCpuNum.value as! Int32)
       if cpuNum >= 0 {
         threadIndexPerCpu[cpuNum] = threadIndex
       }
-      threadIndex = threadIndex + 1
     }
     return threadIndexPerCpu
   }
@@ -159,8 +158,7 @@ class ViewController: UITableViewController {
           color: color)
 
       let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
-      var cpuNumber = 0
-      for coreActivityView in self.coreActivityViews {
+      for (cpuNumber, coreActivityView) in self.coreActivityViews.enumerated() {
         let threadIndex = threadIndexPerCpu[cpuNumber]
         let color = threadIndex != nil
           ? ViewController.threadColors[threadIndex!] : UIColor.white
@@ -169,7 +167,6 @@ class ViewController: UITableViewController {
           duration: numFramesInSeconds,
           value: threadIndex != nil ? 1.0 : 0.0,
           color: color)
-        cpuNumber = cpuNumber + 1
       }
     })
   }
