@@ -2,7 +2,7 @@
 
 An app for exploring real-time audio performance on iOS devices.
 
-<img src="Screenshot.png" alt="Screenshot" height="500">
+<img src="Screenshot.png" alt="Screenshot" height="600">
 
 # Requirements
 
