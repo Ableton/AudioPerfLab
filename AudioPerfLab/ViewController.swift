@@ -3,10 +3,6 @@
 import UIKit
 import os
 
-fileprivate func numProcessors() -> Int {
-  return ProcessInfo.processInfo.processorCount
-}
-
 class ViewController: UITableViewController {
   private var engine: Engine!
   private var displayLink: CADisplayLink!
@@ -53,7 +49,7 @@ class ViewController: UITableViewController {
     driveDurationsView!.extraBufferingDuration = extraBufferingDuration
     driveDurationsView!.missingTimeColor = ViewController.dropoutColor
 
-    for i in 0..<numProcessors() {
+    for i in 0..<numberOfProcessors {
       let coreActivityView = ActivityView.init(frame: .zero)
       coreActivityView.duration = ViewController.activityViewDuration
       coreActivityView.extraBufferingDuration = extraBufferingDuration
@@ -135,7 +131,7 @@ class ViewController: UITableViewController {
 
   static private func getThreadIndexPerCpu(fromMeasurement measurement: DriveMeasurement)
     -> Array<Int?> {
-    var threadIndexPerCpu = Array<Int?>(repeating: nil, count: numProcessors())
+    var threadIndexPerCpu = Array<Int?>(repeating: nil, count: numberOfProcessors)
     var threadIndex = 0
     for reflectedCpuNum in Mirror(reflecting: measurement.cpuNumbers).children {
       let cpuNum = Int(reflectedCpuNum.value as! Int32)
@@ -193,4 +189,8 @@ class ViewController: UITableViewController {
       coreActivityView.setNeedsDisplay()
     }
   }
+}
+
+fileprivate var numberOfProcessors: Int {
+  return ProcessInfo.processInfo.processorCount
 }
