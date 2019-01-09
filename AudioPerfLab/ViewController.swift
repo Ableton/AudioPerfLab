@@ -44,9 +44,9 @@ class ViewController: UITableViewController {
     displayLink.add(to: .main, forMode: RunLoop.Mode.common)
 
     let extraBufferingDuration = ViewController.activityViewLatency * 2
-    driveDurationsView!.duration = ViewController.activityViewDuration
-    driveDurationsView!.extraBufferingDuration = extraBufferingDuration
-    driveDurationsView!.missingTimeColor = ViewController.dropoutColor
+    driveDurationsView.duration = ViewController.activityViewDuration
+    driveDurationsView.extraBufferingDuration = extraBufferingDuration
+    driveDurationsView.missingTimeColor = ViewController.dropoutColor
 
     for i in 0..<numberOfProcessors {
       let coreActivityView = ActivityView.init(frame: .zero)
@@ -104,7 +104,7 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func numThreadsChanged(_ sender: Any) {
-    engine.numWorkerThreads = Int32(numThreadsSlider!.value) - 1
+    engine.numWorkerThreads = Int32(numThreadsSlider.value) - 1
     updateWorkIntervalEnabledState()
   }
 
