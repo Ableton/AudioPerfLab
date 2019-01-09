@@ -4,7 +4,7 @@
 class SliderWithValue: UISlider {
   let kValueFieldWidth: CGFloat = 53.0
   let kPadding: CGFloat = 16.0
-  var valueFormatter = { (value: Float) in return String(Int(value)) }
+  var valueFormatter = { (value: Float) in return "\(Int(value))" }
   private var valueField = UITextField()
 
   override var value: Float {

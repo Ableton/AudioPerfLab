@@ -38,8 +38,7 @@ class ViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    minimumLoadSlider.valueFormatter =
-      { (value: Float) in return String(Int(value * 100)) + "%" }
+    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
 
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
     displayLink.add(to: .main, forMode: RunLoop.Mode.common)
