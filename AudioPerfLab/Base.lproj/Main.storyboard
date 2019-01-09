@@ -63,10 +63,46 @@
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
+                            <tableViewSection headerTitle="Energy" id="HmW-es-KkF" userLabel="Energy">
+                                <cells>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="60" id="xca-Od-uhf">
+                                        <rect key="frame" x="0.0" y="313.5" width="375" height="60"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="xca-Od-uhf" id="XU0-O2-WVU">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="59.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zKA-IQ-0AC" customClass="ActivityView" customModule="AudioPerfLab" customModuleProvider="target">
+                                                    <rect key="frame" x="0.0" y="0.0" width="375" height="60"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                </view>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="30" id="K95-1F-I8T">
+                                        <rect key="frame" x="0.0" y="373.5" width="375" height="30"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="K95-1F-I8T" id="hjB-1C-RcP">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="29.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="1.23 Watts" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="E0o-Ly-UDl">
+                                                    <rect key="frame" x="0.0" y="0.0" width="375" height="30"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </cells>
+                            </tableViewSection>
                             <tableViewSection headerTitle="Audio" id="1l7-t1-wml">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="BGw-qO-FDc">
-                                        <rect key="frame" x="0.0" y="313.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="442.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="BGw-qO-FDc" id="BbX-fx-gSJ">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -100,7 +136,7 @@ Size</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="7qJ-qd-iMH">
-                                        <rect key="frame" x="0.0" y="368.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="497.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7qJ-qd-iMH" id="Lkk-gj-YrE">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -126,7 +162,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="mPt-vd-9zT">
-                                        <rect key="frame" x="0.0" y="423.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="552.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="mPt-vd-9zT" id="lDB-B0-VkA">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -160,7 +196,7 @@ Waves</string>
                             <tableViewSection headerTitle="Threads" id="E6o-zQ-NR6">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="f9Y-Ns-oN4">
-                                        <rect key="frame" x="0.0" y="517.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="646.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="f9Y-Ns-oN4" id="hAO-dT-xQJ">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -184,7 +220,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="HTh-TI-vBh">
-                                        <rect key="frame" x="0.0" y="572.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="701.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HTh-TI-vBh" id="YXt-Wa-ts7">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -208,7 +244,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="HDh-jF-bfO">
-                                        <rect key="frame" x="0.0" y="627.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="756.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HDh-jF-bfO" id="rbT-Oo-ST3">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -232,7 +268,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="cM4-CX-w6Z">
-                                        <rect key="frame" x="0.0" y="682.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="811.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="cM4-CX-w6Z" id="00f-ty-feA">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="54.5"/>
@@ -265,12 +301,14 @@ Waves</string>
                         <outlet property="bufferSizeStepper" destination="g2c-Vc-FJ9" id="etD-bI-I18"/>
                         <outlet property="coreActivityStackView" destination="heS-GQ-vBA" id="bGS-hy-eeW"/>
                         <outlet property="driveDurationsView" destination="S6c-hK-xwh" id="UsV-pP-vHn"/>
+                        <outlet property="energyUsageView" destination="zKA-IQ-0AC" id="dD1-j2-Ud6"/>
                         <outlet property="isWorkIntervalOnSwitch" destination="mSE-gp-SAh" id="Rsk-e3-KcB"/>
                         <outlet property="minimumLoadSlider" destination="fLx-Wo-wc4" id="oBL-Vb-3ML"/>
                         <outlet property="numBurstSinesSlider" destination="F9G-mj-FFP" id="rkA-zV-xAL"/>
                         <outlet property="numBusyThreadsSlider" destination="wyU-wZ-utb" id="06D-wT-OZH"/>
                         <outlet property="numSinesSlider" destination="us9-gh-B8E" id="hrc-H4-yk2"/>
                         <outlet property="numThreadsSlider" destination="yOJ-8d-Twq" id="Dod-fv-vW2"/>
+                        <outlet property="powerLabel" destination="E0o-Ly-UDl" id="KMZ-1S-y6a"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="44A-Ma-yCL" userLabel="First Responder" sceneMemberID="firstResponder"/>

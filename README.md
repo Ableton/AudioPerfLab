@@ -22,6 +22,10 @@ The switch controls if the visualization is active. This can be used to freeze t
 
 A visualization of thread activity on each CPU core. Each row represents a core and each color represents an audio thread. On the iPhone 8, X, XS, and XR, the first four rows represent energy-efficient cores (Mistral/Tempest) and the last two rows represent high-performance cores (Monsoon/Vortex). The CoreAudio I/O thread is drawn in black.
 
+## Energy
+
+A graph of the estimated power consumption of the AudioPerLab process in watts. This can be used to compare the energy impact of different approaches for defeating core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
+
 ## Audio
 
 ### Buffer Size

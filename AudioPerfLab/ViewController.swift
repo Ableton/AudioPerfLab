@@ -9,9 +9,16 @@ class ViewController: UITableViewController {
   private var coreActivityViews: [ActivityView] = []
   private var lastNumFrames: Int32?
 
+  private var lastEnergyUsageTime: Double?
+  private var lastEnergyUsage: Double?
+  private var lastPowerLabelUpdateTime: Double?
+  private var lastEnergyUsageForPowerLabel: Double?
+
   @IBOutlet weak private var activityViewsEnabledSwitch: UISwitch!
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var coreActivityStackView: UIStackView!
+  @IBOutlet weak private var energyUsageView: ActivityView!
+  @IBOutlet weak private var powerLabel: UILabel!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
@@ -20,6 +27,9 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var minimumLoadSlider: SliderWithValue!
   @IBOutlet weak private var numBusyThreadsSlider: SliderWithValue!
   @IBOutlet weak private var isWorkIntervalOnSwitch: UISwitch!
+
+  private static let maxEnergyViewPowerInWatts = 5.0
+  private static let powerLabelUpdateInterval = 0.5
 
   private static let activityViewDuration = 3.0
   private static let activityViewLatency = 0.1
@@ -67,6 +77,9 @@ class ViewController: UITableViewController {
       rowForCore.addSubview(label)
       coreActivityStackView.addArrangedSubview(rowForCore)
     }
+
+    energyUsageView.duration = ViewController.activityViewDuration
+    energyUsageView.extraBufferingDuration = extraBufferingDuration
 
     initalizeControls()
   }
@@ -162,8 +175,45 @@ class ViewController: UITableViewController {
     })
   }
 
+  private func fetchPowerMeasurements() {
+    let time = CACurrentMediaTime()
+    guard let energyUsage = taskEnergyUsage else {
+      powerLabel.text = "Energy Usage Data Not Available"
+      return
+    }
+
+    if let lastEnergyUsageTime = lastEnergyUsageTime,
+       let lastEnergyUsage = lastEnergyUsage {
+      let timeDelta = time - lastEnergyUsageTime
+      let powerInWatts = (energyUsage - lastEnergyUsage) / timeDelta
+      let normalizedPower = powerInWatts / ViewController.maxEnergyViewPowerInWatts
+      energyUsageView.addSample(
+        time: lastEnergyUsageTime,
+        duration: timeDelta,
+        value: normalizedPower,
+        color: UIColor.black)
+    }
+
+    if (lastPowerLabelUpdateTime == nil
+      || (time - lastPowerLabelUpdateTime!) > ViewController.powerLabelUpdateInterval) {
+      if let lastPowerLabelUpdateTime = lastPowerLabelUpdateTime,
+         let lastEnergyUsageForPowerLabel = lastEnergyUsageForPowerLabel {
+        let timeDelta = time - lastPowerLabelUpdateTime
+        let powerInWatts = (energyUsage - lastEnergyUsageForPowerLabel) / timeDelta
+        powerLabel.text = String(format: "%.2f Watts", powerInWatts)
+      }
+
+      lastPowerLabelUpdateTime = time
+      lastEnergyUsageForPowerLabel = energyUsage
+    }
+
+    lastEnergyUsageTime = time
+    lastEnergyUsage = energyUsage
+  }
+
   @objc private func displayLinkStep(displayLink: CADisplayLink) {
     fetchDriveMeasurements()
+    fetchPowerMeasurements()
 
     if activityViewsEnabledSwitch.isOn {
       let activityViewStartTime = displayLink.timestamp -
@@ -174,10 +224,35 @@ class ViewController: UITableViewController {
         coreActivityView.startTime = activityViewStartTime
         coreActivityView.setNeedsDisplay()
       }
+      energyUsageView.startTime = activityViewStartTime
+      energyUsageView.setNeedsDisplay()
     }
   }
 }
 
 fileprivate var numberOfProcessors: Int {
   return ProcessInfo.processInfo.processorCount
+}
+
+// Energy usage of the current task in joules
+fileprivate var taskEnergyUsage: Double? {
+#if arch(arm) || arch(arm64)
+  let TASK_POWER_INFO_V2_COUNT =
+    MemoryLayout<task_power_info_v2>.stride/MemoryLayout<natural_t>.stride
+  var info = task_power_info_v2()
+  var count = mach_msg_type_number_t(TASK_POWER_INFO_V2_COUNT)
+
+  let kerr = withUnsafeMutablePointer(to: &info) {
+    $0.withMemoryRebound(to: integer_t.self, capacity: TASK_POWER_INFO_V2_COUNT) {
+        task_info(mach_task_self_,
+                  task_flavor_t(TASK_POWER_INFO_V2),
+                  $0,
+                  &count)
+    }
+  }
+
+  return kerr == KERN_SUCCESS ? Double(info.task_energy) * 1.0e-9 : nil
+#else
+  return nil
+#endif
 }
