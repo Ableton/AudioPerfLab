@@ -21,7 +21,7 @@ class ActivityView: UIView {
   var startTime = 0.0
   var missingTimeColor = UIColor.white
 
-  private var points = Array<Point>()
+  private var points: [Point] = []
   private var endTime: Double?
   private var lastWritePosition: Double?
 

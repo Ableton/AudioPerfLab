@@ -6,7 +6,7 @@ import os
 class ViewController: UITableViewController {
   private var engine: Engine!
   private var displayLink: CADisplayLink!
-  private var coreActivityViews = [ActivityView]()
+  private var coreActivityViews: [ActivityView] = []
   private var lastNumFrames: Int32?
 
   @IBOutlet weak private var activityViewsEnabledSwitch: UISwitch!
@@ -130,8 +130,8 @@ class ViewController: UITableViewController {
   }
 
   static private func getThreadIndexPerCpu(fromMeasurement measurement: DriveMeasurement)
-    -> Array<Int?> {
-    var threadIndexPerCpu = Array<Int?>(repeating: nil, count: numberOfProcessors)
+    -> [Int?] {
+    var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
     var threadIndex = 0
     for reflectedCpuNum in Mirror(reflecting: measurement.cpuNumbers).children {
       let cpuNum = Int(reflectedCpuNum.value as! Int32)
