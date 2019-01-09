@@ -128,8 +128,7 @@ class ViewController: UITableViewController {
     displayLink.isPaused = activityViewsEnabledSwitch.isOn == false
   }
 
-  static private func getThreadIndexPerCpu(fromMeasurement measurement: DriveMeasurement)
-    -> [Int?] {
+  static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
     var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
     var threadIndex = 0
     for reflectedCpuNum in Mirror(reflecting: measurement.cpuNumbers).children {
@@ -159,8 +158,7 @@ class ViewController: UITableViewController {
           value: measurement.duration / numFramesInSeconds,
           color: color)
 
-      let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(
-        fromMeasurement: measurement)
+      let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
       var cpuNumber = 0
       for coreActivityView in self.coreActivityViews {
         let threadIndex = threadIndexPerCpu[cpuNumber]
