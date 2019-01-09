@@ -3,18 +3,6 @@
 import UIKit
 import os
 
-extension UISegmentedControl {
-  func findSegmentIndex(withTitle: String) -> Int?
-  {
-    for i in 0..<self.numberOfSegments {
-      if self.titleForSegment(at: i) == withTitle {
-        return i
-      }
-    }
-    return nil
-  }
-}
-
 fileprivate func numProcessors() -> Int {
   return ProcessInfo.processInfo.processorCount
 }
