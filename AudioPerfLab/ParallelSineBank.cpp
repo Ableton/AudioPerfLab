@@ -18,18 +18,21 @@ void ParallelSineBank::setPartials(std::vector<Partial> partials)
   mPartials = std::move(partials);
 }
 
-void ParallelSineBank::prepare(const int numActivePartials)
+void ParallelSineBank::prepare(const int numActivePartials, const int numFrames)
 {
   mNumActivePartials = numActivePartials;
   mNumTakenPartials = 0;
+
+  for (auto& stereoBuffer : mBuffers)
+  {
+    std::fill_n(stereoBuffer[0].begin(), numFrames, 0.0f);
+    std::fill_n(stereoBuffer[1].begin(), numFrames, 0.0f);
+  }
 }
 
 void ParallelSineBank::process(const int threadIndex, const int numFrames)
 {
   auto& stereoBuffer = mBuffers[threadIndex];
-
-  std::fill_n(stereoBuffer[0].begin(), numFrames, 0.0f);
-  std::fill_n(stereoBuffer[1].begin(), numFrames, 0.0f);
 
   // Process partials in chunks to avoid contention on the mNumTakenPartials atomic
   int partialStartIndex = 0;

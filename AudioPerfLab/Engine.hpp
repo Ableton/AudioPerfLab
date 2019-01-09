@@ -19,6 +19,7 @@ struct DriveMeasurement
 @property(nonatomic, readonly) double sampleRate;
 @property(nonatomic) int numWorkerThreads;
 @property(nonatomic) int numBusyThreads;
+@property(nonatomic) bool processInDriverThread;
 @property(nonatomic) bool isWorkIntervalOn;
 @property(nonatomic) double minimumLoad;
 @property(nonatomic) int numSines;

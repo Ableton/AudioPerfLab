@@ -71,6 +71,12 @@ public:
     }
   }
 
+  bool processInDriverThread() const { return mProcessInDriverThread; }
+  void setProcessInDriverThread(const bool isEnabled)
+  {
+    mProcessInDriverThread = isEnabled;
+  }
+
   bool isWorkIntervalOn() const { return mIsWorkIntervalOn; }
   void setIsWorkIntervalOn(const bool isOn)
   {
@@ -207,14 +213,17 @@ private:
     const auto effectiveNumSines =
       mNumSines.load()
       + (mNumSineBurstSamplesRemaining > 0 ? mNumAdditionalSinesInBurst.load() : 0);
-    mSineBank.prepare(effectiveNumSines);
+    mSineBank.prepare(effectiveNumSines, inNumberFrames);
 
     for (size_t i = 0; i < mWorkerThreads.size(); ++i)
     {
       mStartWorkingSemaphore.post();
     }
 
-    mSineBank.process(0, inNumberFrames);
+    if (mProcessInDriverThread)
+    {
+      mSineBank.process(0, inNumberFrames);
+    }
     mCpuNumbers[0] = cpuNumber();
 
     // Wait for worker threads to finish to avoid a race if a slow worker hasn't started
@@ -231,7 +240,10 @@ private:
     const auto endTime = Clock::now();
     addDriveMeasurement(inTimeStamp->mHostTime, startTime, endTime, inNumberFrames);
 
-    yieldUntilMinimumLoad(startTime, inNumberFrames);
+    if (mProcessInDriverThread)
+    {
+      yieldUntilMinimumLoad(startTime, inNumberFrames);
+    }
 
     return noErr;
   }
@@ -292,6 +304,7 @@ private:
   Driver mDriver;
   ParallelSineBank mSineBank;
 
+  std::atomic<bool> mProcessInDriverThread{true};
   bool mIsWorkIntervalOn{false};
   std::atomic<int> mNumFrames{0};
   std::atomic<int> mNumSines{kDefaultNumSines};
@@ -331,6 +344,12 @@ private:
 
 - (int)numBusyThreads { return mEngine.numBusyThreads(); }
 - (void)setNumBusyThreads:(int)numThreads { mEngine.setNumBusyThreads(numThreads); }
+
+- (bool)processInDriverThread { return mEngine.processInDriverThread(); }
+- (void)setProcessInDriverThread:(bool)enabled
+{
+  mEngine.setProcessInDriverThread(enabled);
+}
 
 - (bool)isWorkIntervalOn { return mEngine.isWorkIntervalOn(); }
 - (void)setIsWorkIntervalOn:(bool)isOn { mEngine.setIsWorkIntervalOn(isOn); }

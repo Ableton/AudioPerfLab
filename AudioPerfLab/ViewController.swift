@@ -26,6 +26,7 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var numThreadsSlider: SliderWithValue!
   @IBOutlet weak private var minimumLoadSlider: SliderWithValue!
   @IBOutlet weak private var numBusyThreadsSlider: SliderWithValue!
+  @IBOutlet weak private var processInDriverThreadControl: UISegmentedControl!
   @IBOutlet weak private var isWorkIntervalOnSwitch: UISwitch!
 
   private static let maxEnergyViewPowerInWatts = 5.0
@@ -91,15 +92,24 @@ class ViewController: UITableViewController {
     numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numThreadsSlider.value = Float(engine.numWorkerThreads + 1)
+    numThreadsSlider.value =
+      Float(engine.numWorkerThreads + (engine.processInDriverThread ? 1 : 0))
     minimumLoadSlider.value = Float(engine.minimumLoad)
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
+    processInDriverThreadControl.selectedSegmentIndex =
+      engine.processInDriverThread ? 1 : 0
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
     updateWorkIntervalEnabledState()
   }
 
   private func updateWorkIntervalEnabledState() {
     isWorkIntervalOnSwitch.isEnabled = engine.numWorkerThreads > 0
+  }
+
+  private func updateNumEngineWorkerThreads() {
+    engine.numWorkerThreads =
+      Int32(numThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
+    updateWorkIntervalEnabledState()
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
@@ -112,8 +122,7 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func numThreadsChanged(_ sender: Any) {
-    engine.numWorkerThreads = Int32(numThreadsSlider.value) - 1
-    updateWorkIntervalEnabledState()
+    updateNumEngineWorkerThreads()
   }
 
   @IBAction private func minimumLoadChanged(_ sender: Any) {
@@ -122,6 +131,11 @@ class ViewController: UITableViewController {
 
   @IBAction private func numBusyThreadsChanged(_ sender: Any) {
     engine.numBusyThreads = Int32(numBusyThreadsSlider!.value)
+  }
+
+  @IBAction private func processInDriverThreadChanged(_ sender: Any) {
+    engine.processInDriverThread = processInDriverThreadControl.selectedSegmentIndex == 1
+    updateNumEngineWorkerThreads()
   }
 
   @IBAction private func isWorkIntervalOnChanged(_ sender: Any) {

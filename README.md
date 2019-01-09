@@ -58,6 +58,20 @@ The number of busy background threads to create. Busy threads are low-priority t
 
 For small buffer sizes (e.g. 128), adding a busy thread reduces the minimum load necessary in order for audio threads to be scheduled onto high-performance cores. The visualization has the same effect as a busy thread, so it must be disabled to observe this behavior.
 
+### Driver Thread
+
+The driver thread's mode.
+
+#### Waits for Workers
+
+The driver thread wakes up and waits for processing threads, but does not process sines itself. The total number of real-time threads (e.g., as shown in the Cores visualization) is one more than the "Process Threads" value (due to the driver thread).
+
+The driver thread's automatically joined work interval is sometimes detrimental to performance. This mode can be used to avoid a work interval for all audio processing threads without calling a private API.
+
+#### Processes Sines
+
+The driver thread wakes up and waits for processing threads and processes sines as well. The total number of audio threads (e.g., as shown in the Cores visualization) is equal to the "Process Threads" value.
+
 ### Work Interval
 
 When enabled, audio worker threads use a private API to join the [work interval](https://github.com/apple/darwin-xnu/blob/master/bsd/sys/work_interval.h) used by the CoreAudio I/O thread.
