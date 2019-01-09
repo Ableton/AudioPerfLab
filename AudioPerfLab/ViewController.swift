@@ -176,9 +176,9 @@ class ViewController: UITableViewController {
 
     let activityViewStartTime = displayLink.timestamp -
       ViewController.activityViewDuration - ViewController.activityViewLatency
-    self.driveDurationsView.startTime = activityViewStartTime
-    self.driveDurationsView.setNeedsDisplay()
-    for coreActivityView in self.coreActivityViews {
+    driveDurationsView.startTime = activityViewStartTime
+    driveDurationsView.setNeedsDisplay()
+    for coreActivityView in coreActivityViews {
       coreActivityView.startTime = activityViewStartTime
       coreActivityView.setNeedsDisplay()
     }
