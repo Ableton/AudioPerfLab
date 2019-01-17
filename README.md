@@ -42,9 +42,9 @@ Pressing ▶ triggers a short burst of a configurable number of sine waves.
 
 ## Threads
 
-### Audio Threads
+### Process Threads
 
-The total number of audio threads, including the CoreAudio I/O thread.
+The total number of real-time threads that process sine waves.
 
 ### Minimum Load
 
@@ -64,7 +64,7 @@ The driver thread's mode.
 
 #### Waits for Workers
 
-The driver thread wakes up and waits for processing threads, but does not process sines itself. The total number of real-time threads (e.g., as shown in the Cores visualization) is one more than the "Process Threads" value (due to the driver thread).
+The driver thread wakes up and waits for processing threads, but does not process sines itself. Due to the non-processing driver thread, the total number of real-time threads (e.g., as shown in the Cores visualization) is one more than the "Process Threads" value.
 
 The driver thread's automatically joined work interval is sometimes detrimental to performance. This mode can be used to avoid a work interval for all audio processing threads without calling a private API.
 
