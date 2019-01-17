@@ -49,6 +49,23 @@ public:
 
   auto& driver() { return mDriver; }
 
+  int preferredBufferSize() { return mDriver.preferredBufferSize(); }
+  void setPreferredBufferSize(const int preferredBufferSize)
+  {
+    if (preferredBufferSize != mDriver.preferredBufferSize())
+    {
+      // Recreate the worker threads in order to use the new buffer size when setting
+      // the thread policy.
+
+      const auto numWorkerThreads = int(mWorkerThreads.size());
+      mDriver.stop();
+      teardownWorkerThreads();
+      mDriver.setPreferredBufferSize(preferredBufferSize);
+      setupWorkerThreads(numWorkerThreads);
+      mDriver.start();
+    }
+  }
+
   int numWorkerThreads() const { return int(mWorkerThreads.size()); }
   void setNumWorkerThreads(const int numWorkerThreads)
   {
@@ -329,10 +346,10 @@ private:
   EngineImpl mEngine;
 }
 
-- (int)preferredBufferSize { return mEngine.driver().preferredBufferSize(); }
+- (int)preferredBufferSize { return mEngine.preferredBufferSize(); }
 - (void)setPreferredBufferSize:(int)preferredBufferSize
 {
-  mEngine.driver().setPreferredBufferSize(preferredBufferSize);
+  mEngine.setPreferredBufferSize(preferredBufferSize);
 }
 
 - (double)sampleRate { return mEngine.driver().sampleRate(); }
