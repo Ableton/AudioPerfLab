@@ -178,12 +178,12 @@ private:
     mBusyThreads.clear();
   }
 
-  void yieldUntilMinimumLoad(const std::chrono::time_point<Clock> bufferStartTime,
-                             const int numFrames)
+  void ensureMinimumLoad(const std::chrono::time_point<Clock> bufferStartTime,
+                         const int numFrames)
   {
     const auto bufferDuration =
       std::chrono::duration<double>{numFrames / mDriver.sampleRate()};
-    yieldUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
+    hardwareDelayUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
   }
 
   void addDriveMeasurement(const uint64_t hostTime,
@@ -257,7 +257,7 @@ private:
 
     if (mProcessInDriverThread)
     {
-      yieldUntilMinimumLoad(startTime, inNumberFrames);
+      ensureMinimumLoad(startTime, inNumberFrames);
     }
 
     return noErr;
@@ -292,7 +292,7 @@ private:
       mSineBank.process(threadIndex, numFrames);
       mCpuNumbers[threadIndex] = cpuNumber();
       mFinishedWorkSemaphore.post();
-      yieldUntilMinimumLoad(startTime, numFrames);
+      ensureMinimumLoad(startTime, numFrames);
     }
 
     if (mIsWorkIntervalOn)
@@ -310,9 +310,9 @@ private:
 
     while (mAreBusyThreadsActive)
     {
-      const auto yieldUntilTime = Clock::now() + std::chrono::milliseconds{9};
-      yieldUntil(yieldUntilTime);
-      std::this_thread::sleep_until(yieldUntilTime + std::chrono::milliseconds{1});
+      const auto delayUntilTime = Clock::now() + std::chrono::milliseconds{9};
+      hardwareDelayUntil(delayUntilTime);
+      std::this_thread::sleep_until(delayUntilTime + std::chrono::milliseconds{1});
     }
   }
 

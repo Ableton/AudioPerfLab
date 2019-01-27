@@ -25,7 +25,7 @@ void setThreadTimeConstraintPolicy(pthread_t thread,
 void findAndJoinWorkInterval();
 void leaveWorkInterval();
 
-inline void hardwareYield()
+inline void hardwareDelay()
 {
 #if defined(__arm64__)
   // Enter a low power state until a wake-up event occurs. See the "Wait for Event
@@ -47,11 +47,11 @@ inline void hardwareYield()
 }
 
 template <typename Clock, typename Rep>
-void yieldUntil(const std::chrono::time_point<Clock, Rep> until)
+void hardwareDelayUntil(const std::chrono::time_point<Clock, Rep> until)
 {
   while (Clock::now() < until)
   {
-    hardwareYield();
+    hardwareDelay();
   }
 }
 
