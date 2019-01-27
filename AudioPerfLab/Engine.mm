@@ -301,18 +301,24 @@ private:
     }
   }
 
-  // A low-priority thread that yields for 90% of the time and sleeps for the rest.
+  // A low-priority thread that constantly performs low-energy work
   void busyThread()
   {
+    constexpr auto kLowEnergyDelayDuration = std::chrono::milliseconds{10};
+    constexpr auto kSleepDuration = std::chrono::milliseconds{5};
+
     sched_param param{};
     param.sched_priority = sched_get_priority_min(SCHED_FIFO);
     pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
 
     while (mAreBusyThreadsActive)
     {
-      const auto delayUntilTime = Clock::now() + std::chrono::milliseconds{9};
+      const auto delayUntilTime = Clock::now() + kLowEnergyDelayDuration;
       hardwareDelayUntil(delayUntilTime);
-      std::this_thread::sleep_until(delayUntilTime + std::chrono::milliseconds{1});
+
+      // Sleep to avoid being terminated when running in the background by violating the
+      // iOS CPU usage limit
+      std::this_thread::sleep_until(delayUntilTime + kSleepDuration);
     }
   }
 
