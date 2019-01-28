@@ -7,6 +7,7 @@ class ViewController: UITableViewController {
   private var engine = Engine()
   private var displayLink: CADisplayLink?
   private var coreActivityViews: [ActivityView] = []
+  private var tableViewHeaders: [CollapsibleTableViewHeader] = []
   private var lastNumFrames: Int32?
 
   private var lastEnergyUsageTime: Double?
@@ -49,6 +50,12 @@ class ViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    for section in 0..<tableView.numberOfSections {
+      let title = tableView(tableView, titleForHeaderInSection: section)!
+      tableViewHeaders.append(makeTableViewHeader(title: title))
+    }
+    tableViewHeader("Energy")!.isExpanded = false
+
     minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
 
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
@@ -64,6 +71,7 @@ class ViewController: UITableViewController {
       coreActivityView.duration = ViewController.activityViewDuration
       coreActivityView.extraBufferingDuration = extraBufferingDuration
       coreActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      coreActivityView.contentMode = .scaleAspectFit
       coreActivityViews.append(coreActivityView)
 
       let label = UILabel(frame: CGRect(x: 0, y: 0, width: 9, height: 0))
@@ -144,6 +152,43 @@ class ViewController: UITableViewController {
 
   @IBAction private func playSineBurst(_ sender: Any) {
     engine.playSineBurst(for: 0.25, additionalSines: Int32(numBurstSinesSlider.value))
+  }
+
+  func makeTableViewHeader(title: String) -> CollapsibleTableViewHeader {
+    let headerView = CollapsibleTableViewHeader(frame: .zero)
+    headerView.title = title
+    headerView.onTap = {
+      self.tableView.beginUpdates()
+      self.tableView.endUpdates()
+    }
+    return headerView
+  }
+
+  func tableViewHeader(_ title: String) -> CollapsibleTableViewHeader? {
+    return tableViewHeaders.first(where: { $0.title == title })
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    heightForHeaderInSection section: Int) -> CGFloat {
+    return 40.0
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    heightForRowAt indexPath: IndexPath) -> CGFloat {
+    if tableViewHeaders[indexPath.section].isExpanded {
+      return super.tableView(tableView, heightForRowAt: indexPath)
+    } else {
+      // Keep a separator line for collapsed sections
+      return indexPath.row == 0 ? 0.5 : 0.0
+    }
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    viewForHeaderInSection section: Int) -> UIView? {
+    return tableViewHeaders[section]
   }
 
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
@@ -232,14 +277,21 @@ class ViewController: UITableViewController {
     if activityViewsEnabledSwitch.isOn {
       let activityViewStartTime = displayLink.timestamp -
         ViewController.activityViewDuration - ViewController.activityViewLatency
-      driveDurationsView.startTime = activityViewStartTime
-      driveDurationsView.setNeedsDisplay()
-      for coreActivityView in coreActivityViews {
-        coreActivityView.startTime = activityViewStartTime
-        coreActivityView.setNeedsDisplay()
+
+      if tableViewHeader("Load")!.isExpanded {
+        driveDurationsView.startTime = activityViewStartTime
+        driveDurationsView.setNeedsDisplay()
       }
-      energyUsageView.startTime = activityViewStartTime
-      energyUsageView.setNeedsDisplay()
+      if tableViewHeader("Cores")!.isExpanded {
+        for coreActivityView in coreActivityViews {
+          coreActivityView.startTime = activityViewStartTime
+          coreActivityView.setNeedsDisplay()
+        }
+      }
+      if tableViewHeader("Energy")!.isExpanded {
+        energyUsageView.startTime = activityViewStartTime
+        energyUsageView.setNeedsDisplay()
+      }
     }
   }
 }
