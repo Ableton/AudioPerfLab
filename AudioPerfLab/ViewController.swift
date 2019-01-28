@@ -19,7 +19,6 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
-  @IBOutlet weak private var powerLabel: UILabel!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
@@ -235,11 +234,13 @@ class ViewController: UITableViewController {
   }
 
   private func fetchPowerMeasurements() {
-    let time = CACurrentMediaTime()
+    let energyHeader = tableViewHeader("Energy")!
     guard let energyUsage = taskEnergyUsage else {
-      powerLabel.text = "Energy Usage Data Not Available"
+      energyHeader.value = "Not Available"
       return
     }
+
+    let time = CACurrentMediaTime()
 
     if let lastEnergyUsageTime = lastEnergyUsageTime,
        let lastEnergyUsage = lastEnergyUsage {
@@ -259,7 +260,7 @@ class ViewController: UITableViewController {
          let lastEnergyUsageForPowerLabel = lastEnergyUsageForPowerLabel {
         let timeDelta = time - lastPowerLabelUpdateTime
         let powerInWatts = (energyUsage - lastEnergyUsageForPowerLabel) / timeDelta
-        powerLabel.text = String(format: "%.2f Watts", powerInWatts)
+        energyHeader.value = String(format: "%.2f Watts", powerInWatts)
       }
 
       lastPowerLabelUpdateTime = time
