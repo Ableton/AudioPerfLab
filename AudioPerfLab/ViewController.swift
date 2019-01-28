@@ -34,6 +34,7 @@ class ViewController: UITableViewController {
 
   private static let activityViewDuration = 3.0
   private static let activityViewLatency = 0.1
+  private static let activityViewExtraBufferingDuration = activityViewLatency * 2
   private static let dropoutColor = UIColor.red
   private static let threadColors = [
     UIColor.black,
@@ -56,20 +57,29 @@ class ViewController: UITableViewController {
     tableViewHeader("Cores")!.isExpanded = false
     tableViewHeader("Energy")!.isExpanded = false
 
-    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
-
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
     displayLink!.add(to: .main, forMode: RunLoop.Mode.common)
+    setupDriveDurationsView()
+    setupCoreActivityViews()
+    setupEnergyUsageView()
 
-    let extraBufferingDuration = ViewController.activityViewLatency * 2
+    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
+    initalizeControls()
+  }
+
+  private func setupDriveDurationsView() {
     driveDurationsView.duration = ViewController.activityViewDuration
-    driveDurationsView.extraBufferingDuration = extraBufferingDuration
+    driveDurationsView.extraBufferingDuration =
+      ViewController.activityViewExtraBufferingDuration
     driveDurationsView.missingTimeColor = ViewController.dropoutColor
+  }
 
+  private func setupCoreActivityViews() {
     for i in 0..<numberOfProcessors {
       let coreActivityView = ActivityView(frame: .zero)
       coreActivityView.duration = ViewController.activityViewDuration
-      coreActivityView.extraBufferingDuration = extraBufferingDuration
+      coreActivityView.extraBufferingDuration =
+        ViewController.activityViewExtraBufferingDuration
       coreActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
       coreActivityView.contentMode = .scaleAspectFit
       coreActivityViews.append(coreActivityView)
@@ -86,11 +96,12 @@ class ViewController: UITableViewController {
       rowForCore.addSubview(label)
       coreActivityStackView.addArrangedSubview(rowForCore)
     }
+  }
 
+  private func setupEnergyUsageView() {
     energyUsageView.duration = ViewController.activityViewDuration
-    energyUsageView.extraBufferingDuration = extraBufferingDuration
-
-    initalizeControls()
+    energyUsageView.extraBufferingDuration =
+      ViewController.activityViewExtraBufferingDuration
   }
 
   private func initalizeControls() {
