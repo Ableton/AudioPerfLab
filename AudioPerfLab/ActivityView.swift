@@ -1,6 +1,6 @@
 // Copyright: 2018, Ableton AG, Berlin. All rights reserved.
 
-import Foundation
+import UIKit
 
 class ActivityView: UIView {
   struct Point {
