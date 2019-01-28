@@ -24,7 +24,7 @@ A visualization of thread activity on each CPU core. Each row represents a core 
 
 ## Energy
 
-A graph of the estimated power consumption of the AudioPerLab process in watts. This can be used to compare the energy impact of different approaches for defeating core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
+A graph of the estimated power consumption of the AudioPerLab process in watts. This can be used to compare the energy impact of different approaches for avoiding core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
 
 ## Audio
 
@@ -54,7 +54,7 @@ When the real audio load is low, adding artificial load tricks the OS into sched
 
 ### Busy Threads
 
-The number of busy background threads to create. Busy threads are low-priority threads that yield for 90% of the time and sleep for the rest.
+The number of busy background threads to create. Busy threads are low-priority threads that constantly perform low-energy work.
 
 For small buffer sizes (e.g. 128), adding a busy thread reduces the minimum load necessary in order for audio threads to be scheduled onto high-performance cores. The visualization has the same effect as a busy thread, so it must be disabled to observe this behavior.
 
