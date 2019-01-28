@@ -60,20 +60,20 @@ class ViewController: UITableViewController {
     driveDurationsView.missingTimeColor = ViewController.dropoutColor
 
     for i in 0..<numberOfProcessors {
-      let coreActivityView = ActivityView.init(frame: .zero)
+      let coreActivityView = ActivityView(frame: .zero)
       coreActivityView.duration = ViewController.activityViewDuration
       coreActivityView.extraBufferingDuration = extraBufferingDuration
       coreActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
       coreActivityViews.append(coreActivityView)
 
-      let label = UILabel.init(frame: CGRect(x: 0, y: 0, width: 9, height: 0))
+      let label = UILabel(frame: CGRect(x: 0, y: 0, width: 9, height: 0))
       label.textAlignment = .center
       label.font = UIFont.systemFont(ofSize: 9)
       label.text = String(i + 1)
       label.autoresizingMask = [.flexibleHeight]
       label.backgroundColor = UIColor.white.withAlphaComponent(0.5)
 
-      let rowForCore = UIView.init(frame: .zero)
+      let rowForCore = UIView(frame: .zero)
       rowForCore.addSubview(coreActivityView)
       rowForCore.addSubview(label)
       coreActivityStackView.addArrangedSubview(rowForCore)
