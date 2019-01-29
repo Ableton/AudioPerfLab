@@ -201,11 +201,15 @@ class ViewController: UITableViewController {
     return tableViewHeaders[section]
   }
 
+  static private func getCpuNumbers(from measurement: DriveMeasurement) -> [Int] {
+    return Mirror(reflecting: measurement.cpuNumbers).children.map {
+      Int($0.value as! Int32)
+    }
+  }
+
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
     var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
-    for (threadIndex, reflectedCpuNum) in
-      Mirror(reflecting: measurement.cpuNumbers).children.enumerated() {
-      let cpuNum = Int(reflectedCpuNum.value as! Int32)
+    for (threadIndex, cpuNum) in getCpuNumbers(from: measurement).enumerated() {
       if cpuNum >= 0 {
         threadIndexPerCpu[cpuNum] = threadIndex
       }
