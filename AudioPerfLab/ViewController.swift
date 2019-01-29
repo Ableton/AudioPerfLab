@@ -229,10 +229,10 @@ class ViewController: UITableViewController {
       let color = measurement.duration <= numFramesInSeconds
         ? UIColor.black : ViewController.dropoutColor
       self.driveDurationsView.addSample(
-          time: driveStartTime,
-          duration: numFramesInSeconds,
-          value: measurement.duration / numFramesInSeconds,
-          color: color)
+        time: driveStartTime,
+        duration: numFramesInSeconds,
+        value: measurement.duration / numFramesInSeconds,
+        color: color)
 
       let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
       for (cpuNumber, coreActivityView) in self.coreActivityViews.enumerated() {
