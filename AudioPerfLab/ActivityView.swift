@@ -35,7 +35,7 @@ class ActivityView: UIView {
   }
 
   private func initialize() {
-    self.backgroundColor = UIColor.white
+    isOpaque = false
   }
 
   override func layoutSubviews() {
