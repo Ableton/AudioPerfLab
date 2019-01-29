@@ -30,11 +30,12 @@ void ParallelSineBank::prepare(const int numActivePartials, const int numFrames)
   }
 }
 
-void ParallelSineBank::process(const int threadIndex, const int numFrames)
+int ParallelSineBank::process(const int threadIndex, const int numFrames)
 {
   auto& stereoBuffer = mBuffers[threadIndex];
 
   // Process partials in chunks to avoid contention on the mNumTakenPartials atomic
+  int numActivePartialsProcessed = 0;
   int partialStartIndex = 0;
   while ((partialStartIndex = mNumTakenPartials.fetch_add(kNumPartialsPerProcessingChunk))
          < int(mPartials.size()))
@@ -45,11 +46,20 @@ void ParallelSineBank::process(const int threadIndex, const int numFrames)
          ++partialIndex)
     {
       auto& partial = mPartials[partialIndex];
-      partial.targetAmp =
-        partialIndex < mNumActivePartials ? partial.ampWhenActive : 0.0f;
+      if (partialIndex < mNumActivePartials)
+      {
+        partial.targetAmp = partial.ampWhenActive;
+        ++numActivePartialsProcessed;
+      }
+      else
+      {
+        partial.targetAmp = 0.0f;
+      }
       processPartial(partial, numFrames, stereoBuffer);
     }
   }
+
+  return numActivePartialsProcessed;
 }
 
 void ParallelSineBank::mixTo(const std::array<float*, 2>& dest, const int numFrames)

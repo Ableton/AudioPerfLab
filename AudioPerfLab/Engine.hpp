@@ -11,6 +11,7 @@ struct DriveMeasurement
   double duration;
   int numFrames;
   int cpuNumbers[MAX_NUM_THREADS];
+  int numActivePartialsProcessed[MAX_NUM_THREADS];
 };
 
 @interface Engine : NSObject

@@ -18,7 +18,7 @@ public:
   void setPartials(std::vector<Partial> partials);
 
   void prepare(int numActivePartials, int numFrames);
-  void process(int threadIndex, int numFrames);
+  int process(int threadIndex, int numFrames);
   void mixTo(const std::array<float*, 2>& dest, int numFrames);
 
 private:
