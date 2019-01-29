@@ -79,7 +79,7 @@ class ActivityView: UIView {
   }
 
   override func draw(_ rect: CGRect) {
-    guard let endTime = endTime, !points.isEmpty else { return }
+    guard let endTime = endTime, endTime > startTime, !points.isEmpty else { return }
 
     let path = UIBezierPath()
     path.move(to: CGPoint(x: 0.0, y: self.frame.height))
