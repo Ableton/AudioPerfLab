@@ -133,6 +133,8 @@ class ActivityView: UIView {
   }
 
   private func addPoint(position: Double, value: Double, color: UIColor) {
+    guard !points.isEmpty else { return }
+
     let i = Int(position.truncatingRemainder(dividingBy: Double(points.count)))
     let newPeak = lastWritePosition == nil || floor(lastWritePosition!) != floor(position)
       ? value : max(points[i].value, value)
