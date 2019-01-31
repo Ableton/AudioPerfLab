@@ -217,6 +217,36 @@ class ViewController: UITableViewController {
     return threadIndexPerCpu
   }
 
+  private func addLoadMeasurement(
+    time: Double,
+    duration bufferDuration: Double,
+    measurement: DriveMeasurement) {
+    let color =
+      measurement.duration <= bufferDuration ? UIColor.black : ViewController.dropoutColor
+    driveDurationsView.addSample(
+      time: time,
+      duration: bufferDuration,
+      value: measurement.duration / bufferDuration,
+      color: color)
+  }
+
+  private func addCoreMeasurement(
+    time: Double,
+    duration bufferDuration: Double,
+    measurement: DriveMeasurement) {
+    let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
+    for (cpuNumber, coreActivityView) in coreActivityViews.enumerated() {
+      let threadIndex = threadIndexPerCpu[cpuNumber]
+      let color =
+        threadIndex != nil ? ViewController.threadColors[threadIndex!] : UIColor.white
+      coreActivityView.addSample(
+        time: time,
+        duration: bufferDuration,
+        value: threadIndex != nil ? 1.0 : 0.0,
+        color: color)
+    }
+  }
+
   private func fetchDriveMeasurements() {
     engine.fetchMeasurements({ measurement in
       if measurement.numFrames != self.lastNumFrames {
@@ -224,27 +254,10 @@ class ViewController: UITableViewController {
         self.lastNumFrames = measurement.numFrames
       }
 
-      let numFramesInSeconds = Double(measurement.numFrames) / self.engine.sampleRate
-      let driveStartTime = measurement.hostTime - numFramesInSeconds
-      let color = measurement.duration <= numFramesInSeconds
-        ? UIColor.black : ViewController.dropoutColor
-      self.driveDurationsView.addSample(
-        time: driveStartTime,
-        duration: numFramesInSeconds,
-        value: measurement.duration / numFramesInSeconds,
-        color: color)
-
-      let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
-      for (cpuNumber, coreActivityView) in self.coreActivityViews.enumerated() {
-        let threadIndex = threadIndexPerCpu[cpuNumber]
-        let color = threadIndex != nil
-          ? ViewController.threadColors[threadIndex!] : UIColor.white
-        coreActivityView.addSample(
-          time: driveStartTime,
-          duration: numFramesInSeconds,
-          value: threadIndex != nil ? 1.0 : 0.0,
-          color: color)
-      }
+      let duration = Double(measurement.numFrames) / self.engine.sampleRate
+      let time = measurement.hostTime - duration
+      self.addLoadMeasurement(time: time, duration: duration, measurement: measurement)
+      self.addCoreMeasurement(time: time, duration: duration, measurement: measurement)
     })
   }
 
