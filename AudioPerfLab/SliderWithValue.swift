@@ -1,5 +1,7 @@
 // Copyright: 2018, Ableton AG, Berlin. All rights reserved.
 
+import UIKit
+
 @IBDesignable
 class SliderWithValue: UISlider {
   let kValueFieldWidth: CGFloat = 53.0

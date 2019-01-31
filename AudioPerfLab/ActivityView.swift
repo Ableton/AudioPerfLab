@@ -1,6 +1,6 @@
 // Copyright: 2018, Ableton AG, Berlin. All rights reserved.
 
-import Foundation
+import UIKit
 
 class ActivityView: UIView {
   struct Point {
@@ -46,11 +46,12 @@ class ActivityView: UIView {
 
   private func initializePointsArray() {
     let numExtraBufferingPoints = pointsPerSecond() * extraBufferingDuration
-    points = Array(
-      repeating: Point(value: 0.0, color: UIColor.black),
-      count: Int(Double(frame.size.width) + numExtraBufferingPoints))
-    endTime = nil
-    lastWritePosition = nil
+    let numPoints = Int(Double(frame.size.width) + numExtraBufferingPoints)
+    if points.count != numPoints {
+      points = Array(repeating: Point(value: 0.0, color: UIColor.black), count: numPoints)
+      endTime = nil
+      lastWritePosition = nil
+    }
   }
 
   func addSample(

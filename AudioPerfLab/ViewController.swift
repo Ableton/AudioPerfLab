@@ -7,6 +7,7 @@ class ViewController: UITableViewController {
   private var engine = Engine()
   private var displayLink: CADisplayLink?
   private var coreActivityViews: [ActivityView] = []
+  private var tableViewHeaders: [CollapsibleTableViewHeader] = []
   private var lastNumFrames: Int32?
 
   private var lastEnergyUsageTime: Double?
@@ -18,7 +19,6 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
-  @IBOutlet weak private var powerLabel: UILabel!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
@@ -49,6 +49,12 @@ class ViewController: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    for section in 0..<tableView.numberOfSections {
+      let title = tableView(tableView, titleForHeaderInSection: section)!
+      tableViewHeaders.append(makeTableViewHeader(title: title))
+    }
+    tableViewHeader("Energy")!.isExpanded = false
+
     minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
 
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
@@ -60,20 +66,21 @@ class ViewController: UITableViewController {
     driveDurationsView.missingTimeColor = ViewController.dropoutColor
 
     for i in 0..<numberOfProcessors {
-      let coreActivityView = ActivityView.init(frame: .zero)
+      let coreActivityView = ActivityView(frame: .zero)
       coreActivityView.duration = ViewController.activityViewDuration
       coreActivityView.extraBufferingDuration = extraBufferingDuration
       coreActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      coreActivityView.contentMode = .scaleAspectFit
       coreActivityViews.append(coreActivityView)
 
-      let label = UILabel.init(frame: CGRect(x: 0, y: 0, width: 9, height: 0))
+      let label = UILabel(frame: CGRect(x: 0, y: 0, width: 9, height: 0))
       label.textAlignment = .center
       label.font = UIFont.systemFont(ofSize: 9)
       label.text = String(i + 1)
       label.autoresizingMask = [.flexibleHeight]
       label.backgroundColor = UIColor.white.withAlphaComponent(0.5)
 
-      let rowForCore = UIView.init(frame: .zero)
+      let rowForCore = UIView(frame: .zero)
       rowForCore.addSubview(coreActivityView)
       rowForCore.addSubview(label)
       coreActivityStackView.addArrangedSubview(rowForCore)
@@ -146,6 +153,43 @@ class ViewController: UITableViewController {
     engine.playSineBurst(for: 0.25, additionalSines: Int32(numBurstSinesSlider.value))
   }
 
+  func makeTableViewHeader(title: String) -> CollapsibleTableViewHeader {
+    let headerView = CollapsibleTableViewHeader(frame: .zero)
+    headerView.title = title
+    headerView.onTap = {
+      self.tableView.beginUpdates()
+      self.tableView.endUpdates()
+    }
+    return headerView
+  }
+
+  func tableViewHeader(_ title: String) -> CollapsibleTableViewHeader? {
+    return tableViewHeaders.first(where: { $0.title == title })
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    heightForHeaderInSection section: Int) -> CGFloat {
+    return 40.0
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    heightForRowAt indexPath: IndexPath) -> CGFloat {
+    if tableViewHeaders[indexPath.section].isExpanded {
+      return super.tableView(tableView, heightForRowAt: indexPath)
+    } else {
+      // Keep a separator line for collapsed sections
+      return indexPath.row == 0 ? 0.5 : 0.0
+    }
+  }
+
+  override func tableView(
+    _ tableView: UITableView,
+    viewForHeaderInSection section: Int) -> UIView? {
+    return tableViewHeaders[section]
+  }
+
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
     var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
     for (threadIndex, reflectedCpuNum) in
@@ -190,11 +234,13 @@ class ViewController: UITableViewController {
   }
 
   private func fetchPowerMeasurements() {
-    let time = CACurrentMediaTime()
+    let energyHeader = tableViewHeader("Energy")!
     guard let energyUsage = taskEnergyUsage else {
-      powerLabel.text = "Energy Usage Data Not Available"
+      energyHeader.value = "Not Available"
       return
     }
+
+    let time = CACurrentMediaTime()
 
     if let lastEnergyUsageTime = lastEnergyUsageTime,
        let lastEnergyUsage = lastEnergyUsage {
@@ -214,7 +260,7 @@ class ViewController: UITableViewController {
          let lastEnergyUsageForPowerLabel = lastEnergyUsageForPowerLabel {
         let timeDelta = time - lastPowerLabelUpdateTime
         let powerInWatts = (energyUsage - lastEnergyUsageForPowerLabel) / timeDelta
-        powerLabel.text = String(format: "%.2f Watts", powerInWatts)
+        energyHeader.value = String(format: "%.2f Watts", powerInWatts)
       }
 
       lastPowerLabelUpdateTime = time
@@ -232,14 +278,21 @@ class ViewController: UITableViewController {
     if activityViewsEnabledSwitch.isOn {
       let activityViewStartTime = displayLink.timestamp -
         ViewController.activityViewDuration - ViewController.activityViewLatency
-      driveDurationsView.startTime = activityViewStartTime
-      driveDurationsView.setNeedsDisplay()
-      for coreActivityView in coreActivityViews {
-        coreActivityView.startTime = activityViewStartTime
-        coreActivityView.setNeedsDisplay()
+
+      if tableViewHeader("Load")!.isExpanded {
+        driveDurationsView.startTime = activityViewStartTime
+        driveDurationsView.setNeedsDisplay()
       }
-      energyUsageView.startTime = activityViewStartTime
-      energyUsageView.setNeedsDisplay()
+      if tableViewHeader("Cores")!.isExpanded {
+        for coreActivityView in coreActivityViews {
+          coreActivityView.startTime = activityViewStartTime
+          coreActivityView.setNeedsDisplay()
+        }
+      }
+      if tableViewHeader("Energy")!.isExpanded {
+        energyUsageView.startTime = activityViewStartTime
+        energyUsageView.setNeedsDisplay()
+      }
     }
   }
 }
