@@ -84,12 +84,15 @@
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="89.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <stackView clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" axis="vertical" distribution="fillEqually" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="heS-GQ-vBA">
+                                                <stackView clearsContextBeforeDrawing="NO" contentMode="scaleToFill" ambiguous="YES" axis="vertical" distribution="fillEqually" spacing="2" translatesAutoresizingMaskIntoConstraints="NO" id="heS-GQ-vBA">
                                                     <rect key="frame" x="0.0" y="0.0" width="375" height="90"/>
-                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </stackView>
                                             </subviews>
+                                            <constraints>
+                                                <constraint firstItem="heS-GQ-vBA" firstAttribute="width" secondItem="UH6-W3-yIv" secondAttribute="width" id="61P-Qj-yq0"/>
+                                                <constraint firstItem="heS-GQ-vBA" firstAttribute="height" secondItem="UH6-W3-yIv" secondAttribute="height" priority="999" id="dhB-P0-Heb"/>
+                                            </constraints>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                 </cells>
