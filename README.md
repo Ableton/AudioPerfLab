@@ -18,11 +18,11 @@ A graph of the amount of time taken to process each audio buffer as a percentage
 
 The switch controls if visualizations are active. It can be used to freeze the graphs in order to take a closer look. 
 
-⚠️ Drawing visualizations is expensive and can impact the way audio threads are scheduled, sometimes resulting in better performance. Measurements are collected even when visualizations are disabled, so by briefly turning them off, performing a test, and then switching them back on, you can observe behavior without the confounding effect of drawing.
+⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. Measurements are collected even when visualizations are disabled, so by briefly turning them off, performing a test, and then switching them back on, you can observe behavior without the confounding effect of drawing.
 
 ## Work Distribution
 
-A stacked area graph showing the relative number of sine waves processed per thread. Colors represent threads and the CoreAudio I/O thread is drawn in black. A solid black graph, for examples, indicates that the I/O thread has processed all sines. A half black/half blue graph indicates that two threads each processed an equal number of sines.
+A stacked area graph showing the relative number of sine waves processed per thread. Colors represent threads and the CoreAudio I/O thread is drawn in black. A solid black graph, for example, indicates that the I/O thread has processed all sines. A half black/half blue graph indicates that two threads each processed an equal number of sines.
 
 If work is not distrbuted evenly, then threads are likely being scheduled onto cores with different clock speeds.
 
