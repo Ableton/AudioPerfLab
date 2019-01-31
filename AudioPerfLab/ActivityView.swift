@@ -20,9 +20,29 @@ class ActivityView: UIView {
   }
   var startTime = 0.0
 
+  var isFrozen: Bool {
+    get {
+      return frozenState != nil
+    }
+    set {
+      if isFrozen != newValue {
+        frozenState = newValue
+          ? FrozenState(points: points, startTime: startTime, endTime: endTime)
+          : nil
+      }
+    }
+  }
+
   private var points: [Point] = []
   private var endTime: Double?
   private var lastWritePosition: Double?
+
+  private struct FrozenState {
+    let points: [Point]
+    let startTime: Double
+    let endTime: Double?
+  }
+  private var frozenState: FrozenState?
 
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
@@ -78,7 +98,7 @@ class ActivityView: UIView {
     endTime = time + sampleDuration
   }
 
-  override func draw(_ rect: CGRect) {
+  private func draw(startTime: Double, endTime: Double?, points: [Point]) {
     guard let endTime = endTime, endTime > startTime, !points.isEmpty else { return }
 
     let path = UIBezierPath()
@@ -116,6 +136,20 @@ class ActivityView: UIView {
     path.close()
     currentColor.setFill()
     path.fill()
+  }
+
+  override func draw(_ rect: CGRect) {
+    if let frozenState = frozenState
+    {
+      draw(
+        startTime: frozenState.startTime,
+        endTime: frozenState.endTime,
+        points: frozenState.points)
+    }
+    else
+    {
+      draw(startTime: startTime, endTime: endTime, points: points)
+    }
   }
 
   private func addPoints(
