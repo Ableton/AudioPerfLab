@@ -53,6 +53,7 @@ class ViewController: UITableViewController {
       let title = tableView(tableView, titleForHeaderInSection: section)!
       tableViewHeaders.append(makeTableViewHeader(title: title))
     }
+    tableViewHeader("Cores")!.isExpanded = false
     tableViewHeader("Energy")!.isExpanded = false
 
     minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
