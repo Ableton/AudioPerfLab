@@ -146,6 +146,12 @@ class ViewController: UITableViewController {
     updateThreadDependentControls()
   }
 
+  @IBAction func activityViewsEnabledChanged(_ sender: Any) {
+    let isFrozen = !activityViewsEnabledSwitch.isOn
+    activityViews().forEach { $0.isFrozen = isFrozen }
+    redrawExpandedActivityViews()
+  }
+
   @IBAction private func bufferSizeChanged(_ sender: Any) {
     engine.preferredBufferSize = 1 << Int(bufferSizeStepper.value)
     bufferSizeField.text = String(engine.preferredBufferSize)
@@ -186,6 +192,7 @@ class ViewController: UITableViewController {
     headerView.onTap = {
       self.tableView.beginUpdates()
       self.tableView.endUpdates()
+      self.redrawExpandedActivityViews()
     }
     return headerView
   }
@@ -356,36 +363,38 @@ class ViewController: UITableViewController {
     lastEnergyUsage = energyUsage
   }
 
+  private func activityViews() -> [ActivityView] {
+    return [driveDurationsView, energyUsageView]
+      + workDistributionView.subviews.compactMap { $0 as? ActivityView }
+      + coreActivityViews
+  }
+
+  private func redrawExpandedActivityViews() {
+    if tableViewHeader("Load")!.isExpanded {
+      driveDurationsView.setNeedsDisplay()
+    }
+    if tableViewHeader("Work Distribution")!.isExpanded {
+      workDistributionView.subviews
+        .compactMap { $0 as? ActivityView }
+        .forEach { $0.setNeedsDisplay() }
+    }
+    if tableViewHeader("Cores")!.isExpanded {
+      coreActivityViews.forEach { $0.setNeedsDisplay() }
+    }
+    if tableViewHeader("Energy")!.isExpanded {
+      energyUsageView.setNeedsDisplay()
+    }
+  }
+
   @objc private func displayLinkStep(displayLink: CADisplayLink) {
     fetchDriveMeasurements()
     fetchPowerMeasurements()
 
+    let startTime = displayLink.timestamp -
+      ViewController.activityViewDuration - ViewController.activityViewLatency
+    activityViews().forEach { $0.startTime = startTime }
     if activityViewsEnabledSwitch.isOn {
-      let activityViewStartTime = displayLink.timestamp -
-        ViewController.activityViewDuration - ViewController.activityViewLatency
-
-      if tableViewHeader("Load")!.isExpanded {
-        driveDurationsView.startTime = activityViewStartTime
-        driveDurationsView.setNeedsDisplay()
-      }
-      if tableViewHeader("Work Distribution")!.isExpanded {
-        for workActivityView in workDistributionView.subviews {
-          if let workActivityView = workActivityView as? ActivityView {
-            workActivityView.startTime = activityViewStartTime
-            workActivityView.setNeedsDisplay()
-          }
-        }
-      }
-      if tableViewHeader("Cores")!.isExpanded {
-        for coreActivityView in coreActivityViews {
-          coreActivityView.startTime = activityViewStartTime
-          coreActivityView.setNeedsDisplay()
-        }
-      }
-      if tableViewHeader("Energy")!.isExpanded {
-        energyUsageView.startTime = activityViewStartTime
-        energyUsageView.setNeedsDisplay()
-      }
+      redrawExpandedActivityViews()
     }
   }
 }

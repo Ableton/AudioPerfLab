@@ -20,9 +20,29 @@ class ActivityView: UIView {
   }
   var startTime = 0.0
 
+  var isFrozen: Bool {
+    get {
+      return frozenState != nil
+    }
+    set {
+      if isFrozen != newValue {
+        frozenState = newValue
+          ? FrozenState(points: points, startTime: startTime, endTime: endTime)
+          : nil
+      }
+    }
+  }
+
   private var points: [Point] = []
   private var endTime: Double?
   private var lastWritePosition: Double?
+
+  private struct FrozenState {
+    let points: [Point]
+    let startTime: Double
+    let endTime: Double?
+  }
+  private var frozenState: FrozenState?
 
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
@@ -45,7 +65,7 @@ class ActivityView: UIView {
 
   private func initializePointsArray() {
     let numExtraBufferingPoints = pointsPerSecond() * extraBufferingDuration
-    let numPoints = Int(Double(frame.size.width) + numExtraBufferingPoints)
+    let numPoints = Int(Double(bounds.width) + numExtraBufferingPoints)
     if points.count != numPoints {
       points = Array(repeating: Point(value: 0.0, color: UIColor.black), count: numPoints)
       endTime = nil
@@ -78,11 +98,11 @@ class ActivityView: UIView {
     endTime = time + sampleDuration
   }
 
-  override func draw(_ rect: CGRect) {
+  private func draw(startTime: Double, endTime: Double?, points: [Point]) {
     guard let endTime = endTime, endTime > startTime, !points.isEmpty else { return }
 
     let path = UIBezierPath()
-    path.move(to: CGPoint(x: 0.0, y: self.frame.height))
+    path.move(to: CGPoint(x: 0.0, y: bounds.height))
 
     let startPosition = timeToPosition(startTime)
     let endPosition = timeToPosition(min(startTime + duration, endTime))
@@ -93,29 +113,43 @@ class ActivityView: UIView {
     for x in 0..<Int(drawWidth) {
       let dataIndex = (readIndex + x) % points.count
       let sample = points[dataIndex]
-      let y = CGFloat(1.0 - sample.value) * self.frame.height
+      let y = CGFloat(1.0 - sample.value) * bounds.height
 
       if sample.color != currentColor {
         let previousX = path.currentPoint.x
 
-        path.addLine(to: CGPoint(x: previousX, y: self.frame.height))
+        path.addLine(to: CGPoint(x: previousX, y: bounds.height))
         path.close()
         currentColor.setFill()
         path.fill()
         path.removeAllPoints()
 
         currentColor = sample.color
-        path.move(to: CGPoint(x: previousX, y: self.frame.height))
+        path.move(to: CGPoint(x: previousX, y: bounds.height))
         path.addLine(to: CGPoint(x: previousX, y: y))
       }
 
       path.addLine(to: CGPoint(x: CGFloat(x), y: y))
     }
     path.addLine(to: CGPoint(x: CGFloat(drawWidth), y: path.currentPoint.y))
-    path.addLine(to: CGPoint(x: CGFloat(drawWidth), y: self.frame.height))
+    path.addLine(to: CGPoint(x: CGFloat(drawWidth), y: bounds.height))
     path.close()
     currentColor.setFill()
     path.fill()
+  }
+
+  override func draw(_ rect: CGRect) {
+    if let frozenState = frozenState
+    {
+      draw(
+        startTime: frozenState.startTime,
+        endTime: frozenState.endTime,
+        points: frozenState.points)
+    }
+    else
+    {
+      draw(startTime: startTime, endTime: endTime, points: points)
+    }
   }
 
   private func addPoints(
@@ -142,7 +176,7 @@ class ActivityView: UIView {
   }
 
   private func pointsPerSecond() -> Double {
-    return duration == 0.0 ? 0.0 : Double(self.frame.width) / duration
+    return duration == 0.0 ? 0.0 : Double(bounds.width) / duration
   }
 
   private func timeToPosition(_ time: Double) -> Double {
