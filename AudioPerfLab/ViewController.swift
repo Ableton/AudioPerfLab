@@ -71,7 +71,6 @@ class ViewController: UITableViewController {
     driveDurationsView.duration = ViewController.activityViewDuration
     driveDurationsView.extraBufferingDuration =
       ViewController.activityViewExtraBufferingDuration
-    driveDurationsView.missingTimeColor = ViewController.dropoutColor
   }
 
   private func setupCoreActivityViews() {

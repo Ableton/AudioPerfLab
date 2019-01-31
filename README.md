@@ -14,7 +14,7 @@ An app for exploring real-time audio performance on iOS devices.
 
 ## Load
 
-A graph of the amount of time taken to process each audio buffer as a percentage of the buffer duration. Drop-outs and intervals without audio processing are drawn in red.
+A graph of the amount of time taken to process each audio buffer as a percentage of the buffer duration. Drop-outs are drawn in red.
 
 The switch controls if visualizations are active. It can be used to freeze the graphs in order to take a closer look. 
 

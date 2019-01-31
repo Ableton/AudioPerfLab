@@ -19,7 +19,6 @@ class ActivityView: UIView {
     }
   }
   var startTime = 0.0
-  var missingTimeColor = UIColor.white
 
   private var points: [Point] = []
   private var endTime: Double?
@@ -64,8 +63,8 @@ class ActivityView: UIView {
       if missingTimeInPoints >= 0.1 {
         addPoints(position: timeToPosition(endTime),
                     length: missingTimeInPoints,
-                     value: 1.0,
-                     color: missingTimeColor)
+                     value: 0.0,
+                     color: UIColor.clear)
       }
     }
 
