@@ -110,8 +110,7 @@ class ViewController: UITableViewController {
     numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numProcessingThreadsSlider.value =
-      Float(engine.numWorkerThreads + (engine.processInDriverThread ? 1 : 0))
+    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
     minimumLoadSlider.value = Float(engine.minimumLoad)
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
     processInDriverThreadControl.selectedSegmentIndex =
@@ -321,6 +320,14 @@ class ViewController: UITableViewController {
         energyUsageView.startTime = activityViewStartTime
         energyUsageView.setNeedsDisplay()
       }
+    }
+  }
+}
+
+extension Engine {
+  var numProcessingThreads: Int {
+    get {
+      return Int(numWorkerThreads + (processInDriverThread ? 1 : 0))
     }
   }
 }
