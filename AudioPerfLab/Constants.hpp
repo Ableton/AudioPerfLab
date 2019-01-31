@@ -5,9 +5,9 @@
 #include <chrono>
 #include <initializer_list>
 
-constexpr auto kDefaultNumWorkerThreads = 0;
+constexpr auto kDefaultNumWorkerThreads = 1;
 constexpr auto kDefaultNumBusyThreads = 0;
-constexpr auto kDefaultPreferredBufferSize = 1024;
+constexpr auto kDefaultPreferredBufferSize = 128;
 constexpr auto kDefaultNumSines = 60;
 constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
 
