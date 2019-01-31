@@ -17,6 +17,8 @@ class ViewController: UITableViewController {
 
   @IBOutlet weak private var activityViewsEnabledSwitch: UISwitch!
   @IBOutlet weak private var driveDurationsView: ActivityView!
+  @IBOutlet weak private var workDistributionView: UIView!
+  @IBOutlet weak private var workDistributionOneThreadWarning: UILabel!
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
@@ -34,6 +36,7 @@ class ViewController: UITableViewController {
 
   private static let activityViewDuration = 3.0
   private static let activityViewLatency = 0.1
+  private static let activityViewExtraBufferingDuration = activityViewLatency * 2
   private static let dropoutColor = UIColor.red
   private static let threadColors = [
     UIColor.black,
@@ -53,22 +56,45 @@ class ViewController: UITableViewController {
       let title = tableView(tableView, titleForHeaderInSection: section)!
       tableViewHeaders.append(makeTableViewHeader(title: title))
     }
+    tableViewHeader("Work Distribution")!.isExpanded = false
+    tableViewHeader("Cores")!.isExpanded = false
     tableViewHeader("Energy")!.isExpanded = false
-
-    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
 
     displayLink = CADisplayLink(target: self, selector: #selector(displayLinkStep))
     displayLink!.add(to: .main, forMode: RunLoop.Mode.common)
+    setupDriveDurationsView()
+    setupWorkDistributionViews()
+    setupCoreActivityViews()
+    setupEnergyUsageView()
 
-    let extraBufferingDuration = ViewController.activityViewLatency * 2
+    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
+    initalizeControls()
+  }
+
+  private func setupDriveDurationsView() {
     driveDurationsView.duration = ViewController.activityViewDuration
-    driveDurationsView.extraBufferingDuration = extraBufferingDuration
-    driveDurationsView.missingTimeColor = ViewController.dropoutColor
+    driveDurationsView.extraBufferingDuration =
+      ViewController.activityViewExtraBufferingDuration
+  }
 
+  private func setupWorkDistributionViews() {
+    for _ in 0..<MAX_NUM_THREADS {
+      let workActivityView = ActivityView(frame: workDistributionView.bounds)
+      workActivityView.duration = ViewController.activityViewDuration
+      workActivityView.extraBufferingDuration =
+        ViewController.activityViewExtraBufferingDuration
+      workActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+      workActivityView.contentMode = .scaleAspectFit
+      workDistributionView.addSubview(workActivityView)
+    }
+  }
+
+  private func setupCoreActivityViews() {
     for i in 0..<numberOfProcessors {
       let coreActivityView = ActivityView(frame: .zero)
       coreActivityView.duration = ViewController.activityViewDuration
-      coreActivityView.extraBufferingDuration = extraBufferingDuration
+      coreActivityView.extraBufferingDuration =
+        ViewController.activityViewExtraBufferingDuration
       coreActivityView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
       coreActivityView.contentMode = .scaleAspectFit
       coreActivityViews.append(coreActivityView)
@@ -85,11 +111,12 @@ class ViewController: UITableViewController {
       rowForCore.addSubview(label)
       coreActivityStackView.addArrangedSubview(rowForCore)
     }
+  }
 
+  private func setupEnergyUsageView() {
     energyUsageView.duration = ViewController.activityViewDuration
-    energyUsageView.extraBufferingDuration = extraBufferingDuration
-
-    initalizeControls()
+    energyUsageView.extraBufferingDuration =
+      ViewController.activityViewExtraBufferingDuration
   }
 
   private func initalizeControls() {
@@ -99,24 +126,24 @@ class ViewController: UITableViewController {
     numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numProcessingThreadsSlider.value =
-      Float(engine.numWorkerThreads + (engine.processInDriverThread ? 1 : 0))
+    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
     minimumLoadSlider.value = Float(engine.minimumLoad)
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
     processInDriverThreadControl.selectedSegmentIndex =
       engine.processInDriverThread ? 1 : 0
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
-    updateWorkIntervalEnabledState()
+    updateThreadDependentControls()
   }
 
-  private func updateWorkIntervalEnabledState() {
+  private func updateThreadDependentControls() {
     isWorkIntervalOnSwitch.isEnabled = engine.numWorkerThreads > 0
+    workDistributionOneThreadWarning.isHidden = engine.numProcessingThreads > 1
   }
 
   private func updateNumEngineWorkerThreads() {
     engine.numWorkerThreads =
       Int32(numProcessingThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
-    updateWorkIntervalEnabledState()
+    updateThreadDependentControls()
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
@@ -190,16 +217,89 @@ class ViewController: UITableViewController {
     return tableViewHeaders[section]
   }
 
+  static private func getActivePartialsProcessed(
+    from measurement: DriveMeasurement) -> [Int] {
+    return Mirror(reflecting: measurement.numActivePartialsProcessed).children.map {
+      Int($0.value as! Int32)
+    }
+  }
+
+  static private func getCpuNumbers(from measurement: DriveMeasurement) -> [Int] {
+    return Mirror(reflecting: measurement.cpuNumbers).children.map {
+      Int($0.value as! Int32)
+    }
+  }
+
   static private func getThreadIndexPerCpu(from measurement: DriveMeasurement) -> [Int?] {
     var threadIndexPerCpu = [Int?](repeating: nil, count: numberOfProcessors)
-    for (threadIndex, reflectedCpuNum) in
-      Mirror(reflecting: measurement.cpuNumbers).children.enumerated() {
-      let cpuNum = Int(reflectedCpuNum.value as! Int32)
+    for (threadIndex, cpuNum) in getCpuNumbers(from: measurement).enumerated() {
       if cpuNum >= 0 {
         threadIndexPerCpu[cpuNum] = threadIndex
       }
     }
     return threadIndexPerCpu
+  }
+
+  private func addLoadMeasurement(
+    time: Double,
+    duration bufferDuration: Double,
+    measurement: DriveMeasurement) {
+    let color =
+      measurement.duration <= bufferDuration ? UIColor.black : ViewController.dropoutColor
+    driveDurationsView.addSample(
+      time: time,
+      duration: bufferDuration,
+      value: measurement.duration / bufferDuration,
+      color: color)
+  }
+
+  private func addWorkDistributionMeasurement(
+    time: Double,
+    duration bufferDuration: Double,
+    measurement: DriveMeasurement) {
+    let activePartialsProcessed =
+      ViewController.getActivePartialsProcessed(from: measurement)
+    let totalNumActivePartialsProcessed = activePartialsProcessed.reduce(
+      0, { $0 + max(0, $1) })
+
+    // Create a stacked area chart by overlaying ActivityViews. Start with the top-most
+    // view (on the z-axis) to draw the bottom-most area for the first thread.
+    var lastValue = 0.0
+    for (threadIndex, workActivityView) in
+      self.workDistributionView.subviews.reversed().enumerated() {
+      let workActivityView = workActivityView as! ActivityView
+      let partialsProcessed = activePartialsProcessed[threadIndex]
+
+      if partialsProcessed >= 0 {
+        let percent =
+          Double(partialsProcessed) / Double(totalNumActivePartialsProcessed)
+        let value = percent + lastValue
+        let color = ViewController.threadColors[threadIndex]
+        workActivityView.addSample(
+          time: time,
+          duration: bufferDuration,
+          value: value,
+          color: color)
+        lastValue = value
+      }
+    }
+  }
+
+  private func addCoreMeasurement(
+    time: Double,
+    duration bufferDuration: Double,
+    measurement: DriveMeasurement) {
+    let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
+    for (cpuNumber, coreActivityView) in coreActivityViews.enumerated() {
+      let threadIndex = threadIndexPerCpu[cpuNumber]
+      let color =
+        threadIndex != nil ? ViewController.threadColors[threadIndex!] : UIColor.white
+      coreActivityView.addSample(
+        time: time,
+        duration: bufferDuration,
+        value: threadIndex != nil ? 1.0 : 0.0,
+        color: color)
+    }
   }
 
   private func fetchDriveMeasurements() {
@@ -209,27 +309,12 @@ class ViewController: UITableViewController {
         self.lastNumFrames = measurement.numFrames
       }
 
-      let numFramesInSeconds = Double(measurement.numFrames) / self.engine.sampleRate
-      let driveStartTime = measurement.hostTime - numFramesInSeconds
-      let color = measurement.duration <= numFramesInSeconds
-        ? UIColor.black : ViewController.dropoutColor
-      self.driveDurationsView.addSample(
-          time: driveStartTime,
-          duration: numFramesInSeconds,
-          value: measurement.duration / numFramesInSeconds,
-          color: color)
-
-      let threadIndexPerCpu = ViewController.getThreadIndexPerCpu(from: measurement)
-      for (cpuNumber, coreActivityView) in self.coreActivityViews.enumerated() {
-        let threadIndex = threadIndexPerCpu[cpuNumber]
-        let color = threadIndex != nil
-          ? ViewController.threadColors[threadIndex!] : UIColor.white
-        coreActivityView.addSample(
-          time: driveStartTime,
-          duration: numFramesInSeconds,
-          value: threadIndex != nil ? 1.0 : 0.0,
-          color: color)
-      }
+      let duration = Double(measurement.numFrames) / self.engine.sampleRate
+      let time = measurement.hostTime - duration
+      self.addLoadMeasurement(time: time, duration: duration, measurement: measurement)
+      self.addWorkDistributionMeasurement(
+        time: time, duration: duration, measurement: measurement)
+      self.addCoreMeasurement(time: time, duration: duration, measurement: measurement)
     })
   }
 
@@ -283,6 +368,14 @@ class ViewController: UITableViewController {
         driveDurationsView.startTime = activityViewStartTime
         driveDurationsView.setNeedsDisplay()
       }
+      if tableViewHeader("Work Distribution")!.isExpanded {
+        for workActivityView in workDistributionView.subviews {
+          if let workActivityView = workActivityView as? ActivityView {
+            workActivityView.startTime = activityViewStartTime
+            workActivityView.setNeedsDisplay()
+          }
+        }
+      }
       if tableViewHeader("Cores")!.isExpanded {
         for coreActivityView in coreActivityViews {
           coreActivityView.startTime = activityViewStartTime
@@ -293,6 +386,14 @@ class ViewController: UITableViewController {
         energyUsageView.startTime = activityViewStartTime
         energyUsageView.setNeedsDisplay()
       }
+    }
+  }
+}
+
+extension Engine {
+  var numProcessingThreads: Int {
+    get {
+      return Int(numWorkerThreads + (processInDriverThread ? 1 : 0))
     }
   }
 }

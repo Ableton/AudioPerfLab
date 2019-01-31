@@ -141,6 +141,7 @@ private:
     for (int i = 1; i <= numWorkerThreads; ++i)
     {
       mWorkerThreads.emplace_back(&EngineImpl::workerThread, this, i);
+      mNumActivePartialsProcessed[i] = -1;
       mCpuNumbers[i] = -1;
     }
   }
@@ -196,9 +197,11 @@ private:
     driveMeasurement.duration =
       std::chrono::duration<double>{bufferEndTime - bufferStartTime}.count();
     driveMeasurement.numFrames = numFrames;
+    std::fill_n(driveMeasurement.numActivePartialsProcessed, MAX_NUM_THREADS, -1);
     std::fill_n(driveMeasurement.cpuNumbers, MAX_NUM_THREADS, -1);
     for (size_t i = 0; i < mWorkerThreads.size() + 1; ++i)
     {
+      driveMeasurement.numActivePartialsProcessed[i] = mNumActivePartialsProcessed[i];
       driveMeasurement.cpuNumbers[i] = mCpuNumbers[i];
     }
     mDriveMeasurements.tryPushBack(driveMeasurement);
@@ -237,10 +240,8 @@ private:
       mStartWorkingSemaphore.post();
     }
 
-    if (mProcessInDriverThread)
-    {
-      mSineBank.process(0, inNumberFrames);
-    }
+    mNumActivePartialsProcessed[0] =
+      mProcessInDriverThread ? mSineBank.process(0, inNumberFrames) : -1;
     mCpuNumbers[0] = cpuNumber();
 
     for (size_t i = 0; i < mWorkerThreads.size(); ++i)
@@ -289,7 +290,8 @@ private:
 
       const auto startTime = Clock::now();
       const auto numFrames = mNumFrames.load();
-      mSineBank.process(threadIndex, numFrames);
+      mNumActivePartialsProcessed[threadIndex] =
+        mSineBank.process(threadIndex, numFrames);
       mCpuNumbers[threadIndex] = cpuNumber();
       mFinishedWorkSemaphore.post();
       ensureMinimumLoad(startTime, numFrames);
@@ -336,7 +338,8 @@ private:
 
   std::atomic<bool> mAreWorkerThreadsActive{false};
   std::vector<std::thread> mWorkerThreads;
-  std::array<std::atomic<int>, MAX_NUM_THREADS> mCpuNumbers;
+  std::array<std::atomic<int>, MAX_NUM_THREADS> mNumActivePartialsProcessed{};
+  std::array<std::atomic<int>, MAX_NUM_THREADS> mCpuNumbers{};
 
   std::atomic<bool> mAreBusyThreadsActive{false};
   std::vector<std::thread> mBusyThreads;

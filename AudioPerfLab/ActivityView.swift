@@ -19,7 +19,6 @@ class ActivityView: UIView {
     }
   }
   var startTime = 0.0
-  var missingTimeColor = UIColor.white
 
   private var points: [Point] = []
   private var endTime: Double?
@@ -36,7 +35,7 @@ class ActivityView: UIView {
   }
 
   private func initialize() {
-    self.backgroundColor = UIColor.white
+    isOpaque = false
   }
 
   override func layoutSubviews() {
@@ -64,8 +63,8 @@ class ActivityView: UIView {
       if missingTimeInPoints >= 0.1 {
         addPoints(position: timeToPosition(endTime),
                     length: missingTimeInPoints,
-                     value: 1.0,
-                     color: missingTimeColor)
+                     value: 0.0,
+                     color: UIColor.clear)
       }
     }
 
@@ -80,7 +79,7 @@ class ActivityView: UIView {
   }
 
   override func draw(_ rect: CGRect) {
-    guard let endTime = endTime, !points.isEmpty else { return }
+    guard let endTime = endTime, endTime > startTime, !points.isEmpty else { return }
 
     let path = UIBezierPath()
     path.move(to: CGPoint(x: 0.0, y: self.frame.height))
@@ -133,6 +132,8 @@ class ActivityView: UIView {
   }
 
   private func addPoint(position: Double, value: Double, color: UIColor) {
+    guard !points.isEmpty else { return }
+
     let i = Int(position.truncatingRemainder(dividingBy: Double(points.count)))
     let newPeak = lastWritePosition == nil || floor(lastWritePosition!) != floor(position)
       ? value : max(points[i].value, value)
