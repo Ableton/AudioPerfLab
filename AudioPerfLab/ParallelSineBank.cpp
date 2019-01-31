@@ -34,7 +34,6 @@ int ParallelSineBank::process(const int threadIndex, const int numFrames)
 {
   auto& stereoBuffer = mBuffers[threadIndex];
 
-  // Process partials in chunks to avoid contention on the mNumTakenPartials atomic
   int numActivePartialsProcessed = 0;
   int partialStartIndex = 0;
   while ((partialStartIndex = mNumTakenPartials.fetch_add(kNumPartialsPerProcessingChunk))
