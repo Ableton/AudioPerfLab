@@ -16,7 +16,9 @@ An app for exploring real-time audio performance on iOS devices.
 
 A graph of the amount of time taken to process each audio buffer as a percentage of the buffer duration. Drop-outs and intervals without audio processing are drawn in red.
 
-The switch controls if the visualization is active. This can be used to freeze the graph in order to take a closer look. Drawing the visualization can sometimes impact the way audio threads are scheduled. Timing measurements are collected even when the visualization is disabled, so by briefly toggling the visualization off and on you can observe behavior without the confounding effect of drawing.
+The switch controls if visualizations are active. It can be used to freeze the graphs in order to take a closer look. 
+
+⚠️ Drawing visualizations is expensive and can impact the way audio threads are scheduled, sometimes resulting in better performance. Measurements are collected even when visualizations are disabled, so by briefly turning them off, performing a test, and then switching them back on, you can observe behavior without the confounding effect of drawing.
 
 ## Cores
 
