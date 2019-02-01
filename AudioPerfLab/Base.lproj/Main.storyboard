@@ -133,8 +133,8 @@ Size</string>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                                 <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" autorepeat="NO" wraps="YES" value="7" minimumValue="5" maximumValue="12" translatesAutoresizingMaskIntoConstraints="NO" id="g2c-Vc-FJ9">
-                                                    <rect key="frame" x="140" y="13" width="94" height="29"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <rect key="frame" x="140" y="13.5" width="94" height="29"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <viewLayoutGuide key="safeArea" id="7XZ-kZ-zl4"/>
                                                     <connections>
                                                         <action selector="bufferSizeChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="AA2-4B-XRc"/>
