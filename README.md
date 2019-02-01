@@ -12,13 +12,13 @@ An app for exploring real-time audio performance on iOS devices.
 
 # Visualizations and Controls
 
+The ❄&#xFE0E; button in the toolbar freezes all visualization curves, which can be used to take a closer look at the data.
+
+⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. Measurements are collected even when frozen, so by briefly freezing, performing a test, and then unfreezing you can observe behavior without the confounding effect of drawing.
+
 ## Load
 
 A graph of the amount of time taken to process each audio buffer as a percentage of the buffer duration. Drop-outs are drawn in red.
-
-The switch controls if visualizations are active. It can be used to freeze the graphs in order to take a closer look. 
-
-⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. Measurements are collected even when visualizations are disabled, so by briefly turning them off, performing a test, and then switching them back on, you can observe behavior without the confounding effect of drawing.
 
 ## Work Distribution
 
