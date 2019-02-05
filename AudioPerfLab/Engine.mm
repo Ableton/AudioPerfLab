@@ -310,8 +310,8 @@ private:
     constexpr auto kSleepDuration = std::chrono::milliseconds{5};
 
     sched_param param{};
-    param.sched_priority = sched_get_priority_min(SCHED_FIFO);
-    pthread_setschedparam(pthread_self(), SCHED_FIFO, &param);
+    param.sched_priority = sched_get_priority_min(SCHED_OTHER);
+    pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
 
     while (mAreBusyThreadsActive)
     {
