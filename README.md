@@ -64,7 +64,7 @@ When the real audio load is low, adding artificial load tricks the OS into sched
 
 The number of busy background threads to create. Busy threads are low-priority threads that constantly perform low-energy work.
 
-For small buffer sizes (e.g. 128), adding a busy thread reduces the minimum load necessary in order for audio threads to be scheduled onto high-performance cores. The visualization has the same effect as a busy thread, so it must be disabled to observe this behavior.
+For small buffer sizes (e.g. 128), adding a busy thread reduces the minimum load necessary in order for audio threads to be scheduled onto high-performance cores. Visualizations have the same effect as a busy thread, so they must be frozen to observe this behavior.
 
 ### Driver Thread
 
