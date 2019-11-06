@@ -2,7 +2,7 @@
 
 #include "Partial.hpp"
 
-#include "Math.hpp"
+#include "Base/Math.hpp"
 
 #include <algorithm>
 #include <cmath>

@@ -1,6 +1,6 @@
 // Copyright: 2018, Ableton AG, Berlin. All rights reserved.
 
-#include "Semaphore.hpp"
+#include "Base/Semaphore.hpp"
 
 #include <cstdint>
 #include <mach/mach_init.h>

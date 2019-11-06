@@ -3,13 +3,14 @@
 #import "Engine.hpp"
 
 #include "Constants.hpp"
-#include "Driver.hpp"
-#include "FixedSPSCQueue.hpp"
-#include "Math.hpp"
 #include "ParallelSineBank.hpp"
 #include "Partial.hpp"
-#include "Semaphore.hpp"
-#include "Thread.hpp"
+
+#include "Base/Driver.hpp"
+#include "Base/FixedSPSCQueue.hpp"
+#include "Base/Math.hpp"
+#include "Base/Semaphore.hpp"
+#include "Base/Thread.hpp"
 
 #include <CoreAudio/CoreAudioTypes.h>
 #include <algorithm>
