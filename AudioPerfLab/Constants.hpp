@@ -7,7 +7,6 @@
 
 constexpr auto kDefaultNumWorkerThreads = 1;
 constexpr auto kDefaultNumBusyThreads = 0;
-constexpr auto kDefaultPreferredBufferSize = 128;
 constexpr auto kDefaultNumSines = 36;
 constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
 
@@ -30,4 +29,3 @@ constexpr auto kNumUnrandomizedPhases = 30;
 constexpr auto kRealtimeThreadQuantum = std::chrono::microseconds{500};
 constexpr auto kDriveMeasurementQueueSize = 1024;
 constexpr auto kMaxNumFrames = 4096;
-constexpr auto kCacheLineSize = 128;

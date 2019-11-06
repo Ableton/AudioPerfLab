@@ -31,6 +31,7 @@
 /* Begin PBXFileReference section */
 		163A0DE621BEBBB2001FD225 /* Semaphore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Semaphore.hpp; sourceTree = "<group>"; };
 		163A0DE721BEBBB3001FD225 /* Thread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Thread.hpp; sourceTree = "<group>"; };
+		166364F3237300A5006F286B /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
 		166431E421A2D46B00987A23 /* AudioPerfLab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioPerfLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		166431E721A2D46B00987A23 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		166431E921A2D46B00987A23 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -100,6 +101,7 @@
 			children = (
 				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
 				166431F921A2D4D700987A23 /* AudioPerfLab-Bridging-Header.h */,
+				166364F3237300A5006F286B /* Config.hpp */,
 				94A145C521C5795E00A2ED88 /* Constants.hpp */,
 				16B554A321C16BB000522483 /* Driver.hpp */,
 				16B554A221C16BB000522483 /* Driver.mm */,

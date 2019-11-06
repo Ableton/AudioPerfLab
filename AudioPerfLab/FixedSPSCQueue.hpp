@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "Config.hpp"
+
 #include <algorithm>
 #include <atomic>
 #include <memory>

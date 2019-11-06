@@ -3,7 +3,7 @@
 #include "Driver.hpp"
 
 #include "AudioBuffer.hpp"
-#include "Constants.hpp"
+#include "Config.hpp"
 
 #import <AVFoundation/AVAudioSession.h>
 #include <AudioToolbox/AudioToolbox.h>
