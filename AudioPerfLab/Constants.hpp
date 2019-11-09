@@ -8,7 +8,7 @@
 constexpr auto kDefaultNumWorkerThreads = 1;
 constexpr auto kDefaultNumBusyThreads = 0;
 constexpr auto kDefaultPreferredBufferSize = 128;
-constexpr auto kDefaultNumSines = 60;
+constexpr auto kDefaultNumSines = 36;
 constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
 
 /* The number of partials taken at a time by worker threads.
@@ -21,10 +21,10 @@ constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
  *   workers are running slow.
  * - It avoids contention on the ParallelSineBank::mNumTakenPartials atomic.
  */
-constexpr auto kNumPartialsPerProcessingChunk = 512;
+constexpr auto kNumPartialsPerProcessingChunk = 256;
 
 // Play every note twice to increase load
-constexpr auto kChordNoteNumbers = {41.0f, 41.0f, 44.0f, 44.0f, 48.0f, 48.0f};
+constexpr auto kChordNoteNumbers = {53.0f, 53.0f, 56.0f, 56.0f, 60.0f, 60.0f};
 
 constexpr auto kRealtimeThreadQuantum = std::chrono::microseconds{500};
 constexpr auto kDriveMeasurementQueueSize = 1024;

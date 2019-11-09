@@ -53,11 +53,11 @@ std::vector<Partial> generateChord(
     };
 
     const auto amp = 1.0f / (noteNumbers.size() * 5);
+    appendPartials(amp, -1.0f, -4.0f);
     appendPartials(amp, -1.0f, -2.0f);
-    appendPartials(amp, -0.5f, -1.0f);
     appendPartials(amp, 0.0f, 0.0f);
-    appendPartials(amp, 0.5f, 1.0f);
     appendPartials(amp, 1.0f, 2.0f);
+    appendPartials(amp, 1.0f, 4.0f);
   }
 
   std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {
@@ -72,7 +72,8 @@ void processPartial(Partial& partial, const int numFrames, StereoAudioBuffer& ou
   constexpr auto kTwoPi = float(M_PI * 2.0);
 
   const auto kSilenceThreshold = 0.00001f;
-  if (partial.targetAmp > kSilenceThreshold || partial.amp > kSilenceThreshold)
+  if (std::fabs(partial.targetAmp) > kSilenceThreshold
+      || std::fabs(partial.amp) > kSilenceThreshold)
   {
     const auto channelAmps = equalPowerPanGains(partial.pan);
     for (int frameIndex = 0; frameIndex < numFrames; ++frameIndex)
