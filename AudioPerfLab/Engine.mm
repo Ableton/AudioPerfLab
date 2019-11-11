@@ -211,8 +211,6 @@ private:
   {
     const std::array<float*, 2> dest{static_cast<float*>(pDestBuffers[0].mData),
                                      static_cast<float*>(pDestBuffers[1].mData)};
-    std::fill_n(dest[0], numFrames, 0.0f);
-    std::fill_n(dest[1], numFrames, 0.0f);
     mSineBank.mixTo(dest, numFrames);
   }
 

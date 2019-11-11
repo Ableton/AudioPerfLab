@@ -2,6 +2,7 @@
 
 #include "Driver.hpp"
 
+#include "AudioBuffer.hpp"
 #include "Constants.hpp"
 
 #import <AVFoundation/AVAudioSession.h>
@@ -212,6 +213,14 @@ void Driver::setupIoUnit()
                                 UInt32 inNumberFrames,
                                 AudioBufferList* ioData) -> OSStatus {
     auto* self = static_cast<Driver*>(inRefCon);
+
+    const AudioBuffer* pOutputBuffers = ioData->mBuffers;
+    const StereoAudioBufferPtrs outputBuffer{
+      static_cast<float*>(pOutputBuffers[0].mData),
+      static_cast<float*>(pOutputBuffers[1].mData)};
+    std::fill_n(outputBuffer[0], inNumberFrames, 0.0f);
+    std::fill_n(outputBuffer[1], inNumberFrames, 0.0f);
+
     return self->mRenderCallback(
       ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
   };
