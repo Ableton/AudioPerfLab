@@ -19,7 +19,7 @@ public:
 
   void prepare(int numActivePartials, int numFrames);
   int process(int threadIndex, int numFrames);
-  void mixTo(const std::array<float*, 2>& dest, int numFrames);
+  void mixTo(StereoAudioBufferPtrs dest, int numFrames);
 
 private:
   std::vector<Partial> mPartials;

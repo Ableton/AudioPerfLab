@@ -61,7 +61,7 @@ int ParallelSineBank::process(const int threadIndex, const int numFrames)
   return numActivePartialsProcessed;
 }
 
-void ParallelSineBank::mixTo(const std::array<float*, 2>& dest, const int numFrames)
+void ParallelSineBank::mixTo(const StereoAudioBufferPtrs dest, const int numFrames)
 {
   const auto sumInto = [](const auto& inBuffer, auto* pOutBuffer, const int numFrames) {
     std::transform(inBuffer.begin(), inBuffer.begin() + numFrames, pOutBuffer, pOutBuffer,

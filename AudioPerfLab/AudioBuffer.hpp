@@ -6,3 +6,4 @@
 #include <vector>
 
 using StereoAudioBuffer = std::array<std::vector<float>, 2>;
+using StereoAudioBufferPtrs = std::array<float*, 2>;
