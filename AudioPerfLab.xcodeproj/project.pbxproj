@@ -63,6 +63,7 @@
 		94A145C521C5795E00A2ED88 /* Constants.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Constants.hpp; sourceTree = "<group>"; };
 		94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelSineBank.hpp; sourceTree = "<group>"; };
 		94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeSwitch.swift; sourceTree = "<group>"; };
+		94E75BC32379605500EE25A2 /* Assert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +83,7 @@
 		166364F22372FD3F006F286B /* Base */ = {
 			isa = PBXGroup;
 			children = (
+				94E75BC32379605500EE25A2 /* Assert.hpp */,
 				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
 				16B554A321C16BB000522483 /* Driver.hpp */,
 				16B554A221C16BB000522483 /* Driver.mm */,

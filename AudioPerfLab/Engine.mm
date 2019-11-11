@@ -6,6 +6,7 @@
 #include "ParallelSineBank.hpp"
 #include "Partial.hpp"
 
+#include "Base/Assert.hpp"
 #include "Base/Driver.hpp"
 #include "Base/FixedSPSCQueue.hpp"
 #include "Base/Math.hpp"
@@ -135,7 +136,7 @@ public:
 private:
   void setupWorkerThreads(const int numWorkerThreads)
   {
-    assert((numWorkerThreads + 1) <= MAX_NUM_THREADS);
+    assertRelease((numWorkerThreads + 1) <= MAX_NUM_THREADS, "Too many worker threads");
 
     mSineBank.setNumThreads(numWorkerThreads + 1);
 
