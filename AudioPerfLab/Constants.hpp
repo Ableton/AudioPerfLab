@@ -5,8 +5,6 @@
 #include <chrono>
 #include <initializer_list>
 
-constexpr auto kDefaultNumWorkerThreads = 1;
-constexpr auto kDefaultNumBusyThreads = 0;
 constexpr auto kDefaultNumSines = 36;
 constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
 
@@ -26,6 +24,5 @@ constexpr auto kNumPartialsPerProcessingChunk = 256;
 constexpr auto kChordNoteNumbers = {53.0f, 53.0f, 56.0f, 56.0f, 60.0f, 60.0f};
 constexpr auto kNumUnrandomizedPhases = 30;
 
-constexpr auto kRealtimeThreadQuantum = std::chrono::microseconds{500};
 constexpr auto kDriveMeasurementQueueSize = 1024;
 constexpr auto kMaxNumFrames = 4096;

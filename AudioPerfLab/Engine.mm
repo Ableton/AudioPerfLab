@@ -7,6 +7,7 @@
 #include "Partial.hpp"
 
 #include "Base/Assert.hpp"
+#include "Base/AudioHost.hpp"
 #include "Base/Driver.hpp"
 #include "Base/FixedSPSCQueue.hpp"
 #include "Base/Math.hpp"
@@ -29,90 +30,26 @@ class EngineImpl
 
 public:
   EngineImpl()
-    : mDriver{[this](const auto... xs) { return this->render(xs...); }}
   {
-    setupWorkerThreads(kDefaultNumWorkerThreads);
-    setupBusyThreads(kDefaultNumBusyThreads);
+    mHost.emplace(
+      [&](const int numWorkerThreads) { setup(numWorkerThreads); },
+      [&](const int numFrames) { renderStarted(numFrames); },
+      [&](
+        const int threadIndex, const int numFrames) { process(threadIndex, numFrames); },
+      [&](const StereoAudioBufferPtrs outputBuffer, const uint64_t hostTime,
+          const int numFrames) { renderEnded(outputBuffer, hostTime, numFrames); });
 
-    if (mDriver.status() != Driver::Status::kInvalid)
+    const auto chordPartials = generateChord(
+      mHost->driver().sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
+    mSineBank.setPartials(randomizePhases(chordPartials, kNumUnrandomizedPhases));
+
+    if (mHost->driver().status() != Driver::Status::kInvalid)
     {
-      const auto chordPartials =
-        generateChord(mDriver.sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
-      mSineBank.setPartials(randomizePhases(chordPartials, kNumUnrandomizedPhases));
-      mDriver.start();
+      mHost->driver().start();
     }
   }
 
-  ~EngineImpl()
-  {
-    mDriver.stop();
-    teardownWorkerThreads();
-    teardownBusyThreads();
-  }
-
-  auto& driver() { return mDriver; }
-
-  int preferredBufferSize() { return mDriver.preferredBufferSize(); }
-  void setPreferredBufferSize(const int preferredBufferSize)
-  {
-    if (preferredBufferSize != mDriver.preferredBufferSize())
-    {
-      // Recreate the worker threads in order to use the new buffer size when setting
-      // the thread policy.
-
-      const auto numWorkerThreads = int(mWorkerThreads.size());
-      mDriver.stop();
-      teardownWorkerThreads();
-      mDriver.setPreferredBufferSize(preferredBufferSize);
-      setupWorkerThreads(numWorkerThreads);
-      mDriver.start();
-    }
-  }
-
-  int numWorkerThreads() const { return int(mWorkerThreads.size()); }
-  void setNumWorkerThreads(const int numWorkerThreads)
-  {
-    if (numWorkerThreads != int(mWorkerThreads.size()))
-    {
-      mDriver.stop();
-      teardownWorkerThreads();
-      setupWorkerThreads(numWorkerThreads);
-      mDriver.start();
-    }
-  }
-
-  int numBusyThreads() const { return int(mBusyThreads.size()); }
-  void setNumBusyThreads(const int numBusyThreads)
-  {
-    if (numBusyThreads != int(mBusyThreads.size()))
-    {
-      teardownBusyThreads();
-      setupBusyThreads(numBusyThreads);
-    }
-  }
-
-  bool processInDriverThread() const { return mProcessInDriverThread; }
-  void setProcessInDriverThread(const bool isEnabled)
-  {
-    mProcessInDriverThread = isEnabled;
-  }
-
-  bool isWorkIntervalOn() const { return mIsWorkIntervalOn; }
-  void setIsWorkIntervalOn(const bool isOn)
-  {
-    if (isOn != mIsWorkIntervalOn)
-    {
-      const auto numWorkerThreads = int(mWorkerThreads.size());
-      mDriver.stop();
-      teardownWorkerThreads();
-      mIsWorkIntervalOn = isOn;
-      setupWorkerThreads(numWorkerThreads);
-      mDriver.start();
-    }
-  }
-
-  double minimumLoad() const { return mMinimumLoad; }
-  void setMinimumLoad(const double minimumLoad) { mMinimumLoad = minimumLoad; }
+  AudioHost& host() { return *mHost; }
 
   int numSines() const { return mNumSines; }
   void setNumSines(const int numSines) { mNumSines = numSines; }
@@ -134,62 +71,6 @@ public:
   }
 
 private:
-  void setupWorkerThreads(const int numWorkerThreads)
-  {
-    assertRelease((numWorkerThreads + 1) <= MAX_NUM_THREADS, "Too many worker threads");
-
-    mSineBank.setNumThreads(numWorkerThreads + 1);
-
-    mAreWorkerThreadsActive = true;
-    for (int i = 1; i <= numWorkerThreads; ++i)
-    {
-      mWorkerThreads.emplace_back(&EngineImpl::workerThread, this, i);
-      mNumActivePartialsProcessed[i] = -1;
-      mCpuNumbers[i] = -1;
-    }
-  }
-
-  void teardownWorkerThreads()
-  {
-    mAreWorkerThreadsActive = false;
-    for (size_t i = 0; i < mWorkerThreads.size(); ++i)
-    {
-      mStartWorkingSemaphore.post();
-    }
-    for (auto& thread : mWorkerThreads)
-    {
-      thread.join();
-    }
-    mWorkerThreads.clear();
-  }
-
-  void setupBusyThreads(const int numBusyThreads)
-  {
-    mAreBusyThreadsActive = true;
-    for (int i = 0; i < numBusyThreads; ++i)
-    {
-      mBusyThreads.emplace_back(&EngineImpl::busyThread, this);
-    }
-  }
-
-  void teardownBusyThreads()
-  {
-    mAreBusyThreadsActive = false;
-    for (auto& busyThread : mBusyThreads)
-    {
-      busyThread.join();
-    }
-    mBusyThreads.clear();
-  }
-
-  void ensureMinimumLoad(const std::chrono::time_point<Clock> bufferStartTime,
-                         const int numFrames)
-  {
-    const auto bufferDuration =
-      std::chrono::duration<double>{numFrames / mDriver.sampleRate()};
-    hardwareDelayUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
-  }
-
   void addDriveMeasurement(const uint64_t hostTime,
                            const std::chrono::time_point<Clock> bufferStartTime,
                            const std::chrono::time_point<Clock> bufferEndTime,
@@ -202,7 +83,7 @@ private:
     driveMeasurement.numFrames = numFrames;
     std::fill_n(driveMeasurement.numActivePartialsProcessed, MAX_NUM_THREADS, -1);
     std::fill_n(driveMeasurement.cpuNumbers, MAX_NUM_THREADS, -1);
-    for (size_t i = 0; i < mWorkerThreads.size() + 1; ++i)
+    for (int i = 0; i < mHost->numWorkerThreads() + 1; ++i)
     {
       driveMeasurement.numActivePartialsProcessed[i] = mNumActivePartialsProcessed[i];
       driveMeasurement.cpuNumbers[i] = mCpuNumbers[i];
@@ -210,145 +91,74 @@ private:
     mDriveMeasurements.tryPushBack(driveMeasurement);
   }
 
-  void mixTo(AudioBuffer* pDestBuffers, const int numFrames)
+  // Called with no audio threads active after app launch and setting changes
+  void setup(const int numWorkerThreads)
   {
-    const std::array<float*, 2> dest{static_cast<float*>(pDestBuffers[0].mData),
-                                     static_cast<float*>(pDestBuffers[1].mData)};
-    mSineBank.mixTo(dest, numFrames);
+    assertRelease((numWorkerThreads + 1) <= MAX_NUM_THREADS, "Too many worker threads");
+
+    mSineBank.setNumThreads(numWorkerThreads + 1);
+    for (int i = 1; i <= numWorkerThreads; ++i)
+    {
+      mNumActivePartialsProcessed[i] = -1;
+      mCpuNumbers[i] = -1;
+    }
   }
 
-  OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
-                  const AudioTimeStamp* inTimeStamp,
-                  UInt32 inBusNumber,
-                  UInt32 inNumberFrames,
-                  AudioBufferList* ioData)
+  // Called at the start of the audio I/O callback with no worker threads active
+  void renderStarted(const int numFrames)
   {
-    const auto startTime = Clock::now();
-    mNumFrames = inNumberFrames;
+    mRenderStartTime = Clock::now();
 
     if (const auto duration = mSineBurstDuration.exchange(0.0f))
     {
-      mNumSineBurstSamplesRemaining = float(mDriver.sampleRate()) * duration;
+      mNumSineBurstSamplesRemaining = float(mHost->driver().sampleRate()) * duration;
     }
 
     const auto effectiveNumSines =
       mNumSines.load()
       + (mNumSineBurstSamplesRemaining > 0 ? mNumAdditionalSinesInBurst.load() : 0);
-    mSineBank.prepare(effectiveNumSines, inNumberFrames);
+    mSineBank.prepare(effectiveNumSines, numFrames);
 
-    for (size_t i = 0; i < mWorkerThreads.size(); ++i)
+    if (!mHost->processInDriverThread())
     {
-      mStartWorkingSemaphore.post();
+      mNumActivePartialsProcessed[0] = -1;
+      mCpuNumbers[0] = cpuNumber();
     }
+  }
 
-    mNumActivePartialsProcessed[0] =
-      mProcessInDriverThread ? mSineBank.process(0, inNumberFrames) : -1;
-    mCpuNumbers[0] = cpuNumber();
+  // Called by the main audio I/O thread and by worker audio threads
+  void process(const int threadIndex, const int numFrames)
+  {
+    mNumActivePartialsProcessed[threadIndex] = mSineBank.process(threadIndex, numFrames);
+    mCpuNumbers[threadIndex] = cpuNumber();
+  }
 
-    for (size_t i = 0; i < mWorkerThreads.size(); ++i)
-    {
-      mFinishedWorkSemaphore.wait();
-    }
+  // Called at the end of the audio I/O callback with no worker threads active
+  void renderEnded(const StereoAudioBufferPtrs outputBuffer,
+                   const uint64_t hostTime,
+                   const int numFrames)
+  {
+    mSineBank.mixTo(outputBuffer, numFrames);
 
-    mixTo(ioData->mBuffers, inNumberFrames);
     mNumSineBurstSamplesRemaining =
-      std::max<int>(0, mNumSineBurstSamplesRemaining - inNumberFrames);
+      std::max<int>(0, mNumSineBurstSamplesRemaining - numFrames);
 
     const auto endTime = Clock::now();
-    addDriveMeasurement(inTimeStamp->mHostTime, startTime, endTime, inNumberFrames);
-
-    if (mProcessInDriverThread)
-    {
-      ensureMinimumLoad(startTime, inNumberFrames);
-    }
-
-    return noErr;
+    addDriveMeasurement(hostTime, mRenderStartTime, endTime, numFrames);
   }
 
-  void workerThread(const int threadIndex)
-  {
-    setThreadTimeConstraintPolicy(
-      pthread_self(),
-      TimeConstraintPolicy{mDriver.nominalBufferDuration(), kRealtimeThreadQuantum,
-                           mDriver.nominalBufferDuration()});
-
-    bool needToJoinWorkInterval = mIsWorkIntervalOn;
-    while (1)
-    {
-      mStartWorkingSemaphore.wait();
-      if (!mAreWorkerThreadsActive)
-      {
-        break;
-      }
-
-      // Join after waking from the semaphore to ensure that the CoreAudio thread is
-      // active so that findAndJoinWorkInterval() can find its work interval.
-      if (needToJoinWorkInterval)
-      {
-        findAndJoinWorkInterval();
-        needToJoinWorkInterval = false;
-      }
-
-      const auto startTime = Clock::now();
-      const auto numFrames = mNumFrames.load();
-      mNumActivePartialsProcessed[threadIndex] =
-        mSineBank.process(threadIndex, numFrames);
-      mCpuNumbers[threadIndex] = cpuNumber();
-      mFinishedWorkSemaphore.post();
-      ensureMinimumLoad(startTime, numFrames);
-    }
-
-    if (mIsWorkIntervalOn)
-    {
-      leaveWorkInterval();
-    }
-  }
-
-  // A low-priority thread that constantly performs low-energy work
-  void busyThread()
-  {
-    constexpr auto kLowEnergyDelayDuration = std::chrono::milliseconds{10};
-    constexpr auto kSleepDuration = std::chrono::milliseconds{5};
-
-    sched_param param{};
-    param.sched_priority = sched_get_priority_min(SCHED_OTHER);
-    pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
-
-    while (mAreBusyThreadsActive)
-    {
-      const auto delayUntilTime = Clock::now() + kLowEnergyDelayDuration;
-      hardwareDelayUntil(delayUntilTime);
-
-      // Sleep to avoid being terminated when running in the background by violating the
-      // iOS CPU usage limit
-      std::this_thread::sleep_until(delayUntilTime + kSleepDuration);
-    }
-  }
-
-  Driver mDriver;
+  std::optional<AudioHost> mHost;
   ParallelSineBank mSineBank;
-
-  std::atomic<bool> mProcessInDriverThread{true};
-  bool mIsWorkIntervalOn{false};
-  std::atomic<int> mNumFrames{0};
+  Clock::time_point mRenderStartTime;
+  FixedSPSCQueue<DriveMeasurement> mDriveMeasurements{kDriveMeasurementQueueSize};
   std::atomic<int> mNumSines{kDefaultNumSines};
 
   std::atomic<int> mNumAdditionalSinesInBurst{0};
   std::atomic<float> mSineBurstDuration{0.0f};
   int mNumSineBurstSamplesRemaining{0};
 
-  std::atomic<bool> mAreWorkerThreadsActive{false};
-  std::vector<std::thread> mWorkerThreads;
   std::array<std::atomic<int>, MAX_NUM_THREADS> mNumActivePartialsProcessed{};
   std::array<std::atomic<int>, MAX_NUM_THREADS> mCpuNumbers{};
-
-  std::atomic<bool> mAreBusyThreadsActive{false};
-  std::vector<std::thread> mBusyThreads;
-
-  std::atomic<double> mMinimumLoad{0.0};
-  Semaphore mStartWorkingSemaphore{0};
-  Semaphore mFinishedWorkSemaphore{0};
-  FixedSPSCQueue<DriveMeasurement> mDriveMeasurements{kDriveMeasurementQueueSize};
 };
 
 @implementation Engine
@@ -356,31 +166,37 @@ private:
   EngineImpl mEngine;
 }
 
-- (int)preferredBufferSize { return mEngine.preferredBufferSize(); }
+- (int)preferredBufferSize { return mEngine.host().preferredBufferSize(); }
 - (void)setPreferredBufferSize:(int)preferredBufferSize
 {
-  mEngine.setPreferredBufferSize(preferredBufferSize);
+  mEngine.host().setPreferredBufferSize(preferredBufferSize);
 }
 
-- (double)sampleRate { return mEngine.driver().sampleRate(); }
+- (double)sampleRate { return mEngine.host().driver().sampleRate(); }
 
-- (int)numWorkerThreads { return mEngine.numWorkerThreads(); }
-- (void)setNumWorkerThreads:(int)numThreads { mEngine.setNumWorkerThreads(numThreads); }
+- (int)numWorkerThreads { return mEngine.host().numWorkerThreads(); }
+- (void)setNumWorkerThreads:(int)numThreads
+{
+  mEngine.host().setNumWorkerThreads(numThreads);
+}
 
-- (int)numBusyThreads { return mEngine.numBusyThreads(); }
-- (void)setNumBusyThreads:(int)numThreads { mEngine.setNumBusyThreads(numThreads); }
+- (int)numBusyThreads { return mEngine.host().numBusyThreads(); }
+- (void)setNumBusyThreads:(int)numThreads
+{
+  mEngine.host().setNumBusyThreads(numThreads);
+}
 
-- (bool)processInDriverThread { return mEngine.processInDriverThread(); }
+- (bool)processInDriverThread { return mEngine.host().processInDriverThread(); }
 - (void)setProcessInDriverThread:(bool)enabled
 {
-  mEngine.setProcessInDriverThread(enabled);
+  mEngine.host().setProcessInDriverThread(enabled);
 }
 
-- (bool)isWorkIntervalOn { return mEngine.isWorkIntervalOn(); }
-- (void)setIsWorkIntervalOn:(bool)isOn { mEngine.setIsWorkIntervalOn(isOn); }
+- (bool)isWorkIntervalOn { return mEngine.host().isWorkIntervalOn(); }
+- (void)setIsWorkIntervalOn:(bool)isOn { mEngine.host().setIsWorkIntervalOn(isOn); }
 
-- (double)minimumLoad { return mEngine.minimumLoad(); }
-- (void)setMinimumLoad:(double)minimumLoad { mEngine.setMinimumLoad(minimumLoad); }
+- (double)minimumLoad { return mEngine.host().minimumLoad(); }
+- (void)setMinimumLoad:(double)minimumLoad { mEngine.host().setMinimumLoad(minimumLoad); }
 
 - (int)numSines { return mEngine.numSines(); }
 - (void)setNumSines:(int)numSines { mEngine.setNumSines(numSines); }

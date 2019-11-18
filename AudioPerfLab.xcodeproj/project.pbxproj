@@ -26,6 +26,7 @@
 		94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A145BF21C4183400A2ED88 /* SliderWithValue.swift */; };
 		94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A145C121C41FB300A2ED88 /* Partial.cpp */; };
 		94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */; };
+		94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94DFC69D2378587300E402FC /* AudioHost.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,6 +65,8 @@
 		94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelSineBank.hpp; sourceTree = "<group>"; };
 		94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeSwitch.swift; sourceTree = "<group>"; };
 		94E75BC32379605500EE25A2 /* Assert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
+		94DFC69C2378587100E402FC /* AudioHost.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioHost.hpp; sourceTree = "<group>"; };
+		94DFC69D2378587300E402FC /* AudioHost.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AudioHost.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +88,8 @@
 			children = (
 				94E75BC32379605500EE25A2 /* Assert.hpp */,
 				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
+				94DFC69C2378587100E402FC /* AudioHost.hpp */,
+				94DFC69D2378587300E402FC /* AudioHost.cpp */,
 				16B554A321C16BB000522483 /* Driver.hpp */,
 				16B554A221C16BB000522483 /* Driver.mm */,
 				166364F3237300A5006F286B /* Config.hpp */,
@@ -228,6 +233,7 @@
 				16B495BA21B933AB00C6D2A4 /* ActivityView.swift in Sources */,
 				94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */,
 				9450A37921FBAC420061783A /* CollapsibleTableViewHeader.swift in Sources */,
+				94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */,
 				166431EA21A2D46B00987A23 /* ViewController.swift in Sources */,
 				166431E821A2D46B00987A23 /* AppDelegate.swift in Sources */,
 				940D7ADD21CA3F5A00216EA1 /* ParallelSineBank.cpp in Sources */,
