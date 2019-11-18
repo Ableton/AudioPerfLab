@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cmath>
 
+constexpr auto kTwoPi = float(M_PI * 2.0);
+
 std::vector<Partial> generateSaw(const float sampleRate,
                                  const float amp,
                                  const std::chrono::duration<float> ampSmoothingDuration,
@@ -27,7 +29,7 @@ std::vector<Partial> generateSaw(const float sampleRate,
     partial.pan = pan;
     const auto partialFrequency = i * frequency;
     const auto samplesPerCycle = sampleRate / partialFrequency;
-    partial.phaseIncrement = 2.0f * float(M_PI) / samplesPerCycle;
+    partial.phaseIncrement = kTwoPi / samplesPerCycle;
 
     result.emplace_back(partial);
   }
@@ -69,8 +71,6 @@ std::vector<Partial> generateChord(
 
 void processPartial(Partial& partial, const int numFrames, StereoAudioBuffer& output)
 {
-  constexpr auto kTwoPi = float(M_PI * 2.0);
-
   const auto kSilenceThreshold = 0.00001f;
   if (std::fabs(partial.targetAmp) > kSilenceThreshold
       || std::fabs(partial.amp) > kSilenceThreshold)
