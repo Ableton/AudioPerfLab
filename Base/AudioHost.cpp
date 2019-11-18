@@ -2,6 +2,7 @@
 
 #include "AudioHost.hpp"
 
+#include "Assert.hpp"
 #include "Thread.hpp"
 
 #include <utility>
@@ -16,18 +17,35 @@ AudioHost::AudioHost(Setup setup,
   , mProcess{std::move(process)}
   , mRenderEnded{std::move(renderEnded)}
 {
-  setupWorkerThreads(kDefaultNumWorkerThreads);
-  setupBusyThreads(kDefaultNumBusyThreads);
 }
 
-AudioHost::~AudioHost()
-{
-  mDriver.stop();
-  teardownWorkerThreads();
-  teardownBusyThreads();
-}
+AudioHost::~AudioHost() { stop(); }
 
 Driver& AudioHost::driver() { return mDriver; }
+
+void AudioHost::start()
+{
+  if (!mIsStarted)
+  {
+    mSetup(mNumRequestedWorkerThreads);
+
+    setupBusyThreads();
+    setupWorkerThreads();
+    mDriver.start();
+    mIsStarted = true;
+  }
+}
+
+void AudioHost::stop()
+{
+  if (mIsStarted)
+  {
+    mDriver.stop();
+    teardownWorkerThreads();
+    teardownBusyThreads();
+    mIsStarted = false;
+  }
+}
 
 int AudioHost::preferredBufferSize() const { return mDriver.preferredBufferSize(); }
 void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
@@ -36,35 +54,25 @@ void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
   {
     // Recreate the worker threads in order to use the new buffer size when setting
     // the thread policy.
-
-    const auto numWorkerThreads = int(mWorkerThreads.size());
-    mDriver.stop();
-    teardownWorkerThreads();
-    mDriver.setPreferredBufferSize(preferredBufferSize);
-    setupWorkerThreads(numWorkerThreads);
-    mDriver.start();
+    whileStopped([&] { mDriver.setPreferredBufferSize(preferredBufferSize); });
   }
 }
 
 int AudioHost::numWorkerThreads() const { return int(mWorkerThreads.size()); }
 void AudioHost::setNumWorkerThreads(const int numWorkerThreads)
 {
-  if (numWorkerThreads != int(mWorkerThreads.size()))
+  if (numWorkerThreads != mNumRequestedWorkerThreads)
   {
-    mDriver.stop();
-    teardownWorkerThreads();
-    setupWorkerThreads(numWorkerThreads);
-    mDriver.start();
+    whileStopped([&] { mNumRequestedWorkerThreads = numWorkerThreads; });
   }
 }
 
 int AudioHost::numBusyThreads() const { return int(mBusyThreads.size()); }
 void AudioHost::setNumBusyThreads(const int numBusyThreads)
 {
-  if (numBusyThreads != int(mBusyThreads.size()))
+  if (numBusyThreads != mNumRequestedBusyThreads)
   {
-    teardownBusyThreads();
-    setupBusyThreads(numBusyThreads);
+    whileStopped([&] { mNumRequestedBusyThreads = numBusyThreads; });
   }
 }
 
@@ -79,24 +87,36 @@ void AudioHost::setIsWorkIntervalOn(const bool isOn)
 {
   if (isOn != mIsWorkIntervalOn)
   {
-    const auto numWorkerThreads = int(mWorkerThreads.size());
-    mDriver.stop();
-    teardownWorkerThreads();
-    mIsWorkIntervalOn = isOn;
-    setupWorkerThreads(numWorkerThreads);
-    mDriver.start();
+    whileStopped([&] { mIsWorkIntervalOn = isOn; });
   }
 }
 
 double AudioHost::minimumLoad() const { return mMinimumLoad; }
 void AudioHost::setMinimumLoad(const double minimumLoad) { mMinimumLoad = minimumLoad; }
 
-void AudioHost::setupWorkerThreads(const int numWorkerThreads)
+void AudioHost::whileStopped(const std::function<void()>& f)
 {
-  mSetup(numWorkerThreads);
+  const bool wasStarted = mIsStarted;
+  if (wasStarted)
+  {
+    stop();
+  }
+
+  f();
+
+  if (wasStarted)
+  {
+    start();
+  }
+}
+
+void AudioHost::setupWorkerThreads()
+{
+  assertRelease(mWorkerThreads.empty(),
+                "Worker threads must be torn down before calling setupWorkerThreads()");
 
   mAreWorkerThreadsActive = true;
-  for (int i = 1; i <= numWorkerThreads; ++i)
+  for (int i = 1; i <= mNumRequestedWorkerThreads; ++i)
   {
     mWorkerThreads.emplace_back(&AudioHost::workerThread, this, i);
   }
@@ -116,10 +136,13 @@ void AudioHost::teardownWorkerThreads()
   mWorkerThreads.clear();
 }
 
-void AudioHost::setupBusyThreads(const int numBusyThreads)
+void AudioHost::setupBusyThreads()
 {
+  assertRelease(mBusyThreads.empty(),
+                "Busy threads must be torn down before calling setupBusyThreads()");
+
   mAreBusyThreadsActive = true;
-  for (int i = 0; i < numBusyThreads; ++i)
+  for (int i = 0; i < mNumRequestedBusyThreads; ++i)
   {
     mBusyThreads.emplace_back(&AudioHost::busyThread, this);
   }

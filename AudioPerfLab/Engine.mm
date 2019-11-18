@@ -30,26 +30,22 @@ class EngineImpl
 
 public:
   EngineImpl()
+    : mHost{[&](const int numWorkerThreads) { setup(numWorkerThreads); },
+            [&](const int numFrames) { renderStarted(numFrames); },
+            [&](const int threadIndex, const int numFrames) {
+              process(threadIndex, numFrames);
+            },
+            [&](const StereoAudioBufferPtrs outputBuffer,
+                const uint64_t hostTime,
+                const int numFrames) { renderEnded(outputBuffer, hostTime, numFrames); }}
   {
-    mHost.emplace(
-      [&](const int numWorkerThreads) { setup(numWorkerThreads); },
-      [&](const int numFrames) { renderStarted(numFrames); },
-      [&](
-        const int threadIndex, const int numFrames) { process(threadIndex, numFrames); },
-      [&](const StereoAudioBufferPtrs outputBuffer, const uint64_t hostTime,
-          const int numFrames) { renderEnded(outputBuffer, hostTime, numFrames); });
-
     const auto chordPartials = generateChord(
-      mHost->driver().sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
+      mHost.driver().sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
     mSineBank.setPartials(randomizePhases(chordPartials, kNumUnrandomizedPhases));
-
-    if (mHost->driver().status() != Driver::Status::kInvalid)
-    {
-      mHost->driver().start();
-    }
+    mHost.start();
   }
 
-  AudioHost& host() { return *mHost; }
+  AudioHost& host() { return mHost; }
 
   int numSines() const { return mNumSines; }
   void setNumSines(const int numSines) { mNumSines = numSines; }
@@ -83,7 +79,7 @@ private:
     driveMeasurement.numFrames = numFrames;
     std::fill_n(driveMeasurement.numActivePartialsProcessed, MAX_NUM_THREADS, -1);
     std::fill_n(driveMeasurement.cpuNumbers, MAX_NUM_THREADS, -1);
-    for (int i = 0; i < mHost->numWorkerThreads() + 1; ++i)
+    for (int i = 0; i < mHost.numWorkerThreads() + 1; ++i)
     {
       driveMeasurement.numActivePartialsProcessed[i] = mNumActivePartialsProcessed[i];
       driveMeasurement.cpuNumbers[i] = mCpuNumbers[i];
@@ -111,7 +107,7 @@ private:
 
     if (const auto duration = mSineBurstDuration.exchange(0.0f))
     {
-      mNumSineBurstSamplesRemaining = float(mHost->driver().sampleRate()) * duration;
+      mNumSineBurstSamplesRemaining = float(mHost.driver().sampleRate()) * duration;
     }
 
     const auto effectiveNumSines =
@@ -119,7 +115,7 @@ private:
       + (mNumSineBurstSamplesRemaining > 0 ? mNumAdditionalSinesInBurst.load() : 0);
     mSineBank.prepare(effectiveNumSines, numFrames);
 
-    if (!mHost->processInDriverThread())
+    if (!mHost.processInDriverThread())
     {
       mNumActivePartialsProcessed[0] = -1;
       mCpuNumbers[0] = cpuNumber();
@@ -147,7 +143,7 @@ private:
     addDriveMeasurement(hostTime, mRenderStartTime, endTime, numFrames);
   }
 
-  std::optional<AudioHost> mHost;
+  AudioHost mHost;
   ParallelSineBank mSineBank;
   Clock::time_point mRenderStartTime;
   FixedSPSCQueue<DriveMeasurement> mDriveMeasurements{kDriveMeasurementQueueSize};

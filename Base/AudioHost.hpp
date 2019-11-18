@@ -39,6 +39,9 @@ public:
 
   Driver& driver();
 
+  void start();
+  void stop();
+
   int preferredBufferSize() const;
   void setPreferredBufferSize(const int preferredBufferSize);
 
@@ -58,10 +61,12 @@ public:
   void setMinimumLoad(double minimumLoad);
 
 private:
-  void setupWorkerThreads(int numWorkerThreads);
+  void whileStopped(const std::function<void()>& f);
+
+  void setupWorkerThreads();
   void teardownWorkerThreads();
 
-  void setupBusyThreads(int numBusyThreads);
+  void setupBusyThreads();
   void teardownBusyThreads();
 
   void ensureMinimumLoad(std::chrono::time_point<Clock> bufferStartTime, int numFrames);
@@ -95,4 +100,8 @@ private:
   RenderStarted mRenderStarted;
   Process mProcess;
   RenderEnded mRenderEnded;
+
+  bool mIsStarted{false};
+  int mNumRequestedWorkerThreads{kDefaultNumWorkerThreads};
+  int mNumRequestedBusyThreads{kDefaultNumBusyThreads};
 };
