@@ -31,4 +31,6 @@ std::vector<Partial> generateChord(float sampleRate,
                                    std::chrono::duration<float> ampSmoothingDuration,
                                    const std::vector<float>& noteNumbers);
 
+std::vector<Partial> randomizePhases(std::vector<Partial> partials, int partialsToSkip);
+
 void processPartial(Partial& partial, int numFrames, StereoAudioBuffer& output);

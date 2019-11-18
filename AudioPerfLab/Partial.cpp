@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 constexpr auto kTwoPi = float(M_PI * 2.0);
 
@@ -67,6 +68,19 @@ std::vector<Partial> generateChord(
   });
 
   return result;
+}
+
+std::vector<Partial> randomizePhases(std::vector<Partial> partials,
+                                     const int partialsToSkip)
+{
+  std::default_random_engine generator{42};
+  std::normal_distribution<float> phaseDistribution(0.0, kTwoPi);
+  const auto iFirst = std::min(partials.begin() + partialsToSkip, partials.end());
+  std::transform(iFirst, partials.end(), iFirst, [&](Partial partial) {
+    partial.phase = phaseDistribution(generator);
+    return partial;
+  });
+  return partials;
 }
 
 void processPartial(Partial& partial, const int numFrames, StereoAudioBuffer& output)

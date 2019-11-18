@@ -34,8 +34,9 @@ public:
 
     if (mDriver.status() != Driver::Status::kInvalid)
     {
-      mSineBank.setPartials(
-        generateChord(mDriver.sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers));
+      const auto chordPartials =
+        generateChord(mDriver.sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
+      mSineBank.setPartials(randomizePhases(chordPartials, kNumUnrandomizedPhases));
       mDriver.start();
     }
   }

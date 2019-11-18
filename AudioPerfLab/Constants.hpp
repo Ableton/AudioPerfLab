@@ -25,6 +25,7 @@ constexpr auto kNumPartialsPerProcessingChunk = 256;
 
 // Play every note twice to increase load
 constexpr auto kChordNoteNumbers = {53.0f, 53.0f, 56.0f, 56.0f, 60.0f, 60.0f};
+constexpr auto kNumUnrandomizedPhases = 30;
 
 constexpr auto kRealtimeThreadQuantum = std::chrono::microseconds{500};
 constexpr auto kDriveMeasurementQueueSize = 1024;
