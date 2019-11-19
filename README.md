@@ -10,6 +10,10 @@ An app for exploring real-time audio performance on iOS devices.
 * iOS 12 and above
 * iPhone 5s and above
 
+# License
+
+This software is distributed under the [MIT License](./LICENSE).
+
 # Visualizations and Controls
 
 The ❄&#xFE0E; button in the toolbar freezes all visualization curves, which can be used to take a closer look at the data.
