@@ -22,31 +22,14 @@
 
 #pragma once
 
-#import <UIKit/UIKit.h>
+#include <cstdlib>
+#include <iostream>
 
-#define MAX_NUM_THREADS 8
-struct DriveMeasurement
+inline void assertRelease(const bool condition, const char* pMessage)
 {
-  double hostTime;
-  double duration;
-  int numFrames;
-  int cpuNumbers[MAX_NUM_THREADS];
-  int numActivePartialsProcessed[MAX_NUM_THREADS];
-};
-
-@interface Engine : NSObject
-
-@property(nonatomic) int preferredBufferSize;
-@property(nonatomic, readonly) double sampleRate;
-@property(nonatomic) int numWorkerThreads;
-@property(nonatomic) int numBusyThreads;
-@property(nonatomic) bool processInDriverThread;
-@property(nonatomic) bool isWorkIntervalOn;
-@property(nonatomic) double minimumLoad;
-@property(nonatomic) int numSines;
-@property(nonatomic, readonly) int maxNumSines;
-
-- (void)playSineBurstFor:(double)duration additionalSines:(int)numAdditionalSines;
-- (void)fetchMeasurements:(void (^)(struct DriveMeasurement))callback;
-
-@end
+  if (!condition)
+  {
+    std::cerr << pMessage << '\n';
+    std::abort();
+  }
+}

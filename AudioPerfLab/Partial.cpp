@@ -1,11 +1,34 @@
-// Copyright: 2018, Ableton AG, Berlin. All rights reserved.
+/*
+ * Copyright (c) 2019 Ableton AG, Berlin
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the
+ * Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ * DEALINGS IN THE SOFTWARE.
+ */
 
 #include "Partial.hpp"
 
-#include "Math.hpp"
+#include "Base/Math.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <random>
+
+constexpr auto kTwoPi = float(M_PI * 2.0);
 
 std::vector<Partial> generateSaw(const float sampleRate,
                                  const float amp,
@@ -27,7 +50,7 @@ std::vector<Partial> generateSaw(const float sampleRate,
     partial.pan = pan;
     const auto partialFrequency = i * frequency;
     const auto samplesPerCycle = sampleRate / partialFrequency;
-    partial.phaseIncrement = 2.0f * float(M_PI) / samplesPerCycle;
+    partial.phaseIncrement = kTwoPi / samplesPerCycle;
 
     result.emplace_back(partial);
   }
@@ -53,11 +76,11 @@ std::vector<Partial> generateChord(
     };
 
     const auto amp = 1.0f / (noteNumbers.size() * 5);
+    appendPartials(amp, -1.0f, -4.0f);
     appendPartials(amp, -1.0f, -2.0f);
-    appendPartials(amp, -0.5f, -1.0f);
     appendPartials(amp, 0.0f, 0.0f);
-    appendPartials(amp, 0.5f, 1.0f);
     appendPartials(amp, 1.0f, 2.0f);
+    appendPartials(amp, 1.0f, 4.0f);
   }
 
   std::sort(result.begin(), result.end(), [](const auto& a, const auto& b) {
@@ -67,12 +90,24 @@ std::vector<Partial> generateChord(
   return result;
 }
 
+std::vector<Partial> randomizePhases(std::vector<Partial> partials,
+                                     const int partialsToSkip)
+{
+  std::default_random_engine generator{42};
+  std::normal_distribution<float> phaseDistribution(0.0, kTwoPi);
+  const auto iFirst = std::min(partials.begin() + partialsToSkip, partials.end());
+  std::transform(iFirst, partials.end(), iFirst, [&](Partial partial) {
+    partial.phase = phaseDistribution(generator);
+    return partial;
+  });
+  return partials;
+}
+
 void processPartial(Partial& partial, const int numFrames, StereoAudioBuffer& output)
 {
-  constexpr auto kTwoPi = float(M_PI * 2.0);
-
   const auto kSilenceThreshold = 0.00001f;
-  if (partial.targetAmp > kSilenceThreshold || partial.amp > kSilenceThreshold)
+  if (std::fabs(partial.targetAmp) > kSilenceThreshold
+      || std::fabs(partial.amp) > kSilenceThreshold)
   {
     const auto channelAmps = equalPowerPanGains(partial.pan);
     for (int frameIndex = 0; frameIndex < numFrames; ++frameIndex)

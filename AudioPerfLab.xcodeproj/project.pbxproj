@@ -26,11 +26,13 @@
 		94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A145BF21C4183400A2ED88 /* SliderWithValue.swift */; };
 		94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A145C121C41FB300A2ED88 /* Partial.cpp */; };
 		94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */; };
+		94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94DFC69D2378587300E402FC /* AudioHost.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		163A0DE621BEBBB2001FD225 /* Semaphore.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Semaphore.hpp; sourceTree = "<group>"; };
 		163A0DE721BEBBB3001FD225 /* Thread.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Thread.hpp; sourceTree = "<group>"; };
+		166364F3237300A5006F286B /* Config.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Config.hpp; sourceTree = "<group>"; };
 		166431E421A2D46B00987A23 /* AudioPerfLab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioPerfLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		166431E721A2D46B00987A23 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		166431E921A2D46B00987A23 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -62,6 +64,9 @@
 		94A145C521C5795E00A2ED88 /* Constants.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Constants.hpp; sourceTree = "<group>"; };
 		94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelSineBank.hpp; sourceTree = "<group>"; };
 		94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeSwitch.swift; sourceTree = "<group>"; };
+		94E75BC32379605500EE25A2 /* Assert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
+		94DFC69C2378587100E402FC /* AudioHost.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioHost.hpp; sourceTree = "<group>"; };
+		94DFC69D2378587300E402FC /* AudioHost.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AudioHost.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,9 +83,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		166364F22372FD3F006F286B /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				94E75BC32379605500EE25A2 /* Assert.hpp */,
+				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
+				94DFC69C2378587100E402FC /* AudioHost.hpp */,
+				94DFC69D2378587300E402FC /* AudioHost.cpp */,
+				16B554A321C16BB000522483 /* Driver.hpp */,
+				16B554A221C16BB000522483 /* Driver.mm */,
+				166364F3237300A5006F286B /* Config.hpp */,
+				16B495BB21B974C100C6D2A4 /* FixedSPSCQueue.hpp */,
+				94A145C421C5484C00A2ED88 /* Math.hpp */,
+				16EBD0C721CA640C00D92FDC /* Semaphore.cpp */,
+				163A0DE621BEBBB2001FD225 /* Semaphore.hpp */,
+				940D7ADE21CA4E2B00216EA1 /* Thread.cpp */,
+				163A0DE721BEBBB3001FD225 /* Thread.hpp */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
 		166431DB21A2D46B00987A23 = {
 			isa = PBXGroup;
 			children = (
+				166364F22372FD3F006F286B /* Base */,
 				166431E621A2D46B00987A23 /* AudioPerfLab */,
 				166431E521A2D46B00987A23 /* Products */,
 				166431FF21A2EB0E00987A23 /* Frameworks */,
@@ -98,23 +124,14 @@
 		166431E621A2D46B00987A23 /* AudioPerfLab */ = {
 			isa = PBXGroup;
 			children = (
-				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
 				166431F921A2D4D700987A23 /* AudioPerfLab-Bridging-Header.h */,
 				94A145C521C5795E00A2ED88 /* Constants.hpp */,
-				16B554A321C16BB000522483 /* Driver.hpp */,
-				16B554A221C16BB000522483 /* Driver.mm */,
 				166431FB21A2D4D700987A23 /* Engine.hpp */,
 				166431FD21A2D52500987A23 /* Engine.mm */,
-				16B495BB21B974C100C6D2A4 /* FixedSPSCQueue.hpp */,
-				94A145C421C5484C00A2ED88 /* Math.hpp */,
 				940D7ADC21CA3F5A00216EA1 /* ParallelSineBank.cpp */,
 				94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */,
 				94A145C121C41FB300A2ED88 /* Partial.cpp */,
 				94A145C221C41FB300A2ED88 /* Partial.hpp */,
-				16EBD0C721CA640C00D92FDC /* Semaphore.cpp */,
-				163A0DE621BEBBB2001FD225 /* Semaphore.hpp */,
-				940D7ADE21CA4E2B00216EA1 /* Thread.cpp */,
-				163A0DE721BEBBB3001FD225 /* Thread.hpp */,
 				16B495B921B933AB00C6D2A4 /* ActivityView.swift */,
 				166431E721A2D46B00987A23 /* AppDelegate.swift */,
 				9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */,
@@ -167,7 +184,7 @@
 		166431DC21A2D46B00987A23 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1110;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "Ableton AG";
 				TargetAttributes = {
@@ -216,6 +233,7 @@
 				16B495BA21B933AB00C6D2A4 /* ActivityView.swift in Sources */,
 				94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */,
 				9450A37921FBAC420061783A /* CollapsibleTableViewHeader.swift in Sources */,
+				94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */,
 				166431EA21A2D46B00987A23 /* ViewController.swift in Sources */,
 				166431E821A2D46B00987A23 /* AppDelegate.swift in Sources */,
 				940D7ADD21CA3F5A00216EA1 /* ParallelSineBank.cpp in Sources */,
@@ -302,6 +320,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -367,6 +386,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

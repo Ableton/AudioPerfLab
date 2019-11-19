@@ -192,7 +192,7 @@ Waves</string>
                                                         <action selector="playSineBurst:" destination="L4Q-x0-BAr" eventType="touchDown" id="oAC-hC-hgL"/>
                                                     </connections>
                                                 </button>
-                                                <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3000" minValue="100" maxValue="3000" translatesAutoresizingMaskIntoConstraints="NO" id="F9G-mj-FFP" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
+                                                <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="1500" minValue="100" maxValue="1500" translatesAutoresizingMaskIntoConstraints="NO" id="F9G-mj-FFP" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
                                                     <rect key="frame" x="137" y="13" width="224" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                 </slider>
