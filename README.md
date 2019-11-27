@@ -1,5 +1,7 @@
 # <img src="Logo.svg" alt="Logo" height="76">
 
+[![Build Status](https://travis-ci.org/Ableton/AudioPerfLab.svg?branch=master)](https://travis-ci.org/Ableton/AudioPerfLab)
+
 An app for exploring real-time audio performance on iOS devices.
 
 <img src="Screenshot.png" alt="Screenshot" height="600">
