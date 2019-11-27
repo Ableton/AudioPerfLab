@@ -1,0 +1,19 @@
+# Copyright (c) 2019 Ableton AG, Berlin. All rights reserved.
+
+branches:
+  only:
+    - master
+
+os: osx
+osx_image: xcode11.2
+
+jobs:
+  include:
+    - env: CONFIGURATION=Debug SDK=iphoneos
+    - env: CONFIGURATION=Release SDK=iphoneos
+
+    - env: CONFIGURATION=Debug SDK=iphonesimulator
+    - env: CONFIGURATION=Release SDK=iphonesimulator
+
+script:
+  - xcodebuild -configuration $CONFIGURATION -sdk $SDK -alltargets CODE_SIGNING_ALLOWED="NO"
