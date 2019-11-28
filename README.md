@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/Ableton/AudioPerfLab.svg?branch=master)](https://travis-ci.org/Ableton/AudioPerfLab)
 
-An app for exploring real-time audio performance on iOS devices.
+An app for exploring real-time audio performance on iOS devices. See the [High Performance Audio on iOS](https://youtu.be/ywrLAv5WNq4) Talk from ADC '19 for more information.
 
 <img src="Screenshot.png" alt="Screenshot" height="600">
 
