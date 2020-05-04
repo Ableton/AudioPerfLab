@@ -25,6 +25,7 @@
 #include "Assert.hpp"
 #include "Thread.hpp"
 
+#include <string>
 #include <utility>
 
 AudioHost::AudioHost(Setup setup,
@@ -194,6 +195,7 @@ OSStatus AudioHost::render(AudioUnitRenderActionFlags* ioActionFlags,
 
 void AudioHost::workerThread(const int threadIndex)
 {
+  setCurrentThreadName("Audio Worker Thread " + std::to_string(threadIndex));
   setThreadTimeConstraintPolicy(
     pthread_self(),
     TimeConstraintPolicy{mDriver.nominalBufferDuration(), kRealtimeThreadQuantum,
