@@ -22,28 +22,74 @@
 
 #pragma once
 
-#include <atomic>
-#include <thread>
+#include "Config.hpp"
+
+#include <chrono>
+#include <memory>
+#include <string>
 #include <vector>
 
-/*! A set of low-priority threads that prevent CPU throttling by constantly
- * performing low-energy work.
+class BusyThreadImpl;
+
+/*! A low-priority thread that prevents CPU throttling by constantly performing low-energy
+ * work.
  */
+class BusyThread
+{
+public:
+  using Seconds = std::chrono::duration<double>;
+
+  explicit BusyThread(std::string threadName);
+
+  BusyThread(BusyThread&&) noexcept;
+  BusyThread& operator=(BusyThread&&) noexcept;
+
+  BusyThread(const BusyThread&) = delete;
+  BusyThread& operator=(const BusyThread&) = delete;
+
+  ~BusyThread();
+
+  //! Start performing busy work. A busy thread is stopped by default.
+  void start();
+
+  //! Stop performing busy work.
+  void stop();
+
+  //! The duration of one busy thread iteration.
+  Seconds period() const;
+  void setPeriod(Seconds period);
+
+  //! The percentage of a busy thread iteration spent performing low-energy work rather
+  //! than blocking.
+  double threadCpuUsage() const;
+  void setThreadCpuUsage(double threadCpuUsage);
+
+private:
+  // Use a Pimpl so that the class is movable
+  std::unique_ptr<BusyThreadImpl> mpImpl;
+};
+
 class BusyThreads
 {
 public:
+  using Seconds = BusyThread::Seconds;
+
   BusyThreads();
-  ~BusyThreads();
 
   int numThreads() const;
   void setNumThreads(int numThreads);
 
+  //! The duration of one busy thread iteration.
+  Seconds period() const;
+  void setPeriod(Seconds period);
+
+  //! The percentage of a busy thread iteration spent performing low-energy work rather
+  //! than blocking.
+  double threadCpuUsage() const;
+  void setThreadCpuUsage(double threadCpuUsage);
+
 private:
-  void setup(int numThreads);
-  void teardown();
-
-  void busyThread(int threadIndex);
-
-  std::atomic<bool> mIsActive{false};
-  std::vector<std::thread> mThreads;
+  std::vector<BusyThread> mThreads;
+  Seconds mPeriod = kDefaultBusyThreadPeriod;
+  double mThreadCpuUsage = kDefaultBusyThreadCpuUsage;
 };
