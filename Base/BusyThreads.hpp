@@ -42,7 +42,7 @@ private:
   void setup(int numThreads);
   void teardown();
 
-  void busyThread();
+  void busyThread(int threadIndex);
 
   std::atomic<bool> mIsActive{false};
   std::vector<std::thread> mThreads;

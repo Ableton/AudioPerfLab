@@ -28,6 +28,7 @@
 #include <chrono>
 #include <pthread.h>
 #include <pthread/sched.h>
+#include <string>
 
 BusyThreads::BusyThreads() { setup(kDefaultNumBusyThreads); }
 BusyThreads::~BusyThreads() { teardown(); }
@@ -50,7 +51,7 @@ void BusyThreads::setup(const int numThreads)
   mIsActive = true;
   for (int i = 0; i < numThreads; ++i)
   {
-    mThreads.emplace_back(&BusyThreads::busyThread, this);
+    mThreads.emplace_back(&BusyThreads::busyThread, this, i);
   }
 }
 
@@ -64,12 +65,14 @@ void BusyThreads::teardown()
   mThreads.clear();
 }
 
-void BusyThreads::busyThread()
+void BusyThreads::busyThread(const int threadIndex)
 {
   using Clock = std::chrono::high_resolution_clock;
 
   constexpr auto kLowEnergyDelayDuration = std::chrono::milliseconds{10};
   constexpr auto kSleepDuration = std::chrono::milliseconds{5};
+
+  setCurrentThreadName("Busy Thread " + std::to_string(threadIndex + 1));
 
   sched_param param{};
   param.sched_priority = sched_get_priority_min(SCHED_OTHER);
