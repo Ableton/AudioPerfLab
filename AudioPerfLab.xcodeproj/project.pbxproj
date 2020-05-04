@@ -338,6 +338,7 @@
 					"-Wno-global-constructors",
 					"-Wno-float-equal",
 					"-Wno-ctad-maybe-unsupported",
+					"-Wno-c99-extensions",
 				);
 			};
 			name = Debug;
@@ -406,6 +407,7 @@
 					"-Wno-global-constructors",
 					"-Wno-float-equal",
 					"-Wno-ctad-maybe-unsupported",
+					"-Wno-c99-extensions",
 				);
 			};
 			name = Release;
