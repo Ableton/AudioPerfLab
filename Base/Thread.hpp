@@ -69,12 +69,24 @@ inline void hardwareDelay()
 #endif
 }
 
+inline void coarseHardwareDelay()
+{
+  // Reduce energy usage slightly by performing many hardware delays at once. On an
+  // iPhone this takes 21us on average.
+  constexpr auto kNumHardwareDelays = 16;
+
+  for (int i = 0; i < kNumHardwareDelays; ++i)
+  {
+    hardwareDelay();
+  }
+}
+
 template <typename Clock, typename Rep>
 void hardwareDelayUntil(const std::chrono::time_point<Clock, Rep> until)
 {
   while (Clock::now() < until)
   {
-    hardwareDelay();
+    coarseHardwareDelay();
   }
 }
 
