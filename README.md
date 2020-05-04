@@ -54,7 +54,25 @@ The number of sine waves to be processed by the audio threads.
 
 Pressing ▶ triggers a short burst of a configurable number of sine waves.
 
-## Threads
+## Busy Threads
+
+Busy threads are low-priority threads that perform low-energy work to prevent CPU throttling. Each thread alternates between blocking on a condition variable and working. Blocking for some of the time avoids termination due to excessive CPU usage when the app is running in the background.
+
+Note that visualizations can have the same effect as a busy thread, so they should be frozen to observe the effect of busy threads alone.
+
+### Threads
+
+The number of threads to create. On iOS 12 and 13, there is no benefit to using more than one.
+
+### Period
+
+The duration of one busy thread loop iteration. Higher values may reduce energy usage by reducing overhead.
+
+### CPU Usage
+
+The percentage of the period spent performing low-energy work. This value needs to be set high enough to prevent CPU throttling and low enough to avoid termination when the app is running in the background.
+
+## Audio Threads
 
 ### Process Threads
 
@@ -65,12 +83,6 @@ The total number of real-time threads that process sine waves.
 The minimum amount of time to spend processing as a percentage of the buffer duration. If real audio processing finishes before this time, then artificial processing is added via a low-energy yield instruction. No artificial processing is added if real processing exceeds this time. Artificial processing is added to all audio threads and is not shown in the load graph.
 
 When the real audio load is low, adding artificial load tricks the OS into scheduling audio threads onto high-performance cores and increasing the clock-rate of those cores. This allows sudden load increases (e.g. the burst button) without drop-outs.
-
-### Busy Threads
-
-The number of busy background threads to create. Busy threads are low-priority threads that constantly perform low-energy work.
-
-For small buffer sizes (e.g. 128), adding a busy thread reduces the minimum load necessary in order for audio threads to be scheduled onto high-performance cores. Visualizations have the same effect as a busy thread, so they must be frozen to observe this behavior.
 
 ### Driver Thread
 

@@ -205,6 +205,18 @@ private:
   mEngine.busyThreads().setNumThreads(numThreads);
 }
 
+- (double)busyThreadPeriod { return mEngine.busyThreads().period().count(); }
+- (void)setBusyThreadPeriod:(double)period
+{
+  mEngine.busyThreads().setPeriod(BusyThreads::Seconds{period});
+}
+
+- (double)busyThreadCpuUsage { return mEngine.busyThreads().threadCpuUsage(); }
+- (void)setBusyThreadCpuUsage:(double)percentage
+{
+  mEngine.busyThreads().setThreadCpuUsage(percentage);
+}
+
 - (bool)processInDriverThread { return mEngine.host().processInDriverThread(); }
 - (void)setProcessInDriverThread:(bool)enabled
 {
