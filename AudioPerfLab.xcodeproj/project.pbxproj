@@ -336,6 +336,8 @@
 					"-Wno-direct-ivar-access",
 					"-Wno-unused-macros",
 					"-Wno-global-constructors",
+					"-Wno-float-equal",
+					"-Wno-ctad-maybe-unsupported",
 				);
 			};
 			name = Debug;
@@ -402,6 +404,8 @@
 					"-Wno-direct-ivar-access",
 					"-Wno-unused-macros",
 					"-Wno-global-constructors",
+					"-Wno-float-equal",
+					"-Wno-ctad-maybe-unsupported",
 				);
 			};
 			name = Release;
