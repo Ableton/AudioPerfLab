@@ -28,6 +28,7 @@
 
 #include "Base/Assert.hpp"
 #include "Base/AudioHost.hpp"
+#include "Base/BusyThreads.hpp"
 #include "Base/Driver.hpp"
 #include "Base/FixedSPSCQueue.hpp"
 #include "Base/Math.hpp"
@@ -66,6 +67,7 @@ public:
   }
 
   AudioHost& host() { return mHost; }
+  BusyThreads& busyThreads() { return mBusyThreads; }
 
   int numSines() const { return mNumSines; }
   void setNumSines(const int numSines) { mNumSines = numSines; }
@@ -164,6 +166,7 @@ private:
   }
 
   AudioHost mHost;
+  BusyThreads mBusyThreads;
   ParallelSineBank mSineBank;
   Clock::time_point mRenderStartTime;
   FixedSPSCQueue<DriveMeasurement> mDriveMeasurements{kDriveMeasurementQueueSize};
@@ -196,10 +199,10 @@ private:
   mEngine.host().setNumWorkerThreads(numThreads);
 }
 
-- (int)numBusyThreads { return mEngine.host().numBusyThreads(); }
+- (int)numBusyThreads { return mEngine.busyThreads().numThreads(); }
 - (void)setNumBusyThreads:(int)numThreads
 {
-  mEngine.host().setNumBusyThreads(numThreads);
+  mEngine.busyThreads().setNumThreads(numThreads);
 }
 
 - (bool)processInDriverThread { return mEngine.host().processInDriverThread(); }

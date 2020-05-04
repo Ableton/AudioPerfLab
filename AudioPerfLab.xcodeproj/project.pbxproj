@@ -25,6 +25,7 @@
 		9450A37921FBAC420061783A /* CollapsibleTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */; };
 		94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A145BF21C4183400A2ED88 /* SliderWithValue.swift */; };
 		94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A145C121C41FB300A2ED88 /* Partial.cpp */; };
+		94CD64E1245D5F4400738E71 /* BusyThreads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CD64E0245D5F4400738E71 /* BusyThreads.cpp */; };
 		94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */; };
 		94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94DFC69D2378587300E402FC /* AudioHost.cpp */; };
 /* End PBXBuildFile section */
@@ -63,10 +64,12 @@
 		94A145C421C5484C00A2ED88 /* Math.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Math.hpp; sourceTree = "<group>"; };
 		94A145C521C5795E00A2ED88 /* Constants.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Constants.hpp; sourceTree = "<group>"; };
 		94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelSineBank.hpp; sourceTree = "<group>"; };
+		94CD64DF245D5F4400738E71 /* BusyThreads.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BusyThreads.hpp; sourceTree = "<group>"; };
+		94CD64E0245D5F4400738E71 /* BusyThreads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BusyThreads.cpp; sourceTree = "<group>"; };
 		94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeSwitch.swift; sourceTree = "<group>"; };
-		94E75BC32379605500EE25A2 /* Assert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
 		94DFC69C2378587100E402FC /* AudioHost.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioHost.hpp; sourceTree = "<group>"; };
 		94DFC69D2378587300E402FC /* AudioHost.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AudioHost.cpp; sourceTree = "<group>"; };
+		94E75BC32379605500EE25A2 /* Assert.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Assert.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,9 +93,11 @@
 				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
 				94DFC69C2378587100E402FC /* AudioHost.hpp */,
 				94DFC69D2378587300E402FC /* AudioHost.cpp */,
+				94CD64DF245D5F4400738E71 /* BusyThreads.hpp */,
+				94CD64E0245D5F4400738E71 /* BusyThreads.cpp */,
+				166364F3237300A5006F286B /* Config.hpp */,
 				16B554A321C16BB000522483 /* Driver.hpp */,
 				16B554A221C16BB000522483 /* Driver.mm */,
-				166364F3237300A5006F286B /* Config.hpp */,
 				16B495BB21B974C100C6D2A4 /* FixedSPSCQueue.hpp */,
 				94A145C421C5484C00A2ED88 /* Math.hpp */,
 				16EBD0C721CA640C00D92FDC /* Semaphore.cpp */,
@@ -244,6 +249,7 @@
 				16CA3F7721FF9402008C3F06 /* DisclosureIndicatorView.swift in Sources */,
 				16EBD0C821CA659100D92FDC /* Semaphore.cpp in Sources */,
 				940D7ADF21CA500B00216EA1 /* Thread.cpp in Sources */,
+				94CD64E1245D5F4400738E71 /* BusyThreads.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

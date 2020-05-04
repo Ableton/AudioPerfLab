@@ -68,9 +68,6 @@ public:
   int numWorkerThreads() const;
   void setNumWorkerThreads(int numWorkerThreads);
 
-  int numBusyThreads() const;
-  void setNumBusyThreads(int numBusyThreads);
-
   bool processInDriverThread() const;
   void setProcessInDriverThread(bool isEnabled);
 
@@ -86,9 +83,6 @@ private:
   void setupWorkerThreads();
   void teardownWorkerThreads();
 
-  void setupBusyThreads();
-  void teardownBusyThreads();
-
   void ensureMinimumLoad(std::chrono::time_point<Clock> bufferStartTime, int numFrames);
 
   OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
@@ -98,7 +92,6 @@ private:
                   AudioBufferList* ioData);
 
   void workerThread(int threadIndex);
-  void busyThread();
 
   Driver mDriver;
 
@@ -108,9 +101,6 @@ private:
 
   std::atomic<bool> mAreWorkerThreadsActive{false};
   std::vector<std::thread> mWorkerThreads;
-
-  std::atomic<bool> mAreBusyThreadsActive{false};
-  std::vector<std::thread> mBusyThreads;
 
   std::atomic<double> mMinimumLoad{0.0};
   Semaphore mStartWorkingSemaphore{0};
@@ -123,5 +113,4 @@ private:
 
   bool mIsStarted{false};
   int mNumRequestedWorkerThreads{kDefaultNumWorkerThreads};
-  int mNumRequestedBusyThreads{kDefaultNumBusyThreads};
 };
