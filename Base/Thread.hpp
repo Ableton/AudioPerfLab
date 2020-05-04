@@ -24,6 +24,7 @@
 
 #include <chrono>
 #include <pthread.h>
+#include <string>
 
 #if defined(__SSE__)
 #include <emmintrin.h>
@@ -31,6 +32,8 @@
 
 uint64_t secondsToMachAbsoluteTime(std::chrono::duration<double> duration);
 std::chrono::duration<double> machAbsoluteTimeToSeconds(uint64_t machTime);
+
+void setCurrentThreadName(const std::string& name);
 
 struct TimeConstraintPolicy
 {
