@@ -41,13 +41,18 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var workDistributionOneThreadWarning: UILabel!
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
+
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
   @IBOutlet weak private var numBurstSinesSlider: SliderWithValue!
+
+  @IBOutlet weak private var numBusyThreadsSlider: SliderWithValue!
+  @IBOutlet weak private var busyThreadPeriodSlider: SliderWithValue!
+  @IBOutlet weak private var busyThreadCpuUsageSlider: SliderWithValue!
+
   @IBOutlet weak private var numProcessingThreadsSlider: SliderWithValue!
   @IBOutlet weak private var minimumLoadSlider: SliderWithValue!
-  @IBOutlet weak private var numBusyThreadsSlider: SliderWithValue!
   @IBOutlet weak private var processInDriverThreadControl: UISegmentedControl!
   @IBOutlet weak private var isWorkIntervalOnSwitch: UISwitch!
 
@@ -87,7 +92,13 @@ class ViewController: UITableViewController {
     setupCoreActivityViews()
     setupEnergyUsageView()
 
-    minimumLoadSlider.valueFormatter = { (value: Float) in return "\(Int(value * 100))%"}
+    let percentageFormatter = { (value: Float) in return "\(Int(value * 100))%"}
+    minimumLoadSlider.valueFormatter = percentageFormatter
+    busyThreadCpuUsageSlider.valueFormatter = percentageFormatter
+
+    busyThreadPeriodSlider.valueFormatter =
+      { (value: Float) in return "\(Int(value * 1000))ms"}
+
     initalizeControls()
   }
 
@@ -149,6 +160,8 @@ class ViewController: UITableViewController {
     numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
     minimumLoadSlider.value = Float(engine.minimumLoad)
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
+    busyThreadPeriodSlider.value = Float(engine.busyThreadPeriod)
+    busyThreadCpuUsageSlider.value = Float(engine.busyThreadCpuUsage)
     processInDriverThreadControl.selectedSegmentIndex =
       engine.processInDriverThread ? 1 : 0
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
@@ -191,6 +204,14 @@ class ViewController: UITableViewController {
 
   @IBAction private func numBusyThreadsChanged(_ sender: Any) {
     engine.numBusyThreads = Int32(numBusyThreadsSlider!.value)
+  }
+
+  @IBAction private func busyThreadPeriodChanged(_ sender: Any) {
+    engine.busyThreadPeriod = Double(busyThreadPeriodSlider!.value)
+  }
+
+  @IBAction private func busyThreadCpuUsageChanged(_ sender: Any) {
+    engine.busyThreadCpuUsage = Double(busyThreadCpuUsageSlider!.value)
   }
 
   @IBAction private func processInDriverThreadChanged(_ sender: Any) {

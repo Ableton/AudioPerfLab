@@ -57,6 +57,11 @@ std::chrono::duration<double> machAbsoluteTimeToSeconds(const uint64_t machAbsol
                                   / sMachTimebaseInfo.denom};
 }
 
+void setCurrentThreadName(const std::string& name)
+{
+  pthread_setname_np(name.c_str());
+}
+
 void setThreadTimeConstraintPolicy(const pthread_t thread,
                                    const TimeConstraintPolicy& timeConstraintPolicy)
 {

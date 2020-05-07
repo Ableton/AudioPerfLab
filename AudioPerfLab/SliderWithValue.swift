@@ -24,7 +24,7 @@ import UIKit
 
 @IBDesignable
 class SliderWithValue: UISlider {
-  let kValueFieldWidth: CGFloat = 53.0
+  let kValueFieldWidth: CGFloat = 60.0
   let kPadding: CGFloat = 16.0
   var valueFormatter = { (value: Float) in return "\(Int(value))" }
   private var valueField = UITextField()

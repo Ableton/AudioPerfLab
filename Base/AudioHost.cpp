@@ -25,6 +25,7 @@
 #include "Assert.hpp"
 #include "Thread.hpp"
 
+#include <string>
 #include <utility>
 
 AudioHost::AudioHost(Setup setup,
@@ -49,7 +50,6 @@ void AudioHost::start()
   {
     mSetup(mNumRequestedWorkerThreads);
 
-    setupBusyThreads();
     setupWorkerThreads();
     mDriver.start();
     mIsStarted = true;
@@ -62,7 +62,6 @@ void AudioHost::stop()
   {
     mDriver.stop();
     teardownWorkerThreads();
-    teardownBusyThreads();
     mIsStarted = false;
   }
 }
@@ -84,15 +83,6 @@ void AudioHost::setNumWorkerThreads(const int numWorkerThreads)
   if (numWorkerThreads != mNumRequestedWorkerThreads)
   {
     whileStopped([&] { mNumRequestedWorkerThreads = numWorkerThreads; });
-  }
-}
-
-int AudioHost::numBusyThreads() const { return int(mBusyThreads.size()); }
-void AudioHost::setNumBusyThreads(const int numBusyThreads)
-{
-  if (numBusyThreads != mNumRequestedBusyThreads)
-  {
-    whileStopped([&] { mNumRequestedBusyThreads = numBusyThreads; });
   }
 }
 
@@ -156,28 +146,6 @@ void AudioHost::teardownWorkerThreads()
   mWorkerThreads.clear();
 }
 
-void AudioHost::setupBusyThreads()
-{
-  assertRelease(mBusyThreads.empty(),
-                "Busy threads must be torn down before calling setupBusyThreads()");
-
-  mAreBusyThreadsActive = true;
-  for (int i = 0; i < mNumRequestedBusyThreads; ++i)
-  {
-    mBusyThreads.emplace_back(&AudioHost::busyThread, this);
-  }
-}
-
-void AudioHost::teardownBusyThreads()
-{
-  mAreBusyThreadsActive = false;
-  for (auto& busyThread : mBusyThreads)
-  {
-    busyThread.join();
-  }
-  mBusyThreads.clear();
-}
-
 void AudioHost::ensureMinimumLoad(const std::chrono::time_point<Clock> bufferStartTime,
                                   const int numFrames)
 {
@@ -227,6 +195,7 @@ OSStatus AudioHost::render(AudioUnitRenderActionFlags* ioActionFlags,
 
 void AudioHost::workerThread(const int threadIndex)
 {
+  setCurrentThreadName("Audio Worker Thread " + std::to_string(threadIndex));
   setThreadTimeConstraintPolicy(
     pthread_self(),
     TimeConstraintPolicy{mDriver.nominalBufferDuration(), kRealtimeThreadQuantum,
@@ -259,26 +228,5 @@ void AudioHost::workerThread(const int threadIndex)
   if (mIsWorkIntervalOn)
   {
     leaveWorkInterval();
-  }
-}
-
-// A low-priority thread that constantly performs low-energy work
-void AudioHost::busyThread()
-{
-  constexpr auto kLowEnergyDelayDuration = std::chrono::milliseconds{10};
-  constexpr auto kSleepDuration = std::chrono::milliseconds{5};
-
-  sched_param param{};
-  param.sched_priority = sched_get_priority_min(SCHED_OTHER);
-  pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
-
-  while (mAreBusyThreadsActive)
-  {
-    const auto delayUntilTime = Clock::now() + kLowEnergyDelayDuration;
-    hardwareDelayUntil(delayUntilTime);
-
-    // Sleep to avoid being terminated when running in the background by violating the
-    // iOS CPU usage limit
-    std::this_thread::sleep_until(delayUntilTime + kSleepDuration);
   }
 }

@@ -24,8 +24,11 @@
 
 #include <chrono>
 
-constexpr auto kDefaultNumWorkerThreads = 1;
 constexpr auto kDefaultNumBusyThreads = 0;
+constexpr auto kDefaultBusyThreadPeriod = std::chrono::milliseconds{15};
+constexpr auto kDefaultBusyThreadCpuUsage = 0.66;
+
+constexpr auto kDefaultNumWorkerThreads = 1;
 
 constexpr auto kCacheLineSize = 128;
 constexpr auto kDefaultPreferredBufferSize = 128;
