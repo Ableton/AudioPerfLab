@@ -52,13 +52,15 @@ class EngineImpl
 public:
   EngineImpl()
     : mHost{[&](const int numWorkerThreads) { setup(numWorkerThreads); },
-            [&](const int numFrames) { renderStarted(numFrames); },
+            [&](const StereoAudioBufferPtrs ioBuffer, const int numFrames) {
+              renderStarted(ioBuffer, numFrames);
+            },
             [&](const int threadIndex, const int numFrames) {
               process(threadIndex, numFrames);
             },
-            [&](const StereoAudioBufferPtrs outputBuffer,
+            [&](const StereoAudioBufferPtrs ioBuffer,
                 const uint64_t hostTime,
-                const int numFrames) { renderEnded(outputBuffer, hostTime, numFrames); }}
+                const int numFrames) { renderEnded(ioBuffer, hostTime, numFrames); }}
   {
     const auto chordPartials = generateChord(
       mHost.driver().sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
@@ -123,7 +125,7 @@ private:
   }
 
   // Called at the start of the audio I/O callback with no worker threads active
-  void renderStarted(const int numFrames)
+  void renderStarted(StereoAudioBufferPtrs, const int numFrames)
   {
     mRenderStartTime = Clock::now();
 
@@ -152,11 +154,14 @@ private:
   }
 
   // Called at the end of the audio I/O callback with no worker threads active
-  void renderEnded(const StereoAudioBufferPtrs outputBuffer,
+  void renderEnded(const StereoAudioBufferPtrs ioBuffer,
                    const uint64_t hostTime,
                    const int numFrames)
   {
-    mSineBank.mixTo(outputBuffer, numFrames);
+    std::fill_n(ioBuffer[0], numFrames, 0.0f);
+    std::fill_n(ioBuffer[1], numFrames, 0.0f);
+
+    mSineBank.mixTo(ioBuffer, numFrames);
 
     mNumSineBurstSamplesRemaining =
       std::max<int>(0, mNumSineBurstSamplesRemaining - numFrames);
@@ -183,6 +188,12 @@ private:
 @implementation Engine
 {
   EngineImpl mEngine;
+}
+
+- (bool)isAudioInputEnabled { return mEngine.host().driver().isInputEnabled(); }
+- (void)setIsAudioInputEnabled:(bool)enabled
+{
+  mEngine.host().driver().setIsInputEnabled(enabled);
 }
 
 - (int)preferredBufferSize { return mEngine.host().preferredBufferSize(); }

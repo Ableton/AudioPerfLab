@@ -36,6 +36,7 @@ struct DriveMeasurement
 
 @interface Engine : NSObject
 
+@property(nonatomic) bool isAudioInputEnabled;
 @property(nonatomic) int preferredBufferSize;
 @property(nonatomic, readonly) double sampleRate;
 @property(nonatomic) int numWorkerThreads;

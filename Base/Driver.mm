@@ -141,6 +141,29 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
   }
 }
 
+bool Driver::isInputEnabled() const { return mIsInputEnabled; }
+void Driver::setIsInputEnabled(const bool isInputEnabled)
+{
+  if (isInputEnabled != mIsInputEnabled)
+  {
+    try
+    {
+      teardownIoUnit();
+      teardownAudioSession();
+
+      mIsInputEnabled = isInputEnabled;
+
+      setupAudioSession();
+      setupIoUnit();
+    }
+    catch (const std::runtime_error& exception)
+    {
+      os_log_error(OS_LOG_DEFAULT, "%s", exception.what());
+      mStatus = Status::kInvalid;
+    }
+  }
+}
+
 Driver::Seconds Driver::nominalBufferDuration() const
 {
   // AVAudioSession.IOBufferDuration sends mach messages, so return a cached value for use
@@ -179,10 +202,17 @@ void Driver::setupAudioSession()
 {
   AVAudioSession* audioSession = AVAudioSession.sharedInstance;
 
+  const auto category = mIsInputEnabled ? AVAudioSessionCategoryPlayAndRecord
+                                        : AVAudioSessionCategoryPlayback;
+  NSUInteger categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
+  if (category == AVAudioSessionCategoryPlayAndRecord)
+  {
+    categoryOptions |= AVAudioSessionCategoryOptionDefaultToSpeaker
+                       | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+  }
+
   NSError* error = nil;
-  [audioSession setCategory:AVAudioSessionCategoryPlayback
-                withOptions:AVAudioSessionCategoryOptionMixWithOthers
-                      error:&error];
+  [audioSession setCategory:category withOptions:categoryOptions error:&error];
   throwIfError(OSStatus(error.code), "couldn't set session's audio category");
 
   mSampleRate = AVAudioSession.sharedInstance.sampleRate;
@@ -210,11 +240,17 @@ OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
                         const UInt32 inNumberFrames,
                         AudioBufferList* ioData)
 {
-  const AudioBuffer* pOutputBuffers = ioData->mBuffers;
-  const StereoAudioBufferPtrs outputBuffer{static_cast<float*>(pOutputBuffers[0].mData),
-                                           static_cast<float*>(pOutputBuffers[1].mData)};
-  std::fill_n(outputBuffer[0], inNumberFrames, 0.0f);
-  std::fill_n(outputBuffer[1], inNumberFrames, 0.0f);
+  const AudioBuffer* pIoBuffers = ioData->mBuffers;
+  const StereoAudioBufferPtrs ioBuffer{
+    static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
+  std::fill_n(ioBuffer[0], inNumberFrames, 0.0f);
+  std::fill_n(ioBuffer[1], inNumberFrames, 0.0f);
+
+  if (mIsInputEnabled)
+  {
+    AudioUnitRender(
+      mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
+  }
 
   return mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
 }
@@ -232,6 +268,14 @@ void Driver::setupIoUnit()
   throwIfError(AudioComponentInstanceNew(comp, &mpRemoteIoUnit),
                "couldn't create a new instance of AURemoteIO");
 
+  if (mIsInputEnabled)
+  {
+    const UInt32 yes = 1;
+    throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_EnableIO,
+                                      kAudioUnitScope_Input, 1, &yes, sizeof(yes)),
+                 "couldn't enable external input on AURemoteIO");
+  }
+
   AudioStreamBasicDescription streamDescription{};
   streamDescription.mSampleRate = AVAudioSession.sharedInstance.sampleRate;
   streamDescription.mFormatID = kAudioFormatLinearPCM;
@@ -244,10 +288,21 @@ void Driver::setupIoUnit()
   streamDescription.mBytesPerFrame = kBytesPerSample;
   streamDescription.mChannelsPerFrame = 2;
   streamDescription.mBitsPerChannel = kBytesPerSample * 8;
-  throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
-                                    kAudioUnitScope_Input, 0, &streamDescription,
-                                    sizeof(streamDescription)),
-               "couldn't set the format on AURemoteIO");
+  if (mIsInputEnabled)
+  {
+    throwIfError(
+      AudioUnitSetProperty(
+        mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
+        kAudioUnitScope_Output, // External input is provided at the AudioUnit's output
+        1, &streamDescription, sizeof(streamDescription)),
+      "couldn't set the input format on AURemoteIO");
+  }
+  throwIfError(
+    AudioUnitSetProperty(
+      mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
+      kAudioUnitScope_Input, // External output is passed to the AudioUnit's input
+      0, &streamDescription, sizeof(streamDescription)),
+    "couldn't set the output format on AURemoteIO");
 
   AURenderCallbackStruct renderCallback{};
   renderCallback.inputProc = [](void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags,

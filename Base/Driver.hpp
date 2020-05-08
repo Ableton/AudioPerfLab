@@ -54,6 +54,14 @@ public:
   void start();
   void stop();
 
+  /*! Enable or disable audio input.
+   *
+   * Input is disabled by default. Note that this is an expensive operation that can block
+   * for up to half a second.
+   */
+  bool isInputEnabled() const;
+  void setIsInputEnabled(bool isInputEnabled);
+
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
@@ -77,6 +85,7 @@ private:
   void teardownIoUnit();
 
   AudioUnit mpRemoteIoUnit{};
+  bool mIsInputEnabled{false};
   int mPreferredBufferSize{kDefaultPreferredBufferSize};
   double mSampleRate{-1.0};
   Seconds mNominalBufferDuration{-1.0};
