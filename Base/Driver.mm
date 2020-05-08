@@ -267,5 +267,6 @@ void Driver::teardownIoUnit()
     // TODO: ensure that the instance is disposed of even after an error above
     throwIfError(AudioComponentInstanceDispose(mRemoteIoUnit),
                  "couldn't dispose of the AURemoteIO instance");
+    mRemoteIoUnit = nullptr;
   }
 }
