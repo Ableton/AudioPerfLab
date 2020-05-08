@@ -42,6 +42,7 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
 
+  @IBOutlet weak private var isAudioInputEnabledSwitch: UISwitch!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
@@ -151,6 +152,7 @@ class ViewController: UITableViewController {
   }
 
   private func initalizeControls() {
+    isAudioInputEnabledSwitch.isOn = engine.isAudioInputEnabled
     bufferSizeStepper.value = log2(Double(engine.preferredBufferSize))
     bufferSizeField.text = String(engine.preferredBufferSize)
     numSinesSlider.value = Float(engine.numSines)
@@ -183,6 +185,10 @@ class ViewController: UITableViewController {
     let isFrozen = freezeActivityViewsSwitch.isOn
     activityViews().forEach { $0.isFrozen = isFrozen }
     redrawExpandedActivityViews()
+  }
+
+  @IBAction private func isAudioInputEnabledChanged(_ sender: Any) {
+    engine.isAudioInputEnabled = isAudioInputEnabledSwitch.isOn
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {

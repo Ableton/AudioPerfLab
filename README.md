@@ -42,6 +42,17 @@ A graph of the estimated power consumption of the AudioPerLab process in watts. 
 
 ## Audio
 
+### Audio Input
+
+Toggle if audio input is enabled. A meter is shown to check that input is working.
+
+This can be used to check for performance differences due to the audio configuration. One known difference is the background CPU usage allowance on iOS 13:
+
+* Only output: 48s over 60s (80% average)
+* Input and output: 9s over 15s (60% average)
+
+Note that the CPU usage is tracked per-thread and not per-process.
+
 ### Buffer Size
 
 The preferred buffer size. The actual buffer size is logged and may differ from the displayed value.
