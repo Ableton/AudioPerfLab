@@ -64,7 +64,7 @@ private:
   void setupIoUnit();
   void teardownIoUnit();
 
-  AudioUnit mRemoteIoUnit{};
+  AudioUnit mpRemoteIoUnit{};
   int mPreferredBufferSize{-1};
   double mSampleRate{-1.0};
   std::chrono::duration<double> mNominalBufferDuration{-1.0};

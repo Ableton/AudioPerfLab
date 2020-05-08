@@ -207,7 +207,7 @@ void Driver::setupIoUnit()
   desc.componentFlagsMask = 0;
 
   AudioComponent comp = AudioComponentFindNext(nullptr, &desc);
-  throwIfError(AudioComponentInstanceNew(comp, &mRemoteIoUnit),
+  throwIfError(AudioComponentInstanceNew(comp, &mpRemoteIoUnit),
                "couldn't create a new instance of AURemoteIO");
 
   AudioStreamBasicDescription streamDescription{};
@@ -222,7 +222,7 @@ void Driver::setupIoUnit()
   streamDescription.mBytesPerFrame = kBytesPerSample;
   streamDescription.mChannelsPerFrame = 2;
   streamDescription.mBitsPerChannel = kBytesPerSample * 8;
-  throwIfError(AudioUnitSetProperty(mRemoteIoUnit, kAudioUnitProperty_StreamFormat,
+  throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
                                     kAudioUnitScope_Input, 0, &streamDescription,
                                     sizeof(streamDescription)),
                "couldn't set the format on AURemoteIO");
@@ -245,28 +245,28 @@ void Driver::setupIoUnit()
       ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
   };
   renderCallback.inputProcRefCon = this;
-  throwIfError(AudioUnitSetProperty(mRemoteIoUnit, kAudioUnitProperty_SetRenderCallback,
+  throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioUnitProperty_SetRenderCallback,
                                     kAudioUnitScope_Input, 0, &renderCallback,
                                     sizeof(renderCallback)),
                "couldn't set render callback on AURemoteIO");
 
   throwIfError(
-    AudioUnitInitialize(mRemoteIoUnit), "couldn't initialize AURemoteIO instance");
+    AudioUnitInitialize(mpRemoteIoUnit), "couldn't initialize AURemoteIO instance");
 
-  throwIfError(AudioOutputUnitStart(mRemoteIoUnit), "couldn't start output unit");
+  throwIfError(AudioOutputUnitStart(mpRemoteIoUnit), "couldn't start output unit");
 }
 
 void Driver::teardownIoUnit()
 {
-  if (mRemoteIoUnit)
+  if (mpRemoteIoUnit)
   {
-    throwIfError(AudioOutputUnitStop(mRemoteIoUnit), "couldn't stop output unit");
-    throwIfError(AudioUnitUninitialize(mRemoteIoUnit),
+    throwIfError(AudioOutputUnitStop(mpRemoteIoUnit), "couldn't stop output unit");
+    throwIfError(AudioUnitUninitialize(mpRemoteIoUnit),
                  "couldn't uninitialize the AURemoteIO instance");
 
     // TODO: ensure that the instance is disposed of even after an error above
-    throwIfError(AudioComponentInstanceDispose(mRemoteIoUnit),
+    throwIfError(AudioComponentInstanceDispose(mpRemoteIoUnit),
                  "couldn't dispose of the AURemoteIO instance");
-    mRemoteIoUnit = nullptr;
+    mpRemoteIoUnit = nullptr;
   }
 }
