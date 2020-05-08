@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include "Config.hpp"
+
 #include <AudioToolbox/AUComponent.h>
 #include <CoreAudio/CoreAudioTypes.h>
 #include <chrono>
@@ -66,6 +68,8 @@ private:
                   UInt32 inNumberFrames,
                   AudioBufferList* ioData);
 
+  void requestBufferSize(int requestedBufferSize);
+
   void setupAudioSession();
   void teardownAudioSession();
 
@@ -73,7 +77,7 @@ private:
   void teardownIoUnit();
 
   AudioUnit mpRemoteIoUnit{};
-  int mPreferredBufferSize{-1};
+  int mPreferredBufferSize{kDefaultPreferredBufferSize};
   double mSampleRate{-1.0};
   Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};

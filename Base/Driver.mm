@@ -23,7 +23,6 @@
 #include "Base/Driver.hpp"
 
 #include "AudioBuffer.hpp"
-#include "Config.hpp"
 
 #import <AVFoundation/AVAudioSession.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -137,20 +136,7 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
 {
   if (preferredBufferSize != mPreferredBufferSize)
   {
-    AVAudioSession* audioSession = AVAudioSession.sharedInstance;
-
-    const NSTimeInterval bufferDuration = preferredBufferSize / audioSession.sampleRate;
-
-    NSError* error = nil;
-    [audioSession setPreferredIOBufferDuration:bufferDuration error:&error];
-    if (error.code != noErr)
-    {
-      const auto errorDesc =
-        errorDescription(OSStatus(error.code), "couldn't set the I/O buffer duration");
-      os_log_error(OS_LOG_DEFAULT, "%s", errorDesc.c_str());
-    }
-
-    mNominalBufferDuration = Seconds{audioSession.IOBufferDuration};
+    requestBufferSize(preferredBufferSize);
     mPreferredBufferSize = preferredBufferSize;
   }
 }
@@ -171,6 +157,24 @@ double Driver::sampleRate() const
 
 Driver::Status Driver::status() const { return mStatus; }
 
+void Driver::requestBufferSize(const int requestedBufferSize)
+{
+  AVAudioSession* audioSession = AVAudioSession.sharedInstance;
+
+  const NSTimeInterval bufferDuration = requestedBufferSize / audioSession.sampleRate;
+
+  NSError* error = nil;
+  [audioSession setPreferredIOBufferDuration:bufferDuration error:&error];
+  if (error.code != noErr)
+  {
+    const auto errorDesc =
+      errorDescription(OSStatus(error.code), "couldn't set the I/O buffer duration");
+    os_log_error(OS_LOG_DEFAULT, "%s", errorDesc.c_str());
+  }
+
+  mNominalBufferDuration = Seconds{audioSession.IOBufferDuration};
+}
+
 void Driver::setupAudioSession()
 {
   AVAudioSession* audioSession = AVAudioSession.sharedInstance;
@@ -182,7 +186,7 @@ void Driver::setupAudioSession()
   throwIfError(OSStatus(error.code), "couldn't set session's audio category");
 
   mSampleRate = AVAudioSession.sharedInstance.sampleRate;
-  setPreferredBufferSize(kDefaultPreferredBufferSize);
+  requestBufferSize(mPreferredBufferSize);
 
   [AVAudioSession.sharedInstance setActive:YES error:&error];
   throwIfError(OSStatus(error.code), "couldn't set session active");
@@ -195,6 +199,9 @@ void Driver::teardownAudioSession()
   NSError* error = nil;
   [audioSession setActive:NO error:&error];
   throwIfError(OSStatus(error.code), "couldn't deactivate session");
+
+  mSampleRate = -1.0;
+  mNominalBufferDuration = Seconds{-1.0};
 }
 
 OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
