@@ -60,6 +60,12 @@ public:
   Status status() const;
 
 private:
+  OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
+                  const AudioTimeStamp* inTimeStamp,
+                  UInt32 inBusNumber,
+                  UInt32 inNumberFrames,
+                  AudioBufferList* ioData);
+
   void setupAudioSession();
   void teardownAudioSession();
 

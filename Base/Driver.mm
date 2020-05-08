@@ -197,6 +197,21 @@ void Driver::teardownAudioSession()
   throwIfError(OSStatus(error.code), "couldn't deactivate session");
 }
 
+OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
+                        const AudioTimeStamp* inTimeStamp,
+                        const UInt32 inBusNumber,
+                        const UInt32 inNumberFrames,
+                        AudioBufferList* ioData)
+{
+  const AudioBuffer* pOutputBuffers = ioData->mBuffers;
+  const StereoAudioBufferPtrs outputBuffer{static_cast<float*>(pOutputBuffers[0].mData),
+                                           static_cast<float*>(pOutputBuffers[1].mData)};
+  std::fill_n(outputBuffer[0], inNumberFrames, 0.0f);
+  std::fill_n(outputBuffer[1], inNumberFrames, 0.0f);
+
+  return mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+}
+
 void Driver::setupIoUnit()
 {
   AudioComponentDescription desc{};
@@ -229,19 +244,10 @@ void Driver::setupIoUnit()
 
   AURenderCallbackStruct renderCallback{};
   renderCallback.inputProc = [](void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags,
-                                const AudioTimeStamp* inTimeStamp, UInt32 inBusNumber,
-                                UInt32 inNumberFrames,
-                                AudioBufferList* ioData) -> OSStatus {
-    auto* self = static_cast<Driver*>(inRefCon);
-
-    const AudioBuffer* pOutputBuffers = ioData->mBuffers;
-    const StereoAudioBufferPtrs outputBuffer{
-      static_cast<float*>(pOutputBuffers[0].mData),
-      static_cast<float*>(pOutputBuffers[1].mData)};
-    std::fill_n(outputBuffer[0], inNumberFrames, 0.0f);
-    std::fill_n(outputBuffer[1], inNumberFrames, 0.0f);
-
-    return self->mRenderCallback(
+                                const AudioTimeStamp* inTimeStamp,
+                                const UInt32 inBusNumber, const UInt32 inNumberFrames,
+                                AudioBufferList* ioData) {
+    return static_cast<Driver*>(inRefCon)->render(
       ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
   };
   renderCallback.inputProcRefCon = this;
