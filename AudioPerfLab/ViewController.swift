@@ -29,6 +29,8 @@ class ViewController: UITableViewController {
   private var coreActivityViews: [ActivityView] = []
   private var tableViewHeaders: [CollapsibleTableViewHeader] = []
   private var lastNumFrames: Int32?
+  private var waitingToChangeInput = false
+  private var inputMeterSmoother = MeterSmoother()
 
   private var lastEnergyUsageTime: Double?
   private var lastEnergyUsage: Double?
@@ -42,6 +44,8 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
 
+  @IBOutlet weak private var inputMeterView: MeterView!
+  @IBOutlet weak private var isAudioInputEnabledSwitch: UISwitch!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
   @IBOutlet weak private var numSinesSlider: SliderWithValue!
@@ -151,6 +155,7 @@ class ViewController: UITableViewController {
   }
 
   private func initalizeControls() {
+    isAudioInputEnabledSwitch.isOn = engine.isAudioInputEnabled
     bufferSizeStepper.value = log2(Double(engine.preferredBufferSize))
     bufferSizeField.text = String(engine.preferredBufferSize)
     numSinesSlider.value = Float(engine.numSines)
@@ -183,6 +188,30 @@ class ViewController: UITableViewController {
     let isFrozen = freezeActivityViewsSwitch.isOn
     activityViews().forEach { $0.isFrozen = isFrozen }
     redrawExpandedActivityViews()
+  }
+
+  @IBAction private func isAudioInputEnabledChanged(_ sender: Any) {
+    if waitingToChangeInput {
+      return
+    }
+
+    // Fade out and wait some time before toggling the input to avoid an audible glitch
+    // due to a CoreAudio bug.
+    let fadeDuration = 0.01
+    let glitchAvoidanceDelay = 0.4
+
+    engine.setOutputVolume(0.0, fadeDuration: fadeDuration)
+    waitingToChangeInput = true
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + glitchAvoidanceDelay) { [weak self] in
+      guard let self = self else {
+        return
+      }
+
+      self.engine.isAudioInputEnabled = self.isAudioInputEnabledSwitch.isOn
+      self.engine.setOutputVolume(1.0, fadeDuration: fadeDuration)
+      self.waitingToChangeInput = false
+    }
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
@@ -363,6 +392,7 @@ class ViewController: UITableViewController {
       self.addWorkDistributionMeasurement(
         time: time, duration: duration, measurement: measurement)
       self.addCoreMeasurement(time: time, duration: duration, measurement: measurement)
+      self.inputMeterSmoother.addPeak(ampToDb(Double(measurement.inputPeakLevel)))
     })
   }
 
@@ -435,6 +465,8 @@ class ViewController: UITableViewController {
       ViewController.activityViewDuration - ViewController.activityViewLatency
     activityViews().forEach { $0.startTime = startTime }
     if !freezeActivityViewsSwitch.isOn {
+      inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
+        displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()
     }
   }

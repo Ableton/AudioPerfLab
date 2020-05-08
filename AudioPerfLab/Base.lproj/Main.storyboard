@@ -108,8 +108,36 @@
                             </tableViewSection>
                             <tableViewSection headerTitle="Audio" id="1l7-t1-wml">
                                 <cells>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="BGw-qO-FDc">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="9E1-Bg-VKp">
                                         <rect key="frame" x="0.0" y="511.5" width="375" height="55"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="9E1-Bg-VKp" id="2xK-na-BUH">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Audio Input" lineBreakMode="tailTruncation" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OlD-0N-sH4">
+                                                    <rect key="frame" x="16" y="8" width="65" height="40"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <view opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hH4-iU-N6K" customClass="MeterView" customModule="AudioPerfLab" customModuleProvider="target">
+                                                    <rect key="frame" x="97" y="13" width="186" height="29"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                </view>
+                                                <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="cif-A1-JDz">
+                                                    <rect key="frame" x="303" y="12" width="51" height="31"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
+                                                    <connections>
+                                                        <action selector="isAudioInputEnabledChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="8Ao-kv-Yal"/>
+                                                    </connections>
+                                                </switch>
+                                            </subviews>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="BGw-qO-FDc">
+                                        <rect key="frame" x="0.0" y="566.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="BGw-qO-FDc" id="BbX-fx-gSJ">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -125,13 +153,13 @@ Size</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <textField opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" text="4096" borderStyle="roundedRect" textAlignment="center" minimumFontSize="14" translatesAutoresizingMaskIntoConstraints="NO" id="eEr-aH-JT4">
-                                                    <rect key="frame" x="299" y="13" width="60" height="30"/>
+                                                    <rect key="frame" x="299" y="12" width="60" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <textInputTraits key="textInputTraits"/>
                                                 </textField>
                                                 <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" autorepeat="NO" wraps="YES" value="7" minimumValue="5" maximumValue="12" translatesAutoresizingMaskIntoConstraints="NO" id="g2c-Vc-FJ9">
-                                                    <rect key="frame" x="140" y="13" width="94" height="29"/>
+                                                    <rect key="frame" x="140" y="12" width="94" height="29"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <viewLayoutGuide key="safeArea" id="7XZ-kZ-zl4"/>
                                                     <connections>
@@ -142,7 +170,7 @@ Size</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="7qJ-qd-iMH">
-                                        <rect key="frame" x="0.0" y="566.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="621.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="7qJ-qd-iMH" id="Lkk-gj-YrE">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -158,7 +186,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="60" minValue="0.0" maxValue="3440" translatesAutoresizingMaskIntoConstraints="NO" id="us9-gh-B8E" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="15" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="numSinesChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="gOJ-zG-Tym"/>
@@ -168,7 +196,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="mPt-vd-9zT">
-                                        <rect key="frame" x="0.0" y="621.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="676.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="mPt-vd-9zT" id="lDB-B0-VkA">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -202,7 +230,7 @@ Waves</string>
                             <tableViewSection headerTitle="Busy Threads" id="JBe-kR-Tgo" userLabel="Busy Threads">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="wKK-Uy-RQA">
-                                        <rect key="frame" x="0.0" y="715.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="770.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="wKK-Uy-RQA" id="XLs-XK-rfu">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -216,7 +244,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="4" translatesAutoresizingMaskIntoConstraints="NO" id="sbz-rQ-YJs" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="14" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="numBusyThreadsChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="d6a-Pw-h0U"/>
@@ -226,7 +254,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Xvb-sf-xdh">
-                                        <rect key="frame" x="0.0" y="770.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="825.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Xvb-sf-xdh" id="0n8-8h-0bv">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -240,7 +268,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.0050000000000000001" minValue="0.0050000000000000001" maxValue="0.10000000000000001" translatesAutoresizingMaskIntoConstraints="NO" id="wla-bF-Ha2" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="14" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="busyThreadPeriodChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="YG6-NJ-jKe"/>
@@ -250,7 +278,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Azu-h9-VaJ">
-                                        <rect key="frame" x="0.0" y="825.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="880.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Azu-h9-VaJ" id="2bn-YS-E2r">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -264,7 +292,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="zUg-cQ-W1i" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="14" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="busyThreadCpuUsageChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="cNj-vm-VHB"/>
@@ -278,7 +306,7 @@ Waves</string>
                             <tableViewSection headerTitle="Audio Threads" id="E6o-zQ-NR6" userLabel="Audio Threads">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="f9Y-Ns-oN4">
-                                        <rect key="frame" x="0.0" y="919.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="974.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="f9Y-Ns-oN4" id="hAO-dT-xQJ">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -292,7 +320,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="2" minValue="1" maxValue="6" translatesAutoresizingMaskIntoConstraints="NO" id="yOJ-8d-Twq" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="14" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="numProcessingThreadsChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="J5N-Nt-YaL"/>
@@ -302,7 +330,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="HTh-TI-vBh">
-                                        <rect key="frame" x="0.0" y="974.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="1029.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="HTh-TI-vBh" id="YXt-Wa-ts7">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -316,7 +344,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.75" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="fLx-Wo-wc4" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="95" y="11" width="266" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="minimumLoadChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="Kyi-9b-0aQ"/>
@@ -326,7 +354,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="Jpk-gs-X7d">
-                                        <rect key="frame" x="0.0" y="1029.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="1084.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Jpk-gs-X7d" id="znG-iW-U8T">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -354,7 +382,7 @@ Waves</string>
                                         </tableViewCellContentView>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" id="cM4-CX-w6Z">
-                                        <rect key="frame" x="0.0" y="1084.5" width="375" height="55"/>
+                                        <rect key="frame" x="0.0" y="1139.5" width="375" height="55"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="cM4-CX-w6Z" id="00f-ty-feA">
                                             <rect key="frame" x="0.0" y="0.0" width="375" height="55"/>
@@ -368,7 +396,7 @@ Waves</string>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="mSE-gp-SAh">
-                                                    <rect key="frame" x="310" y="12" width="51" height="31"/>
+                                                    <rect key="frame" x="303" y="12" width="51" height="31"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                     <connections>
                                                         <action selector="isWorkIntervalOnChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="gKX-OV-Yvo"/>
@@ -401,6 +429,8 @@ Waves</string>
                         <outlet property="driveDurationsView" destination="S6c-hK-xwh" id="UsV-pP-vHn"/>
                         <outlet property="energyUsageView" destination="zKA-IQ-0AC" id="dD1-j2-Ud6"/>
                         <outlet property="freezeActivityViewsSwitch" destination="vcD-Ik-41n" id="I5i-3y-P2o"/>
+                        <outlet property="inputMeterView" destination="hH4-iU-N6K" id="YLE-nd-ibc"/>
+                        <outlet property="isAudioInputEnabledSwitch" destination="cif-A1-JDz" id="54D-vD-KNB"/>
                         <outlet property="isWorkIntervalOnSwitch" destination="mSE-gp-SAh" id="Rsk-e3-KcB"/>
                         <outlet property="minimumLoadSlider" destination="fLx-Wo-wc4" id="oBL-Vb-3ML"/>
                         <outlet property="numBurstSinesSlider" destination="F9G-mj-FFP" id="rkA-zV-xAL"/>

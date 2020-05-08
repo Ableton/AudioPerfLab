@@ -22,6 +22,10 @@
 
 #pragma once
 
+#include "Config.hpp"
+#include "FixedSPSCQueue.hpp"
+#include "VolumeFader.hpp"
+
 #include <AudioToolbox/AUComponent.h>
 #include <CoreAudio/CoreAudioTypes.h>
 #include <chrono>
@@ -31,6 +35,8 @@
 class Driver
 {
 public:
+  using Seconds = std::chrono::duration<double>;
+
   enum class Status
   {
     kStopped,
@@ -50,25 +56,63 @@ public:
   void start();
   void stop();
 
+  /*! Enable or disable audio input.
+   *
+   * Input is disabled by default. Note that this is an expensive operation that can block
+   * for up to half a second.
+   */
+  bool isInputEnabled() const;
+  void setIsInputEnabled(bool isInputEnabled);
+
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
-  std::chrono::duration<double> nominalBufferDuration() const;
+  //! The volume of the output is an amplitude and must be >= 0
+  float outputVolume() const;
+  void setOutputVolume(float volume, Seconds fadeDuration);
+
+  Seconds nominalBufferDuration() const;
   double sampleRate() const;
   Status status() const;
 
 private:
+  struct FadeCommand
+  {
+    void operator()(Driver& driver) const
+    {
+      driver.mVolumeFader.fadeTo(targetOutputVolume, numFrames);
+    }
+
+    float targetOutputVolume{};
+    uint64_t numFrames{};
+  };
+
+  OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
+                  const AudioTimeStamp* inTimeStamp,
+                  UInt32 inBusNumber,
+                  UInt32 inNumberFrames,
+                  AudioBufferList* ioData);
+
+  void requestBufferSize(int requestedBufferSize);
+
   void setupAudioSession();
   void teardownAudioSession();
 
   void setupIoUnit();
   void teardownIoUnit();
 
-  AudioUnit mRemoteIoUnit{};
-  int mPreferredBufferSize{-1};
+  AudioUnit mpRemoteIoUnit{};
+  FixedSPSCQueue<FadeCommand> mCommandQueue;
+
+  bool mIsInputEnabled{false};
+  int mPreferredBufferSize{kDefaultPreferredBufferSize};
   double mSampleRate{-1.0};
-  std::chrono::duration<double> mNominalBufferDuration{-1.0};
+  Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};
+
+  VolumeFader<float> mVolumeFader;
+  float mOutputVolume{1.0};
+
   RenderCallback mRenderCallback;
   std::mutex mRenderMutex;
   std::unique_lock<std::mutex> mRenderLock;

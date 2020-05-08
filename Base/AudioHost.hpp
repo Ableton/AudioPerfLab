@@ -46,10 +46,11 @@ class AudioHost
 
 public:
   using Setup = std::function<void(int numWorkerThreads)>;
-  using RenderStarted = std::function<void(int numFrames)>;
+  using RenderStarted =
+    std::function<void(StereoAudioBufferPtrs ioBuffer, int numFrames)>;
   using Process = std::function<void(int threadIndex, int numFrames)>;
-  using RenderEnded = std::function<void(
-    StereoAudioBufferPtrs outputBuffer, uint64_t hostTime, int numFrames)>;
+  using RenderEnded =
+    std::function<void(StereoAudioBufferPtrs ioBuffer, uint64_t hostTime, int numFrames)>;
 
   AudioHost(Setup setup,
             RenderStarted renderStarted,

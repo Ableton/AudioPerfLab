@@ -38,7 +38,7 @@ class DisclosureIndicatorView: UIView {
   private let edgeLength = 9.0
   private let lineWidth = 2.0
   private let color = UIColor(
-    red: 199.0 / 255.0, green: 199.0 / 255.0, blue: 204.0 / 255.0, alpha: 1.0);
+    red: 199.0 / 255.0, green: 199.0 / 255.0, blue: 204.0 / 255.0, alpha: 1.0)
   private let shapeLayer = CAShapeLayer()
 
   override init(frame: CGRect) {

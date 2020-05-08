@@ -22,8 +22,8 @@
 
 #include "Base/Driver.hpp"
 
+#include "Assert.hpp"
 #include "AudioBuffer.hpp"
-#include "Config.hpp"
 
 #import <AVFoundation/AVAudioSession.h>
 #include <AudioToolbox/AudioToolbox.h>
@@ -34,6 +34,8 @@
 
 namespace
 {
+
+constexpr auto kCommandQueueSize = 16;
 
 std::string errorCodeString(const OSStatus errorCode)
 {
@@ -74,7 +76,8 @@ void throwIfError(const OSStatus errorCode, const std::string& errorString)
 } // anonymous namespace
 
 Driver::Driver(Driver::RenderCallback renderCallback)
-  : mRenderCallback{[callback = std::move(renderCallback), this](const auto... xs) {
+  : mCommandQueue{kCommandQueueSize}
+  , mRenderCallback{[callback = std::move(renderCallback), this](const auto... xs) {
     // Using a lock to stop audio instead of AudioOutputUnitStart()/AudioOutputUnitStop()
     // is faster and avoids TSan errors.
     std::unique_lock<std::mutex> lock(mRenderMutex, std::try_to_lock);
@@ -137,25 +140,45 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
 {
   if (preferredBufferSize != mPreferredBufferSize)
   {
-    AVAudioSession* audioSession = AVAudioSession.sharedInstance;
-
-    const NSTimeInterval bufferDuration = preferredBufferSize / audioSession.sampleRate;
-
-    NSError* error = nil;
-    [audioSession setPreferredIOBufferDuration:bufferDuration error:&error];
-    if (error.code != noErr)
-    {
-      const auto errorDesc =
-        errorDescription(OSStatus(error.code), "couldn't set the I/O buffer duration");
-      os_log_error(OS_LOG_DEFAULT, "%s", errorDesc.c_str());
-    }
-
-    mNominalBufferDuration = std::chrono::duration<double>{audioSession.IOBufferDuration};
+    requestBufferSize(preferredBufferSize);
     mPreferredBufferSize = preferredBufferSize;
   }
 }
 
-std::chrono::duration<double> Driver::nominalBufferDuration() const
+float Driver::outputVolume() const { return mOutputVolume; }
+void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
+{
+  assertRelease(volume >= 0.0f, "invalid volume");
+
+  const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
+  mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
+  mOutputVolume = volume;
+}
+
+bool Driver::isInputEnabled() const { return mIsInputEnabled; }
+void Driver::setIsInputEnabled(const bool isInputEnabled)
+{
+  if (isInputEnabled != mIsInputEnabled)
+  {
+    try
+    {
+      teardownIoUnit();
+      teardownAudioSession();
+
+      mIsInputEnabled = isInputEnabled;
+
+      setupAudioSession();
+      setupIoUnit();
+    }
+    catch (const std::runtime_error& exception)
+    {
+      os_log_error(OS_LOG_DEFAULT, "%s", exception.what());
+      mStatus = Status::kInvalid;
+    }
+  }
+}
+
+Driver::Seconds Driver::nominalBufferDuration() const
 {
   // AVAudioSession.IOBufferDuration sends mach messages, so return a cached value for use
   // in real-time.
@@ -171,18 +194,43 @@ double Driver::sampleRate() const
 
 Driver::Status Driver::status() const { return mStatus; }
 
+void Driver::requestBufferSize(const int requestedBufferSize)
+{
+  AVAudioSession* audioSession = AVAudioSession.sharedInstance;
+
+  const NSTimeInterval bufferDuration = requestedBufferSize / audioSession.sampleRate;
+
+  NSError* error = nil;
+  [audioSession setPreferredIOBufferDuration:bufferDuration error:&error];
+  if (error.code != noErr)
+  {
+    const auto errorDesc =
+      errorDescription(OSStatus(error.code), "couldn't set the I/O buffer duration");
+    os_log_error(OS_LOG_DEFAULT, "%s", errorDesc.c_str());
+  }
+
+  mNominalBufferDuration = Seconds{audioSession.IOBufferDuration};
+}
+
 void Driver::setupAudioSession()
 {
   AVAudioSession* audioSession = AVAudioSession.sharedInstance;
 
+  const auto category = mIsInputEnabled ? AVAudioSessionCategoryPlayAndRecord
+                                        : AVAudioSessionCategoryPlayback;
+  NSUInteger categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
+  if (category == AVAudioSessionCategoryPlayAndRecord)
+  {
+    categoryOptions |= AVAudioSessionCategoryOptionDefaultToSpeaker
+                       | AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+  }
+
   NSError* error = nil;
-  [audioSession setCategory:AVAudioSessionCategoryPlayback
-                withOptions:AVAudioSessionCategoryOptionMixWithOthers
-                      error:&error];
+  [audioSession setCategory:category withOptions:categoryOptions error:&error];
   throwIfError(OSStatus(error.code), "couldn't set session's audio category");
 
   mSampleRate = AVAudioSession.sharedInstance.sampleRate;
-  setPreferredBufferSize(kDefaultPreferredBufferSize);
+  requestBufferSize(mPreferredBufferSize);
 
   [AVAudioSession.sharedInstance setActive:YES error:&error];
   throwIfError(OSStatus(error.code), "couldn't set session active");
@@ -195,6 +243,39 @@ void Driver::teardownAudioSession()
   NSError* error = nil;
   [audioSession setActive:NO error:&error];
   throwIfError(OSStatus(error.code), "couldn't deactivate session");
+
+  mSampleRate = -1.0;
+  mNominalBufferDuration = Seconds{-1.0};
+}
+
+OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
+                        const AudioTimeStamp* inTimeStamp,
+                        const UInt32 inBusNumber,
+                        const UInt32 inNumberFrames,
+                        AudioBufferList* ioData)
+{
+  while (const auto* pCommand = mCommandQueue.front())
+  {
+    (*pCommand)(*this);
+    mCommandQueue.popFront();
+  }
+
+  const AudioBuffer* pIoBuffers = ioData->mBuffers;
+  const StereoAudioBufferPtrs ioBuffer{
+    static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
+  std::fill_n(ioBuffer[0], inNumberFrames, 0.0f);
+  std::fill_n(ioBuffer[1], inNumberFrames, 0.0f);
+
+  if (mIsInputEnabled)
+  {
+    AudioUnitRender(
+      mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
+  }
+
+  const auto result =
+    mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+  mVolumeFader.process(ioBuffer, inNumberFrames);
+  return result;
 }
 
 void Driver::setupIoUnit()
@@ -207,8 +288,16 @@ void Driver::setupIoUnit()
   desc.componentFlagsMask = 0;
 
   AudioComponent comp = AudioComponentFindNext(nullptr, &desc);
-  throwIfError(AudioComponentInstanceNew(comp, &mRemoteIoUnit),
+  throwIfError(AudioComponentInstanceNew(comp, &mpRemoteIoUnit),
                "couldn't create a new instance of AURemoteIO");
+
+  if (mIsInputEnabled)
+  {
+    const UInt32 yes = 1;
+    throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_EnableIO,
+                                      kAudioUnitScope_Input, 1, &yes, sizeof(yes)),
+                 "couldn't enable external input on AURemoteIO");
+  }
 
   AudioStreamBasicDescription streamDescription{};
   streamDescription.mSampleRate = AVAudioSession.sharedInstance.sampleRate;
@@ -222,50 +311,53 @@ void Driver::setupIoUnit()
   streamDescription.mBytesPerFrame = kBytesPerSample;
   streamDescription.mChannelsPerFrame = 2;
   streamDescription.mBitsPerChannel = kBytesPerSample * 8;
-  throwIfError(AudioUnitSetProperty(mRemoteIoUnit, kAudioUnitProperty_StreamFormat,
-                                    kAudioUnitScope_Input, 0, &streamDescription,
-                                    sizeof(streamDescription)),
-               "couldn't set the format on AURemoteIO");
+  if (mIsInputEnabled)
+  {
+    throwIfError(
+      AudioUnitSetProperty(
+        mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
+        kAudioUnitScope_Output, // External input is provided at the AudioUnit's output
+        1, &streamDescription, sizeof(streamDescription)),
+      "couldn't set the input format on AURemoteIO");
+  }
+  throwIfError(
+    AudioUnitSetProperty(
+      mpRemoteIoUnit, kAudioUnitProperty_StreamFormat,
+      kAudioUnitScope_Input, // External output is passed to the AudioUnit's input
+      0, &streamDescription, sizeof(streamDescription)),
+    "couldn't set the output format on AURemoteIO");
 
   AURenderCallbackStruct renderCallback{};
   renderCallback.inputProc = [](void* inRefCon, AudioUnitRenderActionFlags* ioActionFlags,
-                                const AudioTimeStamp* inTimeStamp, UInt32 inBusNumber,
-                                UInt32 inNumberFrames,
-                                AudioBufferList* ioData) -> OSStatus {
-    auto* self = static_cast<Driver*>(inRefCon);
-
-    const AudioBuffer* pOutputBuffers = ioData->mBuffers;
-    const StereoAudioBufferPtrs outputBuffer{
-      static_cast<float*>(pOutputBuffers[0].mData),
-      static_cast<float*>(pOutputBuffers[1].mData)};
-    std::fill_n(outputBuffer[0], inNumberFrames, 0.0f);
-    std::fill_n(outputBuffer[1], inNumberFrames, 0.0f);
-
-    return self->mRenderCallback(
+                                const AudioTimeStamp* inTimeStamp,
+                                const UInt32 inBusNumber, const UInt32 inNumberFrames,
+                                AudioBufferList* ioData) {
+    return static_cast<Driver*>(inRefCon)->render(
       ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
   };
   renderCallback.inputProcRefCon = this;
-  throwIfError(AudioUnitSetProperty(mRemoteIoUnit, kAudioUnitProperty_SetRenderCallback,
+  throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioUnitProperty_SetRenderCallback,
                                     kAudioUnitScope_Input, 0, &renderCallback,
                                     sizeof(renderCallback)),
                "couldn't set render callback on AURemoteIO");
 
   throwIfError(
-    AudioUnitInitialize(mRemoteIoUnit), "couldn't initialize AURemoteIO instance");
+    AudioUnitInitialize(mpRemoteIoUnit), "couldn't initialize AURemoteIO instance");
 
-  throwIfError(AudioOutputUnitStart(mRemoteIoUnit), "couldn't start output unit");
+  throwIfError(AudioOutputUnitStart(mpRemoteIoUnit), "couldn't start output unit");
 }
 
 void Driver::teardownIoUnit()
 {
-  if (mRemoteIoUnit)
+  if (mpRemoteIoUnit)
   {
-    throwIfError(AudioOutputUnitStop(mRemoteIoUnit), "couldn't stop output unit");
-    throwIfError(AudioUnitUninitialize(mRemoteIoUnit),
+    throwIfError(AudioOutputUnitStop(mpRemoteIoUnit), "couldn't stop output unit");
+    throwIfError(AudioUnitUninitialize(mpRemoteIoUnit),
                  "couldn't uninitialize the AURemoteIO instance");
 
     // TODO: ensure that the instance is disposed of even after an error above
-    throwIfError(AudioComponentInstanceDispose(mRemoteIoUnit),
+    throwIfError(AudioComponentInstanceDispose(mpRemoteIoUnit),
                  "couldn't dispose of the AURemoteIO instance");
+    mpRemoteIoUnit = nullptr;
   }
 }

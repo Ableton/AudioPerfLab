@@ -163,7 +163,11 @@ OSStatus AudioHost::render(AudioUnitRenderActionFlags* ioActionFlags,
   const auto startTime = Clock::now();
   mNumFrames = inNumberFrames;
 
-  mRenderStarted(inNumberFrames);
+  const AudioBuffer* pIoBuffers = ioData->mBuffers;
+  const StereoAudioBufferPtrs ioBuffer{
+    static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
+
+  mRenderStarted(ioBuffer, inNumberFrames);
 
   for (size_t i = 0; i < mWorkerThreads.size(); ++i)
   {
@@ -180,10 +184,7 @@ OSStatus AudioHost::render(AudioUnitRenderActionFlags* ioActionFlags,
     mFinishedWorkSemaphore.wait();
   }
 
-  const AudioBuffer* pOutputBuffers = ioData->mBuffers;
-  const StereoAudioBufferPtrs outputBuffer{static_cast<float*>(pOutputBuffers[0].mData),
-                                           static_cast<float*>(pOutputBuffers[1].mData)};
-  mRenderEnded(outputBuffer, inTimeStamp->mHostTime, inNumberFrames);
+  mRenderEnded(ioBuffer, inTimeStamp->mHostTime, inNumberFrames);
 
   if (mProcessInDriverThread)
   {

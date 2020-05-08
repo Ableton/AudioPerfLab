@@ -23,6 +23,9 @@
 		940D7ADD21CA3F5A00216EA1 /* ParallelSineBank.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 940D7ADC21CA3F5A00216EA1 /* ParallelSineBank.cpp */; };
 		940D7ADF21CA500B00216EA1 /* Thread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 940D7ADE21CA4E2B00216EA1 /* Thread.cpp */; };
 		9450A37921FBAC420061783A /* CollapsibleTableViewHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */; };
+		94882A8B2465A4D200FAF78F /* MeterSmoother.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94882A8A2465A4D200FAF78F /* MeterSmoother.swift */; };
+		94882A8D2465A4EA00FAF78F /* MeterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94882A8C2465A4EA00FAF78F /* MeterView.swift */; };
+		94882A8F2465A4F400FAF78F /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94882A8E2465A4F400FAF78F /* Utilities.swift */; };
 		94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A145BF21C4183400A2ED88 /* SliderWithValue.swift */; };
 		94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A145C121C41FB300A2ED88 /* Partial.cpp */; };
 		94CD64E1245D5F4400738E71 /* BusyThreads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CD64E0245D5F4400738E71 /* BusyThreads.cpp */; };
@@ -58,6 +61,13 @@
 		940D7ADC21CA3F5A00216EA1 /* ParallelSineBank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelSineBank.cpp; sourceTree = "<group>"; };
 		940D7ADE21CA4E2B00216EA1 /* Thread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Thread.cpp; sourceTree = "<group>"; };
 		9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapsibleTableViewHeader.swift; sourceTree = "<group>"; };
+		94882A922465B16900FAF78F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		94882A872465A2FC00FAF78F /* VolumeFader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VolumeFader.hpp; sourceTree = "<group>"; };
+		94882A882465A30600FAF78F /* RampedValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RampedValue.hpp; sourceTree = "<group>"; };
+		94882A892465A48700FAF78F /* TimeLogger.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TimeLogger.hpp; sourceTree = "<group>"; };
+		94882A8A2465A4D200FAF78F /* MeterSmoother.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterSmoother.swift; sourceTree = "<group>"; };
+		94882A8C2465A4EA00FAF78F /* MeterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterView.swift; sourceTree = "<group>"; };
+		94882A8E2465A4F400FAF78F /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		94A145BF21C4183400A2ED88 /* SliderWithValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderWithValue.swift; sourceTree = "<group>"; };
 		94A145C121C41FB300A2ED88 /* Partial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Partial.cpp; sourceTree = "<group>"; };
 		94A145C221C41FB300A2ED88 /* Partial.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Partial.hpp; sourceTree = "<group>"; };
@@ -100,10 +110,13 @@
 				16B554A221C16BB000522483 /* Driver.mm */,
 				16B495BB21B974C100C6D2A4 /* FixedSPSCQueue.hpp */,
 				94A145C421C5484C00A2ED88 /* Math.hpp */,
+				94882A882465A30600FAF78F /* RampedValue.hpp */,
 				16EBD0C721CA640C00D92FDC /* Semaphore.cpp */,
 				163A0DE621BEBBB2001FD225 /* Semaphore.hpp */,
 				940D7ADE21CA4E2B00216EA1 /* Thread.cpp */,
 				163A0DE721BEBBB3001FD225 /* Thread.hpp */,
+				94882A892465A48700FAF78F /* TimeLogger.hpp */,
+				94882A872465A2FC00FAF78F /* VolumeFader.hpp */,
 			);
 			path = Base;
 			sourceTree = "<group>";
@@ -111,6 +124,7 @@
 		166431DB21A2D46B00987A23 = {
 			isa = PBXGroup;
 			children = (
+				94882A922465B16900FAF78F /* README.md */,
 				166364F22372FD3F006F286B /* Base */,
 				166431E621A2D46B00987A23 /* AudioPerfLab */,
 				166431E521A2D46B00987A23 /* Products */,
@@ -142,7 +156,10 @@
 				9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */,
 				16CA3F7621FF9402008C3F06 /* DisclosureIndicatorView.swift */,
 				94DAB9EA2203C2CA005A02D8 /* FreezeSwitch.swift */,
+				94882A8A2465A4D200FAF78F /* MeterSmoother.swift */,
+				94882A8C2465A4EA00FAF78F /* MeterView.swift */,
 				94A145BF21C4183400A2ED88 /* SliderWithValue.swift */,
+				94882A8E2465A4F400FAF78F /* Utilities.swift */,
 				166431E921A2D46B00987A23 /* ViewController.swift */,
 				166431EE21A2D46D00987A23 /* Assets.xcassets */,
 				166431F321A2D46D00987A23 /* Info.plist */,
@@ -236,10 +253,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				16B495BA21B933AB00C6D2A4 /* ActivityView.swift in Sources */,
+				94882A8D2465A4EA00FAF78F /* MeterView.swift in Sources */,
 				94DAB9EB2203C2CA005A02D8 /* FreezeSwitch.swift in Sources */,
 				9450A37921FBAC420061783A /* CollapsibleTableViewHeader.swift in Sources */,
 				94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */,
 				166431EA21A2D46B00987A23 /* ViewController.swift in Sources */,
+				94882A8F2465A4F400FAF78F /* Utilities.swift in Sources */,
 				166431E821A2D46B00987A23 /* AppDelegate.swift in Sources */,
 				940D7ADD21CA3F5A00216EA1 /* ParallelSineBank.cpp in Sources */,
 				166431FE21A2D52500987A23 /* Engine.mm in Sources */,
@@ -247,6 +266,7 @@
 				16B554A421C16BB000522483 /* Driver.mm in Sources */,
 				94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */,
 				16CA3F7721FF9402008C3F06 /* DisclosureIndicatorView.swift in Sources */,
+				94882A8B2465A4D200FAF78F /* MeterSmoother.swift in Sources */,
 				16EBD0C821CA659100D92FDC /* Semaphore.cpp in Sources */,
 				940D7ADF21CA500B00216EA1 /* Thread.cpp in Sources */,
 				94CD64E1245D5F4400738E71 /* BusyThreads.cpp in Sources */,

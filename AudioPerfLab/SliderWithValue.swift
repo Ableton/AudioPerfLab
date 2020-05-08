@@ -54,13 +54,17 @@ class SliderWithValue: UISlider {
     addSubview(valueField)
     updateValueField()
 
+    let valueFieldVertCenterConstraint = NSLayoutConstraint(
+      item: valueField, attribute: .centerY, relatedBy: .equal, toItem: self,
+      attribute: .centerY, multiplier: 1.0, constant: 0)
     let valueFieldWidthConstraint = NSLayoutConstraint(
       item: valueField, attribute: .width, relatedBy: .equal, toItem: nil,
       attribute: .notAnAttribute, multiplier: 1.0, constant: kValueFieldWidth)
     let valueFieldConstraint = NSLayoutConstraint(
       item: valueField, attribute: .trailing, relatedBy: .equal, toItem: self,
       attribute: .trailing, multiplier: 1.0, constant: 0)
-    NSLayoutConstraint.activate([valueFieldWidthConstraint, valueFieldConstraint])
+    NSLayoutConstraint.activate([
+      valueFieldVertCenterConstraint, valueFieldWidthConstraint, valueFieldConstraint])
 
     self.addTarget(self, action: #selector(onValueChange), for: .valueChanged)
   }
