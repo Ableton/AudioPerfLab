@@ -59,6 +59,8 @@
 		940D7ADE21CA4E2B00216EA1 /* Thread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Thread.cpp; sourceTree = "<group>"; };
 		9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapsibleTableViewHeader.swift; sourceTree = "<group>"; };
 		94882A922465B16900FAF78F /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		94882A872465A2FC00FAF78F /* VolumeFader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VolumeFader.hpp; sourceTree = "<group>"; };
+		94882A882465A30600FAF78F /* RampedValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RampedValue.hpp; sourceTree = "<group>"; };
 		94A145BF21C4183400A2ED88 /* SliderWithValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SliderWithValue.swift; sourceTree = "<group>"; };
 		94A145C121C41FB300A2ED88 /* Partial.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Partial.cpp; sourceTree = "<group>"; };
 		94A145C221C41FB300A2ED88 /* Partial.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Partial.hpp; sourceTree = "<group>"; };
@@ -101,10 +103,12 @@
 				16B554A221C16BB000522483 /* Driver.mm */,
 				16B495BB21B974C100C6D2A4 /* FixedSPSCQueue.hpp */,
 				94A145C421C5484C00A2ED88 /* Math.hpp */,
+				94882A882465A30600FAF78F /* RampedValue.hpp */,
 				16EBD0C721CA640C00D92FDC /* Semaphore.cpp */,
 				163A0DE621BEBBB2001FD225 /* Semaphore.hpp */,
 				940D7ADE21CA4E2B00216EA1 /* Thread.cpp */,
 				163A0DE721BEBBB3001FD225 /* Thread.hpp */,
+				94882A872465A2FC00FAF78F /* VolumeFader.hpp */,
 			);
 			path = Base;
 			sourceTree = "<group>";
