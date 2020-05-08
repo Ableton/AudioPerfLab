@@ -31,6 +31,8 @@
 class Driver
 {
 public:
+  using Seconds = std::chrono::duration<double>;
+
   enum class Status
   {
     kStopped,
@@ -53,7 +55,7 @@ public:
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
-  std::chrono::duration<double> nominalBufferDuration() const;
+  Seconds nominalBufferDuration() const;
   double sampleRate() const;
   Status status() const;
 
@@ -67,7 +69,7 @@ private:
   AudioUnit mpRemoteIoUnit{};
   int mPreferredBufferSize{-1};
   double mSampleRate{-1.0};
-  std::chrono::duration<double> mNominalBufferDuration{-1.0};
+  Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};
   RenderCallback mRenderCallback;
   std::mutex mRenderMutex;

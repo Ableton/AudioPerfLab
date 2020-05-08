@@ -150,12 +150,12 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
       os_log_error(OS_LOG_DEFAULT, "%s", errorDesc.c_str());
     }
 
-    mNominalBufferDuration = std::chrono::duration<double>{audioSession.IOBufferDuration};
+    mNominalBufferDuration = Seconds{audioSession.IOBufferDuration};
     mPreferredBufferSize = preferredBufferSize;
   }
 }
 
-std::chrono::duration<double> Driver::nominalBufferDuration() const
+Driver::Seconds Driver::nominalBufferDuration() const
 {
   // AVAudioSession.IOBufferDuration sends mach messages, so return a cached value for use
   // in real-time.
