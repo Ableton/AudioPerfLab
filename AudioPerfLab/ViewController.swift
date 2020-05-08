@@ -29,6 +29,7 @@ class ViewController: UITableViewController {
   private var coreActivityViews: [ActivityView] = []
   private var tableViewHeaders: [CollapsibleTableViewHeader] = []
   private var lastNumFrames: Int32?
+  private var waitingToChangeInput = false
 
   private var lastEnergyUsageTime: Double?
   private var lastEnergyUsage: Double?
@@ -188,7 +189,27 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func isAudioInputEnabledChanged(_ sender: Any) {
-    engine.isAudioInputEnabled = isAudioInputEnabledSwitch.isOn
+    if waitingToChangeInput {
+      return
+    }
+
+    // Fade out and wait some time before toggling the input to avoid an audible glitch
+    // due to a CoreAudio bug.
+    let fadeDuration = 0.01
+    let glitchAvoidanceDelay = 0.4
+
+    engine.setOutputVolume(0.0, fadeDuration: fadeDuration)
+    waitingToChangeInput = true
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + glitchAvoidanceDelay) { [weak self] in
+      guard let self = self else {
+        return
+      }
+
+      self.engine.isAudioInputEnabled = self.isAudioInputEnabledSwitch.isOn
+      self.engine.setOutputVolume(1.0, fadeDuration: fadeDuration)
+      self.waitingToChangeInput = false
+    }
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
