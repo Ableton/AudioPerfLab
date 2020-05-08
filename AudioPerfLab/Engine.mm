@@ -196,6 +196,12 @@ private:
   mEngine.host().driver().setIsInputEnabled(enabled);
 }
 
+- (float)outputVolume { return mEngine.host().driver().outputVolume(); }
+- (void)setOutputVolume:(float)outputVolume fadeDuration:(double)fadeDuration
+{
+  mEngine.host().driver().setOutputVolume(outputVolume, Driver::Seconds{fadeDuration});
+}
+
 - (int)preferredBufferSize { return mEngine.host().preferredBufferSize(); }
 - (void)setPreferredBufferSize:(int)preferredBufferSize
 {

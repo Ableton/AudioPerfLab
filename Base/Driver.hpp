@@ -23,6 +23,8 @@
 #pragma once
 
 #include "Config.hpp"
+#include "FixedSPSCQueue.hpp"
+#include "VolumeFader.hpp"
 
 #include <AudioToolbox/AUComponent.h>
 #include <CoreAudio/CoreAudioTypes.h>
@@ -65,11 +67,26 @@ public:
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
+  //! The volume of the output is an amplitude and must be >= 0
+  float outputVolume() const;
+  void setOutputVolume(float volume, Seconds fadeDuration);
+
   Seconds nominalBufferDuration() const;
   double sampleRate() const;
   Status status() const;
 
 private:
+  struct FadeCommand
+  {
+    void operator()(Driver& driver) const
+    {
+      driver.mVolumeFader.fadeTo(targetOutputVolume, numFrames);
+    }
+
+    float targetOutputVolume{};
+    uint64_t numFrames{};
+  };
+
   OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
                   const AudioTimeStamp* inTimeStamp,
                   UInt32 inBusNumber,
@@ -85,11 +102,17 @@ private:
   void teardownIoUnit();
 
   AudioUnit mpRemoteIoUnit{};
+  FixedSPSCQueue<FadeCommand> mCommandQueue;
+
   bool mIsInputEnabled{false};
   int mPreferredBufferSize{kDefaultPreferredBufferSize};
   double mSampleRate{-1.0};
   Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};
+
+  VolumeFader<float> mVolumeFader;
+  float mOutputVolume{1.0};
+
   RenderCallback mRenderCallback;
   std::mutex mRenderMutex;
   std::unique_lock<std::mutex> mRenderLock;

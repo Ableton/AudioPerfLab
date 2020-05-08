@@ -22,6 +22,7 @@
 
 #include "Base/Driver.hpp"
 
+#include "Assert.hpp"
 #include "AudioBuffer.hpp"
 
 #import <AVFoundation/AVAudioSession.h>
@@ -33,6 +34,8 @@
 
 namespace
 {
+
+constexpr auto kCommandQueueSize = 16;
 
 std::string errorCodeString(const OSStatus errorCode)
 {
@@ -73,7 +76,8 @@ void throwIfError(const OSStatus errorCode, const std::string& errorString)
 } // anonymous namespace
 
 Driver::Driver(Driver::RenderCallback renderCallback)
-  : mRenderCallback{[callback = std::move(renderCallback), this](const auto... xs) {
+  : mCommandQueue{kCommandQueueSize}
+  , mRenderCallback{[callback = std::move(renderCallback), this](const auto... xs) {
     // Using a lock to stop audio instead of AudioOutputUnitStart()/AudioOutputUnitStop()
     // is faster and avoids TSan errors.
     std::unique_lock<std::mutex> lock(mRenderMutex, std::try_to_lock);
@@ -139,6 +143,16 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
     requestBufferSize(preferredBufferSize);
     mPreferredBufferSize = preferredBufferSize;
   }
+}
+
+float Driver::outputVolume() const { return mOutputVolume; }
+void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
+{
+  assertRelease(volume >= 0.0f, "invalid volume");
+
+  const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
+  mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
+  mOutputVolume = volume;
 }
 
 bool Driver::isInputEnabled() const { return mIsInputEnabled; }
@@ -240,6 +254,12 @@ OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
                         const UInt32 inNumberFrames,
                         AudioBufferList* ioData)
 {
+  while (const auto* pCommand = mCommandQueue.front())
+  {
+    (*pCommand)(*this);
+    mCommandQueue.popFront();
+  }
+
   const AudioBuffer* pIoBuffers = ioData->mBuffers;
   const StereoAudioBufferPtrs ioBuffer{
     static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
@@ -252,7 +272,10 @@ OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
       mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
   }
 
-  return mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+  const auto result =
+    mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+  mVolumeFader.process(ioBuffer, inNumberFrames);
+  return result;
 }
 
 void Driver::setupIoUnit()

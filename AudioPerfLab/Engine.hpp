@@ -37,6 +37,7 @@ struct DriveMeasurement
 @interface Engine : NSObject
 
 @property(nonatomic) bool isAudioInputEnabled;
+@property(nonatomic, readonly) float outputVolume;
 @property(nonatomic) int preferredBufferSize;
 @property(nonatomic, readonly) double sampleRate;
 @property(nonatomic) int numWorkerThreads;
@@ -49,6 +50,7 @@ struct DriveMeasurement
 @property(nonatomic) int numSines;
 @property(nonatomic, readonly) int maxNumSines;
 
+- (void)setOutputVolume:(float)outputVolume fadeDuration:(double)fadeDuration;
 - (void)playSineBurstFor:(double)duration additionalSines:(int)numAdditionalSines;
 - (void)fetchMeasurements:(void (^)(struct DriveMeasurement))callback;
 
