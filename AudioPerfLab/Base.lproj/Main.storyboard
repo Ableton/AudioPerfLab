@@ -129,6 +129,10 @@
                                                         <action selector="isAudioInputEnabledChanged:" destination="L4Q-x0-BAr" eventType="valueChanged" id="8Ao-kv-Yal"/>
                                                     </connections>
                                                 </switch>
+                                                <view opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="hH4-iU-N6K" customClass="MeterView" customModule="AudioPerfLab" customModuleProvider="target">
+                                                    <rect key="frame" x="97" y="13" width="186" height="29"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                                </view>
                                             </subviews>
                                         </tableViewCellContentView>
                                     </tableViewCell>
@@ -425,6 +429,7 @@ Waves</string>
                         <outlet property="driveDurationsView" destination="S6c-hK-xwh" id="UsV-pP-vHn"/>
                         <outlet property="energyUsageView" destination="zKA-IQ-0AC" id="dD1-j2-Ud6"/>
                         <outlet property="freezeActivityViewsSwitch" destination="vcD-Ik-41n" id="I5i-3y-P2o"/>
+                        <outlet property="inputMeterView" destination="hH4-iU-N6K" id="YLE-nd-ibc"/>
                         <outlet property="isAudioInputEnabledSwitch" destination="cif-A1-JDz" id="54D-vD-KNB"/>
                         <outlet property="isWorkIntervalOnSwitch" destination="mSE-gp-SAh" id="Rsk-e3-KcB"/>
                         <outlet property="minimumLoadSlider" destination="fLx-Wo-wc4" id="oBL-Vb-3ML"/>

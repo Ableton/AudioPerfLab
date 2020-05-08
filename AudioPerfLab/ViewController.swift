@@ -30,6 +30,7 @@ class ViewController: UITableViewController {
   private var tableViewHeaders: [CollapsibleTableViewHeader] = []
   private var lastNumFrames: Int32?
   private var waitingToChangeInput = false
+  private var inputMeterSmoother = MeterSmoother()
 
   private var lastEnergyUsageTime: Double?
   private var lastEnergyUsage: Double?
@@ -43,6 +44,7 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var coreActivityStackView: UIStackView!
   @IBOutlet weak private var energyUsageView: ActivityView!
 
+  @IBOutlet weak private var inputMeterView: MeterView!
   @IBOutlet weak private var isAudioInputEnabledSwitch: UISwitch!
   @IBOutlet weak private var bufferSizeStepper: UIStepper!
   @IBOutlet weak private var bufferSizeField: UITextField!
@@ -390,6 +392,7 @@ class ViewController: UITableViewController {
       self.addWorkDistributionMeasurement(
         time: time, duration: duration, measurement: measurement)
       self.addCoreMeasurement(time: time, duration: duration, measurement: measurement)
+      self.inputMeterSmoother.addPeak(ampToDb(Double(measurement.inputPeakLevel)))
     })
   }
 
@@ -462,6 +465,8 @@ class ViewController: UITableViewController {
       ViewController.activityViewDuration - ViewController.activityViewLatency
     activityViews().forEach { $0.startTime = startTime }
     if !freezeActivityViewsSwitch.isOn {
+      inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
+        displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()
     }
   }

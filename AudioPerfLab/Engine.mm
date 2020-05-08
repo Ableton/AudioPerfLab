@@ -45,6 +45,21 @@
 #include <thread>
 #include <vector>
 
+namespace
+{
+
+float peakLevel(const StereoAudioBufferPtrs input, const int numFrames)
+{
+  float result = 0.0;
+  for (int i = 0; i < numFrames; ++i)
+  {
+    result = std::max({result, std::abs(input[0][i]), std::abs(input[1][i])});
+  }
+  return result;
+}
+
+} // namespace
+
 class EngineImpl
 {
   using Clock = std::chrono::high_resolution_clock;
@@ -94,7 +109,8 @@ private:
   void addDriveMeasurement(const uint64_t hostTime,
                            const std::chrono::time_point<Clock> bufferStartTime,
                            const std::chrono::time_point<Clock> bufferEndTime,
-                           const int numFrames)
+                           const int numFrames,
+                           const float inputPeakLevel)
   {
     DriveMeasurement driveMeasurement{};
     driveMeasurement.hostTime = machAbsoluteTimeToSeconds(hostTime).count();
@@ -108,6 +124,7 @@ private:
       driveMeasurement.numActivePartialsProcessed[i] = mNumActivePartialsProcessed[i];
       driveMeasurement.cpuNumbers[i] = mCpuNumbers[i];
     }
+    driveMeasurement.inputPeakLevel = inputPeakLevel;
     mDriveMeasurements.tryPushBack(driveMeasurement);
   }
 
@@ -158,6 +175,7 @@ private:
                    const uint64_t hostTime,
                    const int numFrames)
   {
+    const auto inputPeakLevel = peakLevel(ioBuffer, numFrames);
     std::fill_n(ioBuffer[0], numFrames, 0.0f);
     std::fill_n(ioBuffer[1], numFrames, 0.0f);
 
@@ -167,7 +185,7 @@ private:
       std::max<int>(0, mNumSineBurstSamplesRemaining - numFrames);
 
     const auto endTime = Clock::now();
-    addDriveMeasurement(hostTime, mRenderStartTime, endTime, numFrames);
+    addDriveMeasurement(hostTime, mRenderStartTime, endTime, numFrames, inputPeakLevel);
   }
 
   AudioHost mHost;

@@ -32,6 +32,7 @@ struct DriveMeasurement
   int numFrames;
   int cpuNumbers[MAX_NUM_THREADS];
   int numActivePartialsProcessed[MAX_NUM_THREADS];
+  float inputPeakLevel;
 };
 
 @interface Engine : NSObject
