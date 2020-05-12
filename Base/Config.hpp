@@ -25,8 +25,11 @@
 #include <chrono>
 
 constexpr auto kDefaultNumBusyThreads = 0;
-constexpr auto kDefaultBusyThreadPeriod = std::chrono::milliseconds{15};
-constexpr auto kDefaultBusyThreadCpuUsage = 0.66;
+
+// These settings are tuned to ramp up CPUs without exceeding the background CPU usage
+// limit. See the README for more information.
+constexpr auto kDefaultBusyThreadPeriod = std::chrono::milliseconds{35};
+constexpr auto kDefaultBusyThreadCpuUsage = 0.5;
 
 constexpr auto kDefaultNumWorkerThreads = 1;
 
