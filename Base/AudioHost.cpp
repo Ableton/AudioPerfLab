@@ -151,7 +151,7 @@ void AudioHost::ensureMinimumLoad(const std::chrono::time_point<Clock> bufferSta
 {
   const auto bufferDuration =
     std::chrono::duration<double>{numFrames / mDriver.sampleRate()};
-  hardwareDelayUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
+  lowEnergyWorkUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
 }
 
 OSStatus AudioHost::render(AudioUnitRenderActionFlags* ioActionFlags,

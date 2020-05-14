@@ -137,7 +137,7 @@ private:
     {
       while (Clock::now() < *delayEndTime && mIsActive)
       {
-        coarseHardwareDelay();
+        lowEnergyWork();
       }
     }
   }
