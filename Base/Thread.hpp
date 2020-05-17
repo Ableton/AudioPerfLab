@@ -69,7 +69,7 @@ inline void hardwareDelay()
 #endif
 }
 
-inline void coarseHardwareDelay()
+inline void lowEnergyWork()
 {
   // Reduce energy usage slightly by performing many hardware delays at once. On an
   // iPhone this takes 21us on average.
@@ -82,11 +82,11 @@ inline void coarseHardwareDelay()
 }
 
 template <typename Clock, typename Rep>
-void hardwareDelayUntil(const std::chrono::time_point<Clock, Rep> until)
+void lowEnergyWorkUntil(const std::chrono::time_point<Clock, Rep> until)
 {
   while (Clock::now() < until)
   {
-    coarseHardwareDelay();
+    lowEnergyWork();
   }
 }
 

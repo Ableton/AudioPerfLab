@@ -39,7 +39,14 @@ class BusyThread
 public:
   using Seconds = std::chrono::duration<double>;
 
-  explicit BusyThread(std::string threadName);
+  /*! Construct a busy thread.
+   *
+   * \param threadName The name of the thread shown in debuggers
+   * \param period The duration of one busy thread iteration
+   * \param cpuUsage The percentage of an iteration spent performing low-energy work
+   * rather than blocking.
+   */
+  BusyThread(std::string threadName, Seconds period, double cpuUsage);
 
   BusyThread(BusyThread&&) noexcept;
   BusyThread& operator=(BusyThread&&) noexcept;
@@ -48,21 +55,6 @@ public:
   BusyThread& operator=(const BusyThread&) = delete;
 
   ~BusyThread();
-
-  //! Start performing busy work. A busy thread is stopped by default.
-  void start();
-
-  //! Stop performing busy work.
-  void stop();
-
-  //! The duration of one busy thread iteration.
-  Seconds period() const;
-  void setPeriod(Seconds period);
-
-  //! The percentage of a busy thread iteration spent performing low-energy work rather
-  //! than blocking.
-  double threadCpuUsage() const;
-  void setThreadCpuUsage(double threadCpuUsage);
 
 private:
   // Use a Pimpl so that the class is movable
@@ -89,6 +81,8 @@ public:
   void setThreadCpuUsage(double threadCpuUsage);
 
 private:
+  void rebuildThreads(int numThreads);
+
   std::vector<BusyThread> mThreads;
   Seconds mPeriod = kDefaultBusyThreadPeriod;
   double mThreadCpuUsage = kDefaultBusyThreadCpuUsage;

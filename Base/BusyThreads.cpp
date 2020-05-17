@@ -28,7 +28,6 @@
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <optional>
 #include <pthread.h>
 #include <pthread/sched.h>
 #include <thread>
@@ -38,79 +37,40 @@ class BusyThreadImpl
 public:
   using Seconds = BusyThread::Seconds;
 
-  explicit BusyThreadImpl(std::string threadName)
+  BusyThreadImpl(std::string threadName, const Seconds period, const double cpuUsage)
     : mThreadName{std::move(threadName)}
-  {
-  }
-
-  ~BusyThreadImpl() { stop(); }
-
-  void start()
-  {
-    assertRelease(mIsActive == mThread.joinable(), "Invalid busy thread state");
-
-    if (!mIsActive)
-    {
-      mIsActive = true;
-      mThread = std::thread{&BusyThreadImpl::busyThread, this};
-    }
-  }
-
-  void stop()
-  {
-    assertRelease(mIsActive == mThread.joinable(), "Invalid busy thread state");
-
-    if (mIsActive)
-    {
-      {
-        std::unique_lock lock{mMutex};
-        mIsActive = false;
-        mConditionVariable.notify_all();
-      }
-
-      mThread.join();
-    }
-  }
-
-  BusyThread::Seconds period() const { return mPeriod; }
-  void setPeriod(const Seconds period)
+    , mPeriod{period}
+    , mCpuUsage{cpuUsage}
+    , mIsActive{true}
   {
     assertRelease(period > Seconds{0.0}, "Invalid busy thread period");
+    assertRelease(cpuUsage >= 0.0 && cpuUsage <= 1.0, "Invalid busy thread CPU usage");
 
-    if (period != mPeriod)
-    {
-      std::unique_lock lock{mMutex};
-      mPeriod = period;
-    }
+    mThread = std::thread{&BusyThreadImpl::busyThread, this};
   }
 
-  double threadCpuUsage() const { return mThreadCpuUsage; }
-  void setThreadCpuUsage(const double threadCpuUsage)
+  ~BusyThreadImpl()
   {
-    assertRelease(
-      threadCpuUsage >= 0.0 && threadCpuUsage <= 1.0, "Invalid busy thread CPU usage");
-
-    if (threadCpuUsage != mThreadCpuUsage)
     {
       std::unique_lock lock{mMutex};
-      mThreadCpuUsage = threadCpuUsage;
+      mIsActive.store(false, std::memory_order_release);
+      mConditionVariable.notify_all();
     }
+
+    mThread.join();
   }
 
 private:
   void busyThread()
   {
-    // A busy thread alternates between blocking on a condition variable and performing
-    // low-energy work via a hardware delay instruction. Blocking avoids being terminated
-    // when running in the background by violating the iOS CPU usage limit. The CPU usage
-    // percentage needs to be set high enough to prevent CPU throttling and low enough to
-    // avoid background termination.
-    //
-    // The use of mIsActive and the condition variable allows the thread to be quickly
-    // destroyed, for example when BusyThreads::setNumThreads() is called.
+    // A busy thread alternates between waiting on a condition variable and performing
+    // low-energy work via a hardware delay instruction. Waiting avoids being terminated
+    // when running in the background by violating the iOS CPU usage limit. The use of
+    // mIsActive and the condition variable allows the thread to be quickly destroyed.
 
     using Clock = std::chrono::steady_clock;
-    using TimePoint = std::chrono::time_point<Clock, Seconds>;
+    const auto waitDuration =
+      std::chrono::duration_cast<Clock::duration>(mPeriod * (1.0 - mCpuUsage));
 
     setCurrentThreadName(mThreadName);
 
@@ -118,60 +78,54 @@ private:
     param.sched_priority = sched_get_priority_min(SCHED_OTHER);
     pthread_setschedparam(pthread_self(), SCHED_OTHER, &param);
 
-    const auto getDelayEndTimeAndBlock = [&] {
-      const auto startTime = Clock::now();
-
-      std::unique_lock lock{mMutex};
-
-      const auto lowEnergyDelayDuration = mPeriod * mThreadCpuUsage;
-      const auto blockDuration = mPeriod - lowEnergyDelayDuration;
-      const auto blockEndTime = startTime + blockDuration;
-      const auto delayEndTime = blockEndTime + lowEnergyDelayDuration;
-
-      mConditionVariable.wait_until(lock, blockEndTime, [this] { return !mIsActive; });
-      return mIsActive ? std::optional<TimePoint>{delayEndTime}
-                       : std::optional<TimePoint>{};
-    };
-
-    while (const auto delayEndTime = getDelayEndTimeAndBlock())
+    const auto isActive = [this] { return mIsActive.load(std::memory_order_acquire); };
+    while (isActive())
     {
-      while (Clock::now() < *delayEndTime && mIsActive)
+      const auto iterationStartTime = Clock::now();
+      const auto waitEndTime = iterationStartTime + waitDuration;
       {
-        coarseHardwareDelay();
+        std::unique_lock lock{mMutex};
+        mConditionVariable.wait_until(lock, waitEndTime, [&] { return !isActive(); });
+      }
+
+      // To compensate for timing inaccuracy in the condition variable, we work until the
+      // desired CPU usage is reached instead of working for a fixed duration. If the
+      // target CPU usage is one we will stay in the loop until deactivated.
+      const auto currentCpuUsage = [&, workStartTime = Clock::now()] {
+        const auto currentTime = Clock::now();
+        const auto workDuration = currentTime - workStartTime;
+        const auto totalDuration = currentTime - iterationStartTime;
+        return totalDuration.count() > 0
+                 ? double(workDuration.count()) / double(totalDuration.count())
+                 : 0.0;
+      };
+      while (currentCpuUsage() < mCpuUsage && isActive())
+      {
+        lowEnergyWork();
       }
     }
   }
 
   const std::string mThreadName;
-  std::thread mThread;
-  std::condition_variable mConditionVariable;
+  const Seconds mPeriod;
+  const double mCpuUsage;
   std::mutex mMutex;
-  std::atomic<bool> mIsActive{false};
-  Seconds mPeriod = kDefaultBusyThreadPeriod;
-  double mThreadCpuUsage = kDefaultBusyThreadCpuUsage;
+  std::condition_variable mConditionVariable;
+  std::atomic<bool> mIsActive;
+  std::thread mThread;
 };
 
 
-BusyThread::BusyThread(std::string threadName)
-  : mpImpl{std::make_unique<BusyThreadImpl>(std::move(threadName))}
+BusyThread::BusyThread(std::string threadName,
+                       const Seconds period,
+                       const double cpuUsage)
+  : mpImpl{std::make_unique<BusyThreadImpl>(std::move(threadName), period, cpuUsage)}
 {
 }
 
 BusyThread::BusyThread(BusyThread&&) noexcept = default;
 BusyThread& BusyThread::operator=(BusyThread&&) noexcept = default;
 BusyThread::~BusyThread() = default;
-
-void BusyThread::start() { mpImpl->start(); }
-void BusyThread::stop() { mpImpl->stop(); }
-
-BusyThread::Seconds BusyThread::period() const { return mpImpl->period(); }
-void BusyThread::setPeriod(const Seconds period) { mpImpl->setPeriod(period); }
-
-double BusyThread::threadCpuUsage() const { return mpImpl->threadCpuUsage(); }
-void BusyThread::setThreadCpuUsage(const double threadCpuUsage)
-{
-  mpImpl->setThreadCpuUsage(threadCpuUsage);
-}
 
 
 BusyThreads::BusyThreads() { setNumThreads(kDefaultNumBusyThreads); }
@@ -183,15 +137,7 @@ void BusyThreads::setNumThreads(const int numThreads)
 
   if (numThreads != int(mThreads.size()))
   {
-    mThreads.clear();
-    for (int threadIndex = 0; threadIndex < numThreads; ++threadIndex)
-    {
-      BusyThread thread{"Busy Thread " + std::to_string(threadIndex + 1)};
-      thread.setPeriod(mPeriod);
-      thread.setThreadCpuUsage(mThreadCpuUsage);
-      thread.start();
-      mThreads.emplace_back(std::move(thread));
-    }
+    rebuildThreads(numThreads);
   }
 }
 
@@ -200,11 +146,8 @@ void BusyThreads::setPeriod(const Seconds period)
 {
   if (period != mPeriod)
   {
-    for (auto& thread : mThreads)
-    {
-      thread.setPeriod(period);
-    }
     mPeriod = period;
+    rebuildThreads(int(mThreads.size()));
   }
 }
 
@@ -213,10 +156,20 @@ void BusyThreads::setThreadCpuUsage(const double threadCpuUsage)
 {
   if (threadCpuUsage != mThreadCpuUsage)
   {
-    for (auto& thread : mThreads)
-    {
-      thread.setThreadCpuUsage(threadCpuUsage);
-    }
     mThreadCpuUsage = threadCpuUsage;
+    rebuildThreads(int(mThreads.size()));
+  }
+}
+
+void BusyThreads::rebuildThreads(const int numThreads)
+{
+  assertRelease(numThreads >= 0, "Invalid number of threads");
+
+  mThreads.clear();
+  for (int threadIndex = 0; threadIndex < numThreads; ++threadIndex)
+  {
+    BusyThread thread{
+      "Busy Thread " + std::to_string(threadIndex + 1), mPeriod, mThreadCpuUsage};
+    mThreads.emplace_back(std::move(thread));
   }
 }
