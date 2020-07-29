@@ -272,8 +272,8 @@ void Driver::setupIoUnit()
   AudioStreamBasicDescription streamDescription{};
   streamDescription.mSampleRate = AVAudioSession.sharedInstance.sampleRate;
   streamDescription.mFormatID = kAudioFormatLinearPCM;
-  streamDescription.mFormatFlags =
-    kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
+  streamDescription.mFormatFlags = AudioFormatFlags(kAudioFormatFlagsNativeFloatPacked)
+                                   | AudioFormatFlags(kAudioFormatFlagIsNonInterleaved);
   const auto kBytesPerSample = sizeof(float);
   streamDescription.mBytesPerPacket = kBytesPerSample;
   streamDescription.mFramesPerPacket = 1;
