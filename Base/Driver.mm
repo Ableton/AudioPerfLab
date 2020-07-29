@@ -135,6 +135,22 @@ void Driver::stop()
   }
 }
 
+Driver::Status Driver::status() const { return mStatus; }
+
+double Driver::sampleRate() const
+{
+  // AVAudioSession.sampleRate sends mach messages, so return a cached value for use in
+  // real-time.
+  return mSampleRate;
+}
+
+Driver::Seconds Driver::nominalBufferDuration() const
+{
+  // AVAudioSession.IOBufferDuration sends mach messages, so return a cached value for use
+  // in real-time.
+  return mNominalBufferDuration;
+}
+
 int Driver::preferredBufferSize() const { return mPreferredBufferSize; }
 void Driver::setPreferredBufferSize(const int preferredBufferSize)
 {
@@ -143,16 +159,6 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
     requestBufferSize(preferredBufferSize);
     mPreferredBufferSize = preferredBufferSize;
   }
-}
-
-float Driver::outputVolume() const { return mOutputVolume; }
-void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
-{
-  assertRelease(volume >= 0.0f, "invalid volume");
-
-  const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
-  mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
-  mOutputVolume = volume;
 }
 
 bool Driver::isInputEnabled() const { return mIsInputEnabled; }
@@ -178,21 +184,15 @@ void Driver::setIsInputEnabled(const bool isInputEnabled)
   }
 }
 
-Driver::Seconds Driver::nominalBufferDuration() const
+float Driver::outputVolume() const { return mOutputVolume; }
+void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
 {
-  // AVAudioSession.IOBufferDuration sends mach messages, so return a cached value for use
-  // in real-time.
-  return mNominalBufferDuration;
-}
+  assertRelease(volume >= 0.0f, "invalid volume");
 
-double Driver::sampleRate() const
-{
-  // AVAudioSession.sampleRate sends mach messages, so return a cached value for use in
-  // real-time.
-  return mSampleRate;
+  const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
+  mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
+  mOutputVolume = volume;
 }
-
-Driver::Status Driver::status() const { return mStatus; }
 
 void Driver::requestBufferSize(const int requestedBufferSize)
 {
@@ -246,36 +246,6 @@ void Driver::teardownAudioSession()
 
   mSampleRate = -1.0;
   mNominalBufferDuration = Seconds{-1.0};
-}
-
-OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
-                        const AudioTimeStamp* inTimeStamp,
-                        const UInt32 inBusNumber,
-                        const UInt32 inNumberFrames,
-                        AudioBufferList* ioData)
-{
-  while (const auto* pCommand = mCommandQueue.front())
-  {
-    (*pCommand)(*this);
-    mCommandQueue.popFront();
-  }
-
-  const AudioBuffer* pIoBuffers = ioData->mBuffers;
-  const StereoAudioBufferPtrs ioBuffer{
-    static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
-  std::fill_n(ioBuffer[0], inNumberFrames, 0.0f);
-  std::fill_n(ioBuffer[1], inNumberFrames, 0.0f);
-
-  if (mIsInputEnabled)
-  {
-    AudioUnitRender(
-      mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
-  }
-
-  const auto result =
-    mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
-  mVolumeFader.process(ioBuffer, inNumberFrames);
-  return result;
 }
 
 void Driver::setupIoUnit()
@@ -359,4 +329,34 @@ void Driver::teardownIoUnit()
                  "couldn't dispose of the AURemoteIO instance");
     mpRemoteIoUnit = nullptr;
   }
+}
+
+OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
+                        const AudioTimeStamp* inTimeStamp,
+                        const UInt32 inBusNumber,
+                        const UInt32 inNumberFrames,
+                        AudioBufferList* ioData)
+{
+  while (const auto* pCommand = mCommandQueue.front())
+  {
+    (*pCommand)(*this);
+    mCommandQueue.popFront();
+  }
+
+  const AudioBuffer* pIoBuffers = ioData->mBuffers;
+  const StereoAudioBufferPtrs ioBuffer{
+    static_cast<float*>(pIoBuffers[0].mData), static_cast<float*>(pIoBuffers[1].mData)};
+  std::fill_n(ioBuffer[0], inNumberFrames, 0.0f);
+  std::fill_n(ioBuffer[1], inNumberFrames, 0.0f);
+
+  if (mIsInputEnabled)
+  {
+    AudioUnitRender(
+      mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);
+  }
+
+  const auto result =
+    mRenderCallback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+  mVolumeFader.process(ioBuffer, inNumberFrames);
+  return result;
 }
