@@ -303,8 +303,7 @@ void Driver::setupIoUnit()
   streamDescription.mSampleRate = AVAudioSession.sharedInstance.sampleRate;
   streamDescription.mFormatID = kAudioFormatLinearPCM;
   streamDescription.mFormatFlags =
-    kAudioFormatFlagsNativeEndian | kAudioFormatFlagIsPacked
-    | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagIsFloat;
+    kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved;
   const auto kBytesPerSample = sizeof(float);
   streamDescription.mBytesPerPacket = kBytesPerSample;
   streamDescription.mFramesPerPacket = 1;
