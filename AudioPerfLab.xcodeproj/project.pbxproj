@@ -101,10 +101,10 @@
 			children = (
 				94E75BC32379605500EE25A2 /* Assert.hpp */,
 				166B37B821CBEF69008834D5 /* AudioBuffer.hpp */,
-				94DFC69C2378587100E402FC /* AudioHost.hpp */,
 				94DFC69D2378587300E402FC /* AudioHost.cpp */,
-				94CD64DF245D5F4400738E71 /* BusyThreads.hpp */,
+				94DFC69C2378587100E402FC /* AudioHost.hpp */,
 				94CD64E0245D5F4400738E71 /* BusyThreads.cpp */,
+				94CD64DF245D5F4400738E71 /* BusyThreads.hpp */,
 				166364F3237300A5006F286B /* Config.hpp */,
 				16B554A321C16BB000522483 /* Driver.hpp */,
 				16B554A221C16BB000522483 /* Driver.mm */,
