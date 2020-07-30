@@ -49,6 +49,7 @@ class FreezeSwitchView: UILabel {
     shapeLayer.lineWidth = 1.1
     shapeLayer.strokeColor = tintColor.cgColor
     shapeLayer.fillColor = nil
+    shapeLayer.zPosition = -1.0
     layer.addSublayer(shapeLayer)
   }
 
