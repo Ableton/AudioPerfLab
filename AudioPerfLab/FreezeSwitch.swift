@@ -81,7 +81,7 @@ class FreezeSwitch: UIBarButtonItem {
     let label = UILabel(frame: .zero)
     let attributes: [NSAttributedString.Key : Any] = [
       .font: UIFont.systemFont(ofSize: 13.0),
-      .foregroundColor: label.tintColor]
+      .foregroundColor: label.tintColor!]
     label.attributedText =
       NSAttributedString(string: "Freeze Visualizations", attributes: attributes)
 
