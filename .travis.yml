@@ -5,15 +5,15 @@ branches:
     - master
 
 os: osx
-osx_image: xcode11.2
+osx_image:
+  - xcode11.6
+  - xcode12
 
-jobs:
-  include:
-    - env: CONFIGURATION=Debug SDK=iphoneos
-    - env: CONFIGURATION=Release SDK=iphoneos
-
-    - env: CONFIGURATION=Debug SDK=iphonesimulator
-    - env: CONFIGURATION=Release SDK=iphonesimulator
+env:
+  - SDK=iphoneos CONFIGURATION=Debug
+  - SDK=iphoneos CONFIGURATION=Release
+  - SDK=iphonesimulator CONFIGURATION=Debug
+  - SDK=iphonesimulator CONFIGURATION=Release
 
 script:
   - xcodebuild -configuration $CONFIGURATION -sdk $SDK -alltargets CODE_SIGNING_ALLOWED="NO"

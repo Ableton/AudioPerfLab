@@ -37,6 +37,15 @@ class SliderWithValue: UISlider {
 
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
+
+    // Work around a UISlider bug in the iOS 14 beta that causes the slider value in the
+    // storyboard to be ignored or incorrectly used. The bug is present with UISlider
+    // alone and does not require a subclass.
+    let valueKey = "UIValue"
+    if aDecoder.containsValue(forKey: valueKey) {
+      value = aDecoder.decodeFloat(forKey: valueKey)
+    }
+
     initialize()
   }
 

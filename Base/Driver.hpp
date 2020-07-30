@@ -56,6 +56,14 @@ public:
   void start();
   void stop();
 
+  Status status() const;
+
+  double sampleRate() const;
+  Seconds nominalBufferDuration() const;
+
+  int preferredBufferSize() const;
+  void setPreferredBufferSize(int preferredBufferSize);
+
   /*! Enable or disable audio input.
    *
    * Input is disabled by default. Note that this is an expensive operation that can block
@@ -64,16 +72,9 @@ public:
   bool isInputEnabled() const;
   void setIsInputEnabled(bool isInputEnabled);
 
-  int preferredBufferSize() const;
-  void setPreferredBufferSize(int preferredBufferSize);
-
   //! The volume of the output is an amplitude and must be >= 0
   float outputVolume() const;
   void setOutputVolume(float volume, Seconds fadeDuration);
-
-  Seconds nominalBufferDuration() const;
-  double sampleRate() const;
-  Status status() const;
 
 private:
   struct FadeCommand
@@ -87,12 +88,6 @@ private:
     uint64_t numFrames{};
   };
 
-  OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
-                  const AudioTimeStamp* inTimeStamp,
-                  UInt32 inBusNumber,
-                  UInt32 inNumberFrames,
-                  AudioBufferList* ioData);
-
   void requestBufferSize(int requestedBufferSize);
 
   void setupAudioSession();
@@ -100,6 +95,12 @@ private:
 
   void setupIoUnit();
   void teardownIoUnit();
+
+  OSStatus render(AudioUnitRenderActionFlags* ioActionFlags,
+                  const AudioTimeStamp* inTimeStamp,
+                  UInt32 inBusNumber,
+                  UInt32 inNumberFrames,
+                  AudioBufferList* ioData);
 
   AudioUnit mpRemoteIoUnit{};
   FixedSPSCQueue<FadeCommand> mCommandQueue;
