@@ -33,3 +33,9 @@ inline void assertRelease(const bool condition, const char* pMessage)
     std::abort();
   }
 }
+
+[[noreturn]] inline void fatalError(const char* pMessage)
+{
+  std::cerr << pMessage << '\n';
+  std::abort();
+}
