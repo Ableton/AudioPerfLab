@@ -107,7 +107,7 @@ private:
   std::optional<SomeAudioWorkgroup> mAudioWorkgroup;
 
   std::atomic<bool> mProcessInDriverThread{true};
-  bool mIsWorkIntervalOn{false};
+  bool mIsWorkIntervalOn{true};
   std::atomic<int> mNumFrames{0};
 
   std::atomic<bool> mAreWorkerThreadsActive{false};
