@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "AudioWorkgroup.hpp"
 #include "Config.hpp"
 #include "FixedSPSCQueue.hpp"
 #include "VolumeFader.hpp"
@@ -31,6 +32,7 @@
 #include <chrono>
 #include <functional>
 #include <mutex>
+#include <optional>
 
 class Driver
 {
@@ -77,6 +79,13 @@ public:
   //! The volume of the output is an amplitude and must be >= 0
   float outputVolume() const;
   void setOutputVolume(float volume, Seconds fadeDuration);
+
+  /*! Return an audio workgroup for worker threads to join.
+   *
+   * If an error occurs, std::nullopt is returned and a message is logged.
+   */
+  API_AVAILABLE(ios(14.0))
+  std::optional<AudioWorkgroup> workgroup() const;
 
 private:
   struct FadeCommand

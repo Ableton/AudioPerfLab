@@ -140,9 +140,24 @@ void AudioHost::setupDriver(const Driver::Config config)
 {
   assertRelease(!mDriver, "The driver must be torn down before calling setupDriver()");
   mDriver.emplace([this](const auto... xs) { return this->render(xs...); }, config);
+
+  if (__builtin_available(iOS 14, *))
+  {
+    const auto workgroup = driver().workgroup();
+    assertRelease(workgroup != std::nullopt, "Couldn't retrieve the workgroup");
+    mAudioWorkgroup.emplace(*workgroup);
+  }
+  else
+  {
+    mAudioWorkgroup.emplace(LegacyAudioWorkgroup{});
+  }
 }
 
-void AudioHost::teardownDriver() { mDriver = std::nullopt; }
+void AudioHost::teardownDriver()
+{
+  mDriver = std::nullopt;
+  mAudioWorkgroup = std::nullopt;
+}
 
 void AudioHost::setupWorkerThreads()
 {
@@ -226,7 +241,7 @@ void AudioHost::workerThread(const int threadIndex)
     TimeConstraintPolicy{driver().nominalBufferDuration(), kRealtimeThreadQuantum,
                          driver().nominalBufferDuration()});
 
-  bool needToJoinWorkInterval = mIsWorkIntervalOn;
+  std::optional<SomeAudioWorkgroup::ScopedMembership> workgroupMembership;
   while (1)
   {
     mStartWorkingSemaphore.wait();
@@ -236,11 +251,10 @@ void AudioHost::workerThread(const int threadIndex)
     }
 
     // Join after waking from the semaphore to ensure that the CoreAudio thread is
-    // active so that findAndJoinWorkInterval() can find its work interval.
-    if (needToJoinWorkInterval)
+    // active so that LegacyAudioWorkgroup can find its work interval.
+    if (mIsWorkIntervalOn && !workgroupMembership)
     {
-      findAndJoinWorkInterval();
-      needToJoinWorkInterval = false;
+      workgroupMembership = mAudioWorkgroup->join();
     }
 
     const auto startTime = Clock::now();
@@ -248,10 +262,5 @@ void AudioHost::workerThread(const int threadIndex)
     mProcess(threadIndex, numFrames);
     mFinishedWorkSemaphore.post();
     ensureMinimumLoad(startTime, numFrames);
-  }
-
-  if (mIsWorkIntervalOn)
-  {
-    leaveWorkInterval();
   }
 }

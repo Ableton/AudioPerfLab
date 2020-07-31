@@ -23,6 +23,7 @@
 #pragma once
 
 #include "AudioBuffer.hpp"
+#include "AudioWorkgroup.hpp"
 #include "Config.hpp"
 #include "Driver.hpp"
 #include "Semaphore.hpp"
@@ -103,6 +104,7 @@ private:
   void workerThread(int threadIndex);
 
   std::optional<Driver> mDriver;
+  std::optional<SomeAudioWorkgroup> mAudioWorkgroup;
 
   std::atomic<bool> mProcessInDriverThread{true};
   bool mIsWorkIntervalOn{false};

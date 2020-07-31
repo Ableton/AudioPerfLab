@@ -30,11 +30,6 @@
 #include <os/log.h>
 #include <system_error>
 
-extern "C" {
-int work_interval_join_port(mach_port_t port);
-int work_interval_leave();
-}
-
 static const mach_timebase_info_data_t sMachTimebaseInfo = [] {
   mach_timebase_info_data_t machTimebaseInfo;
   if (mach_timebase_info(&machTimebaseInfo) != KERN_SUCCESS)
@@ -81,52 +76,5 @@ void setThreadTimeConstraintPolicy(const pthread_t thread,
   {
     throw std::system_error(
       std::error_code(result, std::system_category()), mach_error_string(result));
-  }
-}
-
-void findAndJoinWorkInterval()
-{
-  mach_port_name_array_t rightNames{};
-  mach_msg_type_number_t rightNamesCount{};
-  mach_port_type_array_t rightTypes{};
-  mach_msg_type_number_t rightTypesCount{};
-
-  const kern_return_t result = mach_port_names(
-    mach_task_self(), &rightNames, &rightNamesCount, &rightTypes, &rightTypesCount);
-  if (result != KERN_SUCCESS)
-  {
-    throw std::system_error(
-      std::error_code(result, std::system_category()), mach_error_string(result));
-  }
-  else if (rightNamesCount != rightTypesCount)
-  {
-    throw std::runtime_error("Right names/right types have mismatched sizes");
-  }
-
-  for (size_t i = 0; i < rightNamesCount; ++i)
-  {
-    if (rightTypes[i] & MACH_PORT_TYPE_SEND)
-    {
-      const mach_port_t port = rightNames[i];
-      if (work_interval_join_port(port) == 0)
-      {
-        os_log(OS_LOG_DEFAULT, "Joined work interval port %04X", port);
-        return;
-      }
-    }
-  }
-
-  throw std::runtime_error("Couldn't find work interval");
-}
-
-void leaveWorkInterval()
-{
-  if (work_interval_leave() == 0)
-  {
-    os_log(OS_LOG_DEFAULT, "Left work interval");
-  }
-  else
-  {
-    throw std::runtime_error("Couldn't leave work interval");
   }
 }

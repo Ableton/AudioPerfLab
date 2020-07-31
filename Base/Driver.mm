@@ -29,6 +29,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 #include <algorithm>
 #include <os/log.h>
+#include <os/workgroup.h>
 #include <sstream>
 #include <string>
 
@@ -174,6 +175,25 @@ void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
   const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
   mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
   mConfig.outputVolume = volume;
+}
+
+std::optional<AudioWorkgroup> Driver::workgroup() const
+{
+  os_workgroup_t workgroup;
+  UInt32 size = sizeof(os_workgroup_t);
+  const auto result =
+    AudioUnitGetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_OSWorkgroup,
+                         kAudioUnitScope_Global, 0, &workgroup, &size);
+  if (result == noErr)
+  {
+    return AudioWorkgroup{workgroup};
+  }
+  else
+  {
+    const auto errorString = errorDescription(result, "couldn't retrieve the workgroup");
+    os_log_error(OS_LOG_DEFAULT, "%s", errorString.c_str());
+    return std::nullopt;
+  }
 }
 
 void Driver::requestBufferSize(const int requestedBufferSize)
