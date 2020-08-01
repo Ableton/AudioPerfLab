@@ -111,6 +111,8 @@ The driver thread wakes up and waits for processing threads and processes sines 
 
 ### Work Interval
 
-When enabled, audio worker threads use a private API to join the [work interval](https://github.com/apple/darwin-xnu/blob/master/bsd/sys/work_interval.h) used by the CoreAudio I/O thread.
+When enabled on iOS 14, audio worker threads join the audio device's [workgroup interval](https://developer.apple.com/documentation/audiotoolbox/workgroup_management). The workgroup API is not available prior to iOS 14, so on older systems workers instead use a [private API](https://github.com/apple/darwin-xnu/blob/master/bsd/sys/work_interval.h).
 
-This appears to lower the amount of load necessary before the scheduler uses a high-performance core and reduces the amount of thread switching between cores.
+Joining the work interval informs the performance controller that worker threads contribute to meeting the audio device's deadline, giving them a performance boost.
+
+At low buffer sizes (<= 256), this boost is necessary to perform even small amounts of DSP. This can be observed by freezing visualizations, disabling busy threads, and dialing in a small number of sustained sine waves (e.g., 500). Audio will constantly drop-out unless the work interval is enabled.
