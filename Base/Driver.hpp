@@ -44,19 +44,27 @@ public:
     kInvalid,
   };
 
+  struct Config
+  {
+    int preferredBufferSize = kDefaultPreferredBufferSize;
+    bool isInputEnabled = false;
+    float outputVolume = 1.0;
+  };
+
   using RenderCallback = std::function<OSStatus(AudioUnitRenderActionFlags* ioActionFlags,
                                                 const AudioTimeStamp* inTimeStamp,
                                                 UInt32 inBusNumber,
                                                 UInt32 inNumberFrames,
                                                 AudioBufferList* ioData)>;
 
-  explicit Driver(RenderCallback renderCallback);
+  Driver(RenderCallback renderCallback, Config config);
   ~Driver();
 
   void start();
   void stop();
 
   Status status() const;
+  Config config() const;
 
   double sampleRate() const;
   Seconds nominalBufferDuration() const;
@@ -105,14 +113,12 @@ private:
   AudioUnit mpRemoteIoUnit{};
   FixedSPSCQueue<FadeCommand> mCommandQueue;
 
-  bool mIsInputEnabled{false};
-  int mPreferredBufferSize{kDefaultPreferredBufferSize};
+  Config mConfig;
   double mSampleRate{-1.0};
   Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};
 
   VolumeFader<float> mVolumeFader;
-  float mOutputVolume{1.0};
 
   RenderCallback mRenderCallback;
   std::mutex mRenderMutex;

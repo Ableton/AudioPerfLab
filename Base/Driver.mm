@@ -75,8 +75,10 @@ void throwIfError(const OSStatus errorCode, const std::string& errorString)
 
 } // anonymous namespace
 
-Driver::Driver(Driver::RenderCallback renderCallback)
+Driver::Driver(Driver::RenderCallback renderCallback, const Config config)
   : mCommandQueue{kCommandQueueSize}
+  , mConfig{config}
+  , mVolumeFader{config.outputVolume}
   , mRenderCallback{[callback = std::move(renderCallback), this](const auto... xs) {
     // Using a lock to stop audio instead of AudioOutputUnitStart()/AudioOutputUnitStop()
     // is faster and avoids TSan errors.
@@ -136,6 +138,7 @@ void Driver::stop()
 }
 
 Driver::Status Driver::status() const { return mStatus; }
+Driver::Config Driver::config() const { return mConfig; }
 
 double Driver::sampleRate() const
 {
@@ -151,27 +154,27 @@ Driver::Seconds Driver::nominalBufferDuration() const
   return mNominalBufferDuration;
 }
 
-int Driver::preferredBufferSize() const { return mPreferredBufferSize; }
+int Driver::preferredBufferSize() const { return mConfig.preferredBufferSize; }
 void Driver::setPreferredBufferSize(const int preferredBufferSize)
 {
-  if (preferredBufferSize != mPreferredBufferSize)
+  if (preferredBufferSize != mConfig.preferredBufferSize)
   {
     requestBufferSize(preferredBufferSize);
-    mPreferredBufferSize = preferredBufferSize;
+    mConfig.preferredBufferSize = preferredBufferSize;
   }
 }
 
-bool Driver::isInputEnabled() const { return mIsInputEnabled; }
+bool Driver::isInputEnabled() const { return mConfig.isInputEnabled; }
 void Driver::setIsInputEnabled(const bool isInputEnabled)
 {
-  if (isInputEnabled != mIsInputEnabled)
+  if (isInputEnabled != mConfig.isInputEnabled)
   {
     try
     {
       teardownIoUnit();
       teardownAudioSession();
 
-      mIsInputEnabled = isInputEnabled;
+      mConfig.isInputEnabled = isInputEnabled;
 
       setupAudioSession();
       setupIoUnit();
@@ -184,14 +187,14 @@ void Driver::setIsInputEnabled(const bool isInputEnabled)
   }
 }
 
-float Driver::outputVolume() const { return mOutputVolume; }
+float Driver::outputVolume() const { return mConfig.outputVolume; }
 void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
 {
   assertRelease(volume >= 0.0f, "invalid volume");
 
   const auto fadeDurationInFrames = uint64_t(fadeDuration.count() * mSampleRate);
   mCommandQueue.tryPushBack(FadeCommand{volume, fadeDurationInFrames});
-  mOutputVolume = volume;
+  mConfig.outputVolume = volume;
 }
 
 void Driver::requestBufferSize(const int requestedBufferSize)
@@ -216,8 +219,8 @@ void Driver::setupAudioSession()
 {
   AVAudioSession* audioSession = AVAudioSession.sharedInstance;
 
-  const auto category = mIsInputEnabled ? AVAudioSessionCategoryPlayAndRecord
-                                        : AVAudioSessionCategoryPlayback;
+  const auto category = mConfig.isInputEnabled ? AVAudioSessionCategoryPlayAndRecord
+                                               : AVAudioSessionCategoryPlayback;
   NSUInteger categoryOptions = AVAudioSessionCategoryOptionMixWithOthers;
   if (category == AVAudioSessionCategoryPlayAndRecord)
   {
@@ -230,7 +233,7 @@ void Driver::setupAudioSession()
   throwIfError(OSStatus(error.code), "couldn't set session's audio category");
 
   mSampleRate = AVAudioSession.sharedInstance.sampleRate;
-  requestBufferSize(mPreferredBufferSize);
+  requestBufferSize(mConfig.preferredBufferSize);
 
   [AVAudioSession.sharedInstance setActive:YES error:&error];
   throwIfError(OSStatus(error.code), "couldn't set session active");
@@ -261,7 +264,7 @@ void Driver::setupIoUnit()
   throwIfError(AudioComponentInstanceNew(comp, &mpRemoteIoUnit),
                "couldn't create a new instance of AURemoteIO");
 
-  if (mIsInputEnabled)
+  if (mConfig.isInputEnabled)
   {
     const UInt32 yes = 1;
     throwIfError(AudioUnitSetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_EnableIO,
@@ -280,7 +283,7 @@ void Driver::setupIoUnit()
   streamDescription.mBytesPerFrame = kBytesPerSample;
   streamDescription.mChannelsPerFrame = 2;
   streamDescription.mBitsPerChannel = kBytesPerSample * 8;
-  if (mIsInputEnabled)
+  if (mConfig.isInputEnabled)
   {
     throwIfError(
       AudioUnitSetProperty(
@@ -349,7 +352,7 @@ OSStatus Driver::render(AudioUnitRenderActionFlags* ioActionFlags,
   std::fill_n(ioBuffer[0], inNumberFrames, 0.0f);
   std::fill_n(ioBuffer[1], inNumberFrames, 0.0f);
 
-  if (mIsInputEnabled)
+  if (mConfig.isInputEnabled)
   {
     AudioUnitRender(
       mpRemoteIoUnit, ioActionFlags, inTimeStamp, 1, inNumberFrames, ioData);

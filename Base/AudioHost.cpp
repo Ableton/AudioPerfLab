@@ -32,7 +32,8 @@ AudioHost::AudioHost(Setup setup,
                      RenderStarted renderStarted,
                      Process process,
                      RenderEnded renderEnded)
-  : mDriver{[this](const auto... xs) { return this->render(xs...); }}
+  : mDriver{std::in_place, [this](const auto... xs) { return this->render(xs...); },
+            Driver::Config{}}
   , mSetup{std::move(setup)}
   , mRenderStarted{std::move(renderStarted)}
   , mProcess{std::move(process)}
