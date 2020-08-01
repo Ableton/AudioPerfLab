@@ -60,6 +60,7 @@
 		16EBD0C721CA640C00D92FDC /* Semaphore.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Semaphore.cpp; sourceTree = "<group>"; };
 		940D7ADC21CA3F5A00216EA1 /* ParallelSineBank.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelSineBank.cpp; sourceTree = "<group>"; };
 		940D7ADE21CA4E2B00216EA1 /* Thread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Thread.cpp; sourceTree = "<group>"; };
+		944638EC24D55F590061D066 /* Warnings.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Warnings.hpp; sourceTree = "<group>"; };
 		9450A37821FBAC420061783A /* CollapsibleTableViewHeader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollapsibleTableViewHeader.swift; sourceTree = "<group>"; };
 		94882A872465A2FC00FAF78F /* VolumeFader.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = VolumeFader.hpp; sourceTree = "<group>"; };
 		94882A882465A30600FAF78F /* RampedValue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = RampedValue.hpp; sourceTree = "<group>"; };
@@ -117,6 +118,7 @@
 				163A0DE721BEBBB3001FD225 /* Thread.hpp */,
 				94882A892465A48700FAF78F /* TimeLogger.hpp */,
 				94882A872465A2FC00FAF78F /* VolumeFader.hpp */,
+				944638EC24D55F590061D066 /* Warnings.hpp */,
 			);
 			path = Base;
 			sourceTree = "<group>";
