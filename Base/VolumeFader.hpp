@@ -31,6 +31,12 @@ template <typename T>
 class VolumeFader
 {
 public:
+  VolumeFader() = default;
+
+  explicit VolumeFader(const T initialAmp)
+    : mRampedValue{initialAmp}
+  {}
+
   void fadeTo(const T& amp, const uint64_t numFrames)
   {
     mRampedValue.rampTo(amp, numFrames);
