@@ -208,10 +208,10 @@ private:
   EngineImpl mEngine;
 }
 
-- (bool)isAudioInputEnabled { return mEngine.host().driver().isInputEnabled(); }
+- (bool)isAudioInputEnabled { return mEngine.host().isAudioInputEnabled(); }
 - (void)setIsAudioInputEnabled:(bool)enabled
 {
-  mEngine.host().driver().setIsInputEnabled(enabled);
+  mEngine.host().setIsAudioInputEnabled(enabled);
 }
 
 - (float)outputVolume { return mEngine.host().driver().outputVolume(); }

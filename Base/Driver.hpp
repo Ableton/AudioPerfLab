@@ -72,13 +72,7 @@ public:
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
-  /*! Enable or disable audio input.
-   *
-   * Input is disabled by default. Note that this is an expensive operation that can block
-   * for up to half a second.
-   */
   bool isInputEnabled() const;
-  void setIsInputEnabled(bool isInputEnabled);
 
   //! The volume of the output is an amplitude and must be >= 0
   float outputVolume() const;

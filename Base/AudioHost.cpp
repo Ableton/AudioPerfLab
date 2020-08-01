@@ -32,13 +32,12 @@ AudioHost::AudioHost(Setup setup,
                      RenderStarted renderStarted,
                      Process process,
                      RenderEnded renderEnded)
-  : mDriver{std::in_place, [this](const auto... xs) { return this->render(xs...); },
-            Driver::Config{}}
-  , mSetup{std::move(setup)}
+  : mSetup{std::move(setup)}
   , mRenderStarted{std::move(renderStarted)}
   , mProcess{std::move(process)}
   , mRenderEnded{std::move(renderEnded)}
 {
+  setupDriver(Driver::Config{});
 }
 
 AudioHost::~AudioHost() { stop(); }
@@ -65,6 +64,21 @@ void AudioHost::stop()
     driver().stop();
     teardownWorkerThreads();
     mIsStarted = false;
+  }
+}
+
+bool AudioHost::isAudioInputEnabled() const { return driver().isInputEnabled(); }
+void AudioHost::setIsAudioInputEnabled(const bool isInputEnabled)
+{
+  if (isInputEnabled != driver().isInputEnabled())
+  {
+    whileStopped([&] {
+      auto config = driver().config();
+      config.isInputEnabled = isInputEnabled;
+
+      teardownDriver();
+      setupDriver(config);
+    });
   }
 }
 
@@ -121,6 +135,14 @@ void AudioHost::whileStopped(const std::function<void()>& f)
     start();
   }
 }
+
+void AudioHost::setupDriver(const Driver::Config config)
+{
+  assertRelease(!mDriver, "The driver must be torn down before calling setupDriver()");
+  mDriver.emplace([this](const auto... xs) { return this->render(xs...); }, config);
+}
+
+void AudioHost::teardownDriver() { mDriver = std::nullopt; }
 
 void AudioHost::setupWorkerThreads()
 {

@@ -165,27 +165,6 @@ void Driver::setPreferredBufferSize(const int preferredBufferSize)
 }
 
 bool Driver::isInputEnabled() const { return mConfig.isInputEnabled; }
-void Driver::setIsInputEnabled(const bool isInputEnabled)
-{
-  if (isInputEnabled != mConfig.isInputEnabled)
-  {
-    try
-    {
-      teardownIoUnit();
-      teardownAudioSession();
-
-      mConfig.isInputEnabled = isInputEnabled;
-
-      setupAudioSession();
-      setupIoUnit();
-    }
-    catch (const std::runtime_error& exception)
-    {
-      os_log_error(OS_LOG_DEFAULT, "%s", exception.what());
-      mStatus = Status::kInvalid;
-    }
-  }
-}
 
 float Driver::outputVolume() const { return mConfig.outputVolume; }
 void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)

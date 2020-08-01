@@ -65,6 +65,9 @@ public:
   void start();
   void stop();
 
+  bool isAudioInputEnabled() const;
+  void setIsAudioInputEnabled(bool isInputEnabled);
+
   int preferredBufferSize() const;
   void setPreferredBufferSize(const int preferredBufferSize);
 
@@ -82,6 +85,9 @@ public:
 
 private:
   void whileStopped(const std::function<void()>& f);
+
+  void setupDriver(Driver::Config config);
+  void teardownDriver();
 
   void setupWorkerThreads();
   void teardownWorkerThreads();
