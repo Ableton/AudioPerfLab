@@ -42,7 +42,8 @@ AudioHost::AudioHost(Setup setup,
 
 AudioHost::~AudioHost() { stop(); }
 
-Driver& AudioHost::driver() { return mDriver; }
+Driver& AudioHost::driver() { return *mDriver; }
+const Driver& AudioHost::driver() const { return *mDriver; }
 
 void AudioHost::start()
 {
@@ -51,7 +52,7 @@ void AudioHost::start()
     mSetup(mNumRequestedWorkerThreads);
 
     setupWorkerThreads();
-    mDriver.start();
+    driver().start();
     mIsStarted = true;
   }
 }
@@ -60,20 +61,20 @@ void AudioHost::stop()
 {
   if (mIsStarted)
   {
-    mDriver.stop();
+    driver().stop();
     teardownWorkerThreads();
     mIsStarted = false;
   }
 }
 
-int AudioHost::preferredBufferSize() const { return mDriver.preferredBufferSize(); }
+int AudioHost::preferredBufferSize() const { return driver().preferredBufferSize(); }
 void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
 {
-  if (preferredBufferSize != mDriver.preferredBufferSize())
+  if (preferredBufferSize != driver().preferredBufferSize())
   {
     // Recreate the worker threads in order to use the new buffer size when setting
     // the thread policy.
-    whileStopped([&] { mDriver.setPreferredBufferSize(preferredBufferSize); });
+    whileStopped([&] { driver().setPreferredBufferSize(preferredBufferSize); });
   }
 }
 
@@ -150,7 +151,7 @@ void AudioHost::ensureMinimumLoad(const std::chrono::time_point<Clock> bufferSta
                                   const int numFrames)
 {
   const auto bufferDuration =
-    std::chrono::duration<double>{numFrames / mDriver.sampleRate()};
+    std::chrono::duration<double>{numFrames / driver().sampleRate()};
   lowEnergyWorkUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
 }
 
@@ -199,8 +200,8 @@ void AudioHost::workerThread(const int threadIndex)
   setCurrentThreadName("Audio Worker Thread " + std::to_string(threadIndex));
   setThreadTimeConstraintPolicy(
     pthread_self(),
-    TimeConstraintPolicy{mDriver.nominalBufferDuration(), kRealtimeThreadQuantum,
-                         mDriver.nominalBufferDuration()});
+    TimeConstraintPolicy{driver().nominalBufferDuration(), kRealtimeThreadQuantum,
+                         driver().nominalBufferDuration()});
 
   bool needToJoinWorkInterval = mIsWorkIntervalOn;
   while (1)

@@ -32,6 +32,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <optional>
 #include <thread>
 #include <vector>
 
@@ -59,6 +60,7 @@ public:
   ~AudioHost();
 
   Driver& driver();
+  const Driver& driver() const;
 
   void start();
   void stop();
@@ -94,7 +96,7 @@ private:
 
   void workerThread(int threadIndex);
 
-  Driver mDriver;
+  std::optional<Driver> mDriver;
 
   std::atomic<bool> mProcessInDriverThread{true};
   bool mIsWorkIntervalOn{false};
