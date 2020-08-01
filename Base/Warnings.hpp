@@ -22,39 +22,8 @@
 
 #pragma once
 
-#include "AudioBuffer.hpp"
-#include "RampedValue.hpp"
+#define DISABLE_AVAILABILITY_WARNINGS \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Wunguarded-availability-new\"")
 
-#include <cstdint>
-
-template <typename T>
-class VolumeFader
-{
-public:
-  VolumeFader() = default;
-
-  explicit VolumeFader(const T initialAmp)
-    : mRampedValue{initialAmp}
-  {}
-
-  void fadeTo(const T& amp, const uint64_t numFrames)
-  {
-    mRampedValue.rampTo(amp, numFrames);
-  }
-
-  void process(const StereoAudioBufferPtrs ioBuffer, const uint64_t numFrames)
-  {
-    if (mRampedValue.isRamping() || mRampedValue.value() != T(1))
-    {
-      for (uint64_t i = 0; i < numFrames; ++i)
-      {
-        const auto amp = mRampedValue.tick();
-        ioBuffer[0][i] *= amp;
-        ioBuffer[1][i] *= amp;
-      }
-    }
-  }
-
-private:
-  RampedValue<T> mRampedValue{T(1)};
-};
+#define RESTORE_WARNINGS _Pragma("clang diagnostic pop")

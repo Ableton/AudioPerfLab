@@ -22,6 +22,7 @@
 
 #pragma once
 
+#include "AudioWorkgroup.hpp"
 #include "Config.hpp"
 #include "FixedSPSCQueue.hpp"
 #include "VolumeFader.hpp"
@@ -31,6 +32,7 @@
 #include <chrono>
 #include <functional>
 #include <mutex>
+#include <optional>
 
 class Driver
 {
@@ -44,19 +46,27 @@ public:
     kInvalid,
   };
 
+  struct Config
+  {
+    int preferredBufferSize = kDefaultPreferredBufferSize;
+    bool isInputEnabled = false;
+    float outputVolume = 1.0;
+  };
+
   using RenderCallback = std::function<OSStatus(AudioUnitRenderActionFlags* ioActionFlags,
                                                 const AudioTimeStamp* inTimeStamp,
                                                 UInt32 inBusNumber,
                                                 UInt32 inNumberFrames,
                                                 AudioBufferList* ioData)>;
 
-  explicit Driver(RenderCallback renderCallback);
+  Driver(RenderCallback renderCallback, Config config);
   ~Driver();
 
   void start();
   void stop();
 
   Status status() const;
+  Config config() const;
 
   double sampleRate() const;
   Seconds nominalBufferDuration() const;
@@ -64,17 +74,18 @@ public:
   int preferredBufferSize() const;
   void setPreferredBufferSize(int preferredBufferSize);
 
-  /*! Enable or disable audio input.
-   *
-   * Input is disabled by default. Note that this is an expensive operation that can block
-   * for up to half a second.
-   */
   bool isInputEnabled() const;
-  void setIsInputEnabled(bool isInputEnabled);
 
   //! The volume of the output is an amplitude and must be >= 0
   float outputVolume() const;
   void setOutputVolume(float volume, Seconds fadeDuration);
+
+  /*! Return an audio workgroup for worker threads to join.
+   *
+   * If an error occurs, std::nullopt is returned and a message is logged.
+   */
+  API_AVAILABLE(ios(14.0))
+  std::optional<AudioWorkgroup> workgroup() const;
 
 private:
   struct FadeCommand
@@ -105,14 +116,12 @@ private:
   AudioUnit mpRemoteIoUnit{};
   FixedSPSCQueue<FadeCommand> mCommandQueue;
 
-  bool mIsInputEnabled{false};
-  int mPreferredBufferSize{kDefaultPreferredBufferSize};
+  Config mConfig;
   double mSampleRate{-1.0};
   Seconds mNominalBufferDuration{-1.0};
   Status mStatus{Status::kStopped};
 
   VolumeFader<float> mVolumeFader;
-  float mOutputVolume{1.0};
 
   RenderCallback mRenderCallback;
   std::mutex mRenderMutex;

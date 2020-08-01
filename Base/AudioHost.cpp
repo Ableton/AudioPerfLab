@@ -32,17 +32,18 @@ AudioHost::AudioHost(Setup setup,
                      RenderStarted renderStarted,
                      Process process,
                      RenderEnded renderEnded)
-  : mDriver{[this](const auto... xs) { return this->render(xs...); }}
-  , mSetup{std::move(setup)}
+  : mSetup{std::move(setup)}
   , mRenderStarted{std::move(renderStarted)}
   , mProcess{std::move(process)}
   , mRenderEnded{std::move(renderEnded)}
 {
+  setupDriver(Driver::Config{});
 }
 
 AudioHost::~AudioHost() { stop(); }
 
-Driver& AudioHost::driver() { return mDriver; }
+Driver& AudioHost::driver() { return *mDriver; }
+const Driver& AudioHost::driver() const { return *mDriver; }
 
 void AudioHost::start()
 {
@@ -51,7 +52,7 @@ void AudioHost::start()
     mSetup(mNumRequestedWorkerThreads);
 
     setupWorkerThreads();
-    mDriver.start();
+    driver().start();
     mIsStarted = true;
   }
 }
@@ -60,20 +61,35 @@ void AudioHost::stop()
 {
   if (mIsStarted)
   {
-    mDriver.stop();
+    driver().stop();
     teardownWorkerThreads();
     mIsStarted = false;
   }
 }
 
-int AudioHost::preferredBufferSize() const { return mDriver.preferredBufferSize(); }
+bool AudioHost::isAudioInputEnabled() const { return driver().isInputEnabled(); }
+void AudioHost::setIsAudioInputEnabled(const bool isInputEnabled)
+{
+  if (isInputEnabled != driver().isInputEnabled())
+  {
+    whileStopped([&] {
+      auto config = driver().config();
+      config.isInputEnabled = isInputEnabled;
+
+      teardownDriver();
+      setupDriver(config);
+    });
+  }
+}
+
+int AudioHost::preferredBufferSize() const { return driver().preferredBufferSize(); }
 void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
 {
-  if (preferredBufferSize != mDriver.preferredBufferSize())
+  if (preferredBufferSize != driver().preferredBufferSize())
   {
     // Recreate the worker threads in order to use the new buffer size when setting
     // the thread policy.
-    whileStopped([&] { mDriver.setPreferredBufferSize(preferredBufferSize); });
+    whileStopped([&] { driver().setPreferredBufferSize(preferredBufferSize); });
   }
 }
 
@@ -120,6 +136,29 @@ void AudioHost::whileStopped(const std::function<void()>& f)
   }
 }
 
+void AudioHost::setupDriver(const Driver::Config config)
+{
+  assertRelease(!mDriver, "The driver must be torn down before calling setupDriver()");
+  mDriver.emplace([this](const auto... xs) { return this->render(xs...); }, config);
+
+  if (__builtin_available(iOS 14, *))
+  {
+    const auto workgroup = driver().workgroup();
+    assertRelease(workgroup != std::nullopt, "Couldn't retrieve the workgroup");
+    mAudioWorkgroup.emplace(*workgroup);
+  }
+  else
+  {
+    mAudioWorkgroup.emplace(LegacyAudioWorkgroup{});
+  }
+}
+
+void AudioHost::teardownDriver()
+{
+  mDriver = std::nullopt;
+  mAudioWorkgroup = std::nullopt;
+}
+
 void AudioHost::setupWorkerThreads()
 {
   assertRelease(mWorkerThreads.empty(),
@@ -150,7 +189,7 @@ void AudioHost::ensureMinimumLoad(const std::chrono::time_point<Clock> bufferSta
                                   const int numFrames)
 {
   const auto bufferDuration =
-    std::chrono::duration<double>{numFrames / mDriver.sampleRate()};
+    std::chrono::duration<double>{numFrames / driver().sampleRate()};
   lowEnergyWorkUntil(bufferStartTime + (bufferDuration * double(mMinimumLoad)));
 }
 
@@ -199,10 +238,10 @@ void AudioHost::workerThread(const int threadIndex)
   setCurrentThreadName("Audio Worker Thread " + std::to_string(threadIndex));
   setThreadTimeConstraintPolicy(
     pthread_self(),
-    TimeConstraintPolicy{mDriver.nominalBufferDuration(), kRealtimeThreadQuantum,
-                         mDriver.nominalBufferDuration()});
+    TimeConstraintPolicy{driver().nominalBufferDuration(), kRealtimeThreadQuantum,
+                         driver().nominalBufferDuration()});
 
-  bool needToJoinWorkInterval = mIsWorkIntervalOn;
+  std::optional<SomeAudioWorkgroup::ScopedMembership> workgroupMembership;
   while (1)
   {
     mStartWorkingSemaphore.wait();
@@ -212,11 +251,10 @@ void AudioHost::workerThread(const int threadIndex)
     }
 
     // Join after waking from the semaphore to ensure that the CoreAudio thread is
-    // active so that findAndJoinWorkInterval() can find its work interval.
-    if (needToJoinWorkInterval)
+    // active so that LegacyAudioWorkgroup can find its work interval.
+    if (mIsWorkIntervalOn && !workgroupMembership)
     {
-      findAndJoinWorkInterval();
-      needToJoinWorkInterval = false;
+      workgroupMembership = mAudioWorkgroup->join();
     }
 
     const auto startTime = Clock::now();
@@ -224,10 +262,5 @@ void AudioHost::workerThread(const int threadIndex)
     mProcess(threadIndex, numFrames);
     mFinishedWorkSemaphore.post();
     ensureMinimumLoad(startTime, numFrames);
-  }
-
-  if (mIsWorkIntervalOn)
-  {
-    leaveWorkInterval();
   }
 }

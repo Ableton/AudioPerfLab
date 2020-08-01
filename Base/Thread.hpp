@@ -45,9 +45,6 @@ struct TimeConstraintPolicy
 void setThreadTimeConstraintPolicy(pthread_t thread,
                                    const TimeConstraintPolicy& timeConstraintPolicy);
 
-void findAndJoinWorkInterval();
-void leaveWorkInterval();
-
 inline void hardwareDelay()
 {
 #if defined(__arm64__)

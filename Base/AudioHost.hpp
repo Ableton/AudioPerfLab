@@ -23,6 +23,7 @@
 #pragma once
 
 #include "AudioBuffer.hpp"
+#include "AudioWorkgroup.hpp"
 #include "Config.hpp"
 #include "Driver.hpp"
 #include "Semaphore.hpp"
@@ -32,6 +33,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <optional>
 #include <thread>
 #include <vector>
 
@@ -59,9 +61,13 @@ public:
   ~AudioHost();
 
   Driver& driver();
+  const Driver& driver() const;
 
   void start();
   void stop();
+
+  bool isAudioInputEnabled() const;
+  void setIsAudioInputEnabled(bool isInputEnabled);
 
   int preferredBufferSize() const;
   void setPreferredBufferSize(const int preferredBufferSize);
@@ -81,6 +87,9 @@ public:
 private:
   void whileStopped(const std::function<void()>& f);
 
+  void setupDriver(Driver::Config config);
+  void teardownDriver();
+
   void setupWorkerThreads();
   void teardownWorkerThreads();
 
@@ -94,10 +103,11 @@ private:
 
   void workerThread(int threadIndex);
 
-  Driver mDriver;
+  std::optional<Driver> mDriver;
+  std::optional<SomeAudioWorkgroup> mAudioWorkgroup;
 
   std::atomic<bool> mProcessInDriverThread{true};
-  bool mIsWorkIntervalOn{false};
+  bool mIsWorkIntervalOn{true};
   std::atomic<int> mNumFrames{0};
 
   std::atomic<bool> mAreWorkerThreadsActive{false};

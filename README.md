@@ -2,13 +2,13 @@
 
 [![Build Status](https://travis-ci.com/Ableton/AudioPerfLab.svg?branch=master)](https://travis-ci.com/Ableton/AudioPerfLab)
 
-An app for exploring real-time audio performance on iOS devices. See the [High Performance Audio on iOS](https://youtu.be/ywrLAv5WNq4) Talk from ADC '19 for more information.
+An app for exploring real-time audio performance on iOS devices. See [High Performance Audio on iOS](https://youtu.be/ywrLAv5WNq4) from ADC '19 for more information.
 
 <img src="Screenshot.png" alt="Screenshot" height="600">
 
 # Requirements
 
-* Xcode 11 and above
+* Xcode 12 and above
 * iOS 12 and above
 * iPhone 5s and above
 
@@ -30,15 +30,15 @@ A graph of the amount of time taken to process each audio buffer as a percentage
 
 A stacked area graph showing the relative number of sine waves processed per thread. Colors represent threads and the CoreAudio I/O thread is drawn in black. A solid black graph, for example, indicates that the I/O thread has processed all sines. A half black/half blue graph indicates that two threads each processed an equal number of sines.
 
-If work is not distributed evenly, then threads are likely being scheduled onto cores with different clock speeds. Note that the chunk size (`kNumPartialsPerProcessingChunk`) impacts the distribution when processing a small number of sines.
+If work is not distributed evenly, threads are likely being scheduled onto cores with different clock speeds. Note that the chunk size (`kNumPartialsPerProcessingChunk`) impacts the distribution when processing a small number of sines.
 
 ## Cores
 
-A visualization of thread activity on each CPU core. Each row represents a core and each color represents an audio thread. On the iPhone 8, X, XS, and XR, the first four rows represent energy-efficient cores (Mistral/Tempest) and the last two rows represent high-performance cores (Monsoon/Vortex). The CoreAudio I/O thread is drawn in black.
+A visualization of thread activity on each CPU core. Each row represents a core and each color represents an audio thread. On iPhone 8 and up, the first four rows represent energy-efficient cores and the last two rows represent high-performance cores. The CoreAudio I/O thread is drawn in black.
 
 ## Energy
 
-A graph of the estimated power consumption of the AudioPerLab process in watts. This can be used to compare the energy impact of different approaches for avoiding core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
+A graph of the estimated power consumption of the AudioPerfLab process in watts. This can be used to compare the energy impact of different approaches for avoiding core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
 
 ## Audio
 
@@ -91,7 +91,7 @@ The total number of real-time threads that process sine waves.
 
 ### Minimum Load
 
-The minimum amount of time to spend processing as a percentage of the buffer duration. If real audio processing finishes before this time, then artificial processing is added via a low-energy yield instruction. No artificial processing is added if real processing exceeds this time. Artificial processing is added to all audio threads and is not shown in the load graph.
+The minimum amount of time to spend processing as a percentage of the buffer duration. If real audio processing finishes before this time, artificial processing is added via a low-energy wait instruction. No artificial processing is added if real processing exceeds this time. Artificial processing is added to all audio threads and is not shown in the load graph.
 
 When the real audio load is low, adding artificial load tricks the OS into scheduling audio threads onto high-performance cores and increasing the clock-rate of those cores. This allows sudden load increases (e.g. the burst button) without drop-outs.
 
