@@ -9,8 +9,8 @@ An app for exploring real-time audio performance on iOS devices. See [High Perfo
 # Requirements
 
 * Xcode 12 and above
-* iOS 12 and above
-* iPhone 5s and above
+* iOS 13 and above
+* iPhone 6s and above
 
 # License
 
