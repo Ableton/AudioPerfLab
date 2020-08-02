@@ -37,7 +37,7 @@ class ViewController: UITableViewController {
   private var lastPowerLabelUpdateTime: Double?
   private var lastEnergyUsageForPowerLabel: Double?
 
-  @IBOutlet weak private var freezeActivityViewsSwitch: FreezeSwitch!
+  @IBOutlet weak private var visualizationsOnSwitch: VisualizationsOnSwitch!
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var workDistributionView: UIView!
   @IBOutlet weak private var workDistributionOneThreadWarning: UILabel!
@@ -184,9 +184,9 @@ class ViewController: UITableViewController {
     updateThreadDependentControls()
   }
 
-  @IBAction func activityViewsFrozenChanged(_ sender: Any) {
-    let isFrozen = freezeActivityViewsSwitch.isOn
-    activityViews().forEach { $0.isFrozen = isFrozen }
+  @IBAction func visualizationsOnChanged(_ sender: Any) {
+    let areOn = visualizationsOnSwitch.isOn
+    activityViews().forEach { $0.isFrozen = !areOn }
     redrawExpandedActivityViews()
   }
 
@@ -464,7 +464,7 @@ class ViewController: UITableViewController {
     let startTime = displayLink.timestamp -
       ViewController.activityViewDuration - ViewController.activityViewLatency
     activityViews().forEach { $0.startTime = startTime }
-    if !freezeActivityViewsSwitch.isOn {
+    if visualizationsOnSwitch.isOn {
       inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
         displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()

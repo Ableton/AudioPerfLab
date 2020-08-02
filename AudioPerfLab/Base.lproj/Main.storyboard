@@ -4,6 +4,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17115"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -411,12 +412,14 @@ Waves</string>
                     </tableView>
                     <toolbarItems>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="Miq-nh-wsY"/>
-                        <barButtonItem title="❄" style="plain" id="vcD-Ik-41n" customClass="FreezeSwitch" customModule="AudioPerfLab" customModuleProvider="target">
+                        <barButtonItem title="Item" style="plain" id="vcD-Ik-41n" customClass="VisualizationsOnSwitch" customModule="AudioPerfLab" customModuleProvider="target">
+                            <imageReference key="image" image="EnableVisualizationsFilled" symbolScale="large"/>
+                            <inset key="largeContentSizeImageInsets" minX="0.0" minY="100" maxX="0.0" maxY="50"/>
                             <connections>
-                                <action selector="activityViewsFrozenChanged:" destination="L4Q-x0-BAr" id="QyO-GX-iRN"/>
+                                <action selector="visualizationsOnChanged:" destination="L4Q-x0-BAr" id="TOj-an-UE9"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="oUf-rX-yNF"/>
+                        <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="xcc-AI-KVg"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="sOr-Mw-Zzz"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
@@ -428,7 +431,6 @@ Waves</string>
                         <outlet property="coreActivityStackView" destination="heS-GQ-vBA" id="bGS-hy-eeW"/>
                         <outlet property="driveDurationsView" destination="S6c-hK-xwh" id="UsV-pP-vHn"/>
                         <outlet property="energyUsageView" destination="zKA-IQ-0AC" id="dD1-j2-Ud6"/>
-                        <outlet property="freezeActivityViewsSwitch" destination="vcD-Ik-41n" id="I5i-3y-P2o"/>
                         <outlet property="inputMeterView" destination="hH4-iU-N6K" id="YLE-nd-ibc"/>
                         <outlet property="isAudioInputEnabledSwitch" destination="cif-A1-JDz" id="54D-vD-KNB"/>
                         <outlet property="isWorkIntervalOnSwitch" destination="mSE-gp-SAh" id="Rsk-e3-KcB"/>
@@ -438,6 +440,7 @@ Waves</string>
                         <outlet property="numProcessingThreadsSlider" destination="yOJ-8d-Twq" id="Dod-fv-vW2"/>
                         <outlet property="numSinesSlider" destination="us9-gh-B8E" id="hrc-H4-yk2"/>
                         <outlet property="processInDriverThreadControl" destination="pGv-lS-Bov" id="kXq-Tc-B7n"/>
+                        <outlet property="visualizationsOnSwitch" destination="vcD-Ik-41n" id="QGr-lQ-ZW8"/>
                         <outlet property="workDistributionOneThreadWarning" destination="tFd-x7-zU5" id="3EZ-gU-pem"/>
                         <outlet property="workDistributionView" destination="ea4-Da-Jde" id="6NQ-BZ-Kxp"/>
                     </connections>
@@ -493,6 +496,7 @@ Waves</string>
         </designable>
     </designables>
     <resources>
+        <image name="EnableVisualizationsFilled" width="25" height="20"/>
         <systemColor name="darkTextColor">
             <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
