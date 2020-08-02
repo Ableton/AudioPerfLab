@@ -210,17 +210,8 @@ Waves</string>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="system" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ebV-IW-HUR">
-                                                    <rect key="frame" x="95" y="0.0" width="36" height="55"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="40"/>
-                                                    <state key="normal" title="▶"/>
-                                                    <connections>
-                                                        <action selector="playSineBurst:" destination="L4Q-x0-BAr" eventType="touchDown" id="oAC-hC-hgL"/>
-                                                    </connections>
-                                                </button>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3100" minValue="100" maxValue="3200" translatesAutoresizingMaskIntoConstraints="NO" id="F9G-mj-FFP" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="137" y="13" width="224" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                 </slider>
                                             </subviews>
@@ -411,7 +402,13 @@ Waves</string>
                         </sections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Miq-nh-wsY"/>
+                        <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="Miq-nh-wsY"/>
+                        <barButtonItem style="done" systemItem="play" id="2OD-Wq-v6d">
+                            <connections>
+                                <action selector="playSineBurst:" destination="L4Q-x0-BAr" id="Zcy-gi-Hdr"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="VlH-CB-ocY"/>
                         <barButtonItem title="Item" style="plain" id="vcD-Ik-41n" customClass="VisualizationsOnSwitch" customModule="AudioPerfLab" customModuleProvider="target">
                             <imageReference key="image" image="EnableVisualizationsFilled" symbolScale="large"/>
                             <inset key="largeContentSizeImageInsets" minX="0.0" minY="100" maxX="0.0" maxY="50"/>
