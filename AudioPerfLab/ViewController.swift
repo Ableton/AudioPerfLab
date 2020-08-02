@@ -69,13 +69,13 @@ class ViewController: UITableViewController {
   private static let dropoutColor = UIColor.red
   private static let threadColors = [
     UIColor.black,
-    UIColor.blue,
-    UIColor.green,
-    UIColor.magenta,
-    UIColor.orange,
-    UIColor.purple,
-    UIColor.red,
-    UIColor.yellow,
+    UIColor.systemBlue,
+    UIColor.systemGreen,
+    UIColor.systemPink,
+    UIColor.systemOrange,
+    UIColor.systemPurple,
+    UIColor.systemRed,
+    UIColor.systemYellow,
   ]
 
   override func viewDidLoad() {
