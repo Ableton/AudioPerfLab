@@ -99,11 +99,12 @@ class ViewController: UITableViewController {
     let percentageFormatter = { (value: Float) in return "\(Int(value * 100))%"}
     minimumLoadSlider.valueFormatter = percentageFormatter
     busyThreadCpuUsageSlider.valueFormatter = percentageFormatter
-
     busyThreadPeriodSlider.valueFormatter =
       { (value: Float) in return "\(Int(value * 1000))ms"}
 
-    initalizeControls()
+    numSinesSlider.minimumValue = Float(engine.numSines)
+
+    syncControlsToEngine()
   }
 
   private func setupDriveDurationsView() {
@@ -154,12 +155,11 @@ class ViewController: UITableViewController {
       ViewController.activityViewExtraBufferingDuration
   }
 
-  private func initalizeControls() {
+  private func syncControlsToEngine() {
     isAudioInputEnabledSwitch.isOn = engine.isAudioInputEnabled
     bufferSizeStepper.value = log2(Double(engine.preferredBufferSize))
     bufferSizeField.text = String(engine.preferredBufferSize)
     numSinesSlider.value = Float(engine.numSines)
-    numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
 
