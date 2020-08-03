@@ -66,6 +66,9 @@ public:
   void start();
   void stop();
 
+  AudioHostConfig config() const;
+  void setConfig(const AudioHostConfig& newConfig);
+
   bool isAudioInputEnabled() const;
   void setIsAudioInputEnabled(bool isInputEnabled);
 
@@ -106,14 +109,15 @@ private:
   std::optional<Driver> mDriver;
   std::optional<SomeAudioWorkgroup> mAudioWorkgroup;
 
-  std::atomic<bool> mProcessInDriverThread{true};
-  bool mIsWorkIntervalOn{true};
+  std::atomic<bool> mProcessInDriverThread{
+    kStandardPerformanceConfig.audioHost.processInDriverThread};
+  bool mIsWorkIntervalOn{kStandardPerformanceConfig.audioHost.isWorkIntervalOn};
   std::atomic<int> mNumFrames{0};
 
   std::atomic<bool> mAreWorkerThreadsActive{false};
   std::vector<std::thread> mWorkerThreads;
 
-  std::atomic<double> mMinimumLoad{0.0};
+  std::atomic<double> mMinimumLoad{kStandardPerformanceConfig.audioHost.minimumLoad};
   Semaphore mStartWorkingSemaphore{0};
   Semaphore mFinishedWorkSemaphore{0};
 
@@ -123,5 +127,5 @@ private:
   RenderEnded mRenderEnded;
 
   bool mIsStarted{false};
-  int mNumRequestedWorkerThreads{kDefaultNumWorkerThreads};
+  int mNumRequestedWorkerThreads{kStandardPerformanceConfig.audioHost.numWorkerThreads};
 };

@@ -128,7 +128,24 @@ BusyThread& BusyThread::operator=(BusyThread&&) noexcept = default;
 BusyThread::~BusyThread() = default;
 
 
-BusyThreads::BusyThreads() { setNumThreads(kDefaultNumBusyThreads); }
+BusyThreads::BusyThreads()
+{
+  setNumThreads(kStandardPerformanceConfig.busyThreads.numThreads);
+}
+
+BusyThreadsConfig BusyThreads::config() const
+{
+  return {.numThreads = numThreads(), .period = period(), .cpuUsage = threadCpuUsage()};
+}
+void BusyThreads::setConfig(const BusyThreadsConfig& newConfig)
+{
+  if (newConfig != config())
+  {
+    mPeriod = newConfig.period;
+    mThreadCpuUsage = newConfig.cpuUsage;
+    rebuildThreads(newConfig.numThreads);
+  }
+}
 
 int BusyThreads::numThreads() const { return int(mThreads.size()); }
 void BusyThreads::setNumThreads(const int numThreads)
