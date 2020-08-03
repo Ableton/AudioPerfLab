@@ -58,6 +58,37 @@ float peakLevel(const StereoAudioBufferPtrs input, const int numFrames)
   return result;
 }
 
+PerformanceConfig presetToConfig(const PerformancePreset preset)
+{
+  switch (preset)
+  {
+  case standardPreset:
+    return kStandardPerformanceConfig;
+
+  case optimalPreset:
+    return kOptimalPerformanceConfig;
+
+  case customPreset:
+    fatalError("No config for the custom preset");
+  }
+}
+
+PerformancePreset configToPreset(const PerformanceConfig& config)
+{
+  if (config == kStandardPerformanceConfig)
+  {
+    return standardPreset;
+  }
+  else if (config == kOptimalPerformanceConfig)
+  {
+    return optimalPreset;
+  }
+  else
+  {
+    return customPreset;
+  }
+}
+
 } // namespace
 
 class EngineImpl
@@ -85,6 +116,16 @@ public:
 
   AudioHost& host() { return mHost; }
   BusyThreads& busyThreads() { return mBusyThreads; }
+
+  PerformanceConfig performanceConfig() const
+  {
+    return {.busyThreads = mBusyThreads.config(), .audioHost = mHost.config()};
+  }
+  void setPerformanceConfig(const PerformanceConfig& config)
+  {
+    mBusyThreads.setConfig(config.busyThreads);
+    mHost.setConfig(config.audioHost);
+  }
 
   int numSines() const { return mNumSines; }
   void setNumSines(const int numSines) { mNumSines = numSines; }
@@ -206,6 +247,12 @@ private:
 @implementation Engine
 {
   EngineImpl mEngine;
+}
+
+- (PerformancePreset)preset { return configToPreset(mEngine.performanceConfig()); }
+- (void)setPreset:(PerformancePreset)preset
+{
+  mEngine.setPerformanceConfig(presetToConfig(preset));
 }
 
 - (bool)isAudioInputEnabled { return mEngine.host().isAudioInputEnabled(); }
