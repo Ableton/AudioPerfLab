@@ -30,6 +30,7 @@
 		94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94A145BF21C4183400A2ED88 /* SliderWithValue.swift */; };
 		94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94A145C121C41FB300A2ED88 /* Partial.cpp */; };
 		94CD64E1245D5F4400738E71 /* BusyThreads.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94CD64E0245D5F4400738E71 /* BusyThreads.cpp */; };
+		94D27D3C24D6A938000848BD /* PresetChooser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D27D3B24D6A938000848BD /* PresetChooser.swift */; };
 		94DAB9EB2203C2CA005A02D8 /* VisualizationsOnSwitch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94DAB9EA2203C2CA005A02D8 /* VisualizationsOnSwitch.swift */; };
 		94DFC69E2378587300E402FC /* AudioHost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94DFC69D2378587300E402FC /* AudioHost.cpp */; };
 /* End PBXBuildFile section */
@@ -80,6 +81,7 @@
 		94A145C621C58BDF00A2ED88 /* ParallelSineBank.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelSineBank.hpp; sourceTree = "<group>"; };
 		94CD64DF245D5F4400738E71 /* BusyThreads.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BusyThreads.hpp; sourceTree = "<group>"; };
 		94CD64E0245D5F4400738E71 /* BusyThreads.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BusyThreads.cpp; sourceTree = "<group>"; };
+		94D27D3B24D6A938000848BD /* PresetChooser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetChooser.swift; sourceTree = "<group>"; };
 		94DAB9EA2203C2CA005A02D8 /* VisualizationsOnSwitch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizationsOnSwitch.swift; sourceTree = "<group>"; };
 		94DFC69C2378587100E402FC /* AudioHost.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AudioHost.hpp; sourceTree = "<group>"; };
 		94DFC69D2378587300E402FC /* AudioHost.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = AudioHost.cpp; sourceTree = "<group>"; };
@@ -164,6 +166,7 @@
 				16CA3F7621FF9402008C3F06 /* DisclosureIndicatorView.swift */,
 				94882A8A2465A4D200FAF78F /* MeterSmoother.swift */,
 				94882A8C2465A4EA00FAF78F /* MeterView.swift */,
+				94D27D3B24D6A938000848BD /* PresetChooser.swift */,
 				94A145BF21C4183400A2ED88 /* SliderWithValue.swift */,
 				94882A8E2465A4F400FAF78F /* Utilities.swift */,
 				166431E921A2D46B00987A23 /* ViewController.swift */,
@@ -271,6 +274,7 @@
 				166431FE21A2D52500987A23 /* Engine.mm in Sources */,
 				94A145C021C4183400A2ED88 /* SliderWithValue.swift in Sources */,
 				94A0DEFD24D33E2D004BA55C /* AudioWorkgroup.mm in Sources */,
+				94D27D3C24D6A938000848BD /* PresetChooser.swift in Sources */,
 				16B554A421C16BB000522483 /* Driver.mm in Sources */,
 				94A145C321C41FB300A2ED88 /* Partial.cpp in Sources */,
 				16CA3F7721FF9402008C3F06 /* DisclosureIndicatorView.swift in Sources */,

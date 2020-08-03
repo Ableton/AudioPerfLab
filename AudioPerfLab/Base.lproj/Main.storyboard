@@ -409,6 +409,12 @@ Waves</string>
                             </connections>
                         </barButtonItem>
                         <barButtonItem style="plain" systemItem="flexibleSpace" id="VlH-CB-ocY"/>
+                        <barButtonItem title="Preset Chooser" width="219" id="VNx-GI-XCL" userLabel="Preset Chooser" customClass="PresetChooser" customModule="AudioPerfLab">
+                            <connections>
+                                <action selector="presetChanged:" destination="L4Q-x0-BAr" id="dvH-XN-EZ0"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="bIB-Bf-9Sf"/>
                         <barButtonItem title="Item" style="plain" id="vcD-Ik-41n" customClass="VisualizationsOnSwitch" customModule="AudioPerfLab" customModuleProvider="target">
                             <imageReference key="image" image="EnableVisualizationsFilled" symbolScale="large"/>
                             <inset key="largeContentSizeImageInsets" minX="0.0" minY="100" maxX="0.0" maxY="50"/>
@@ -436,6 +442,7 @@ Waves</string>
                         <outlet property="numBusyThreadsSlider" destination="sbz-rQ-YJs" id="1CV-ZR-xuS"/>
                         <outlet property="numProcessingThreadsSlider" destination="yOJ-8d-Twq" id="Dod-fv-vW2"/>
                         <outlet property="numSinesSlider" destination="us9-gh-B8E" id="hrc-H4-yk2"/>
+                        <outlet property="presetChooser" destination="VNx-GI-XCL" id="K8R-fg-6Jc"/>
                         <outlet property="processInDriverThreadControl" destination="pGv-lS-Bov" id="kXq-Tc-B7n"/>
                         <outlet property="visualizationsOnSwitch" destination="vcD-Ik-41n" id="QGr-lQ-ZW8"/>
                         <outlet property="workDistributionOneThreadWarning" destination="tFd-x7-zU5" id="3EZ-gU-pem"/>

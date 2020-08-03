@@ -37,7 +37,9 @@ class ViewController: UITableViewController {
   private var lastPowerLabelUpdateTime: Double?
   private var lastEnergyUsageForPowerLabel: Double?
 
+  @IBOutlet weak private var presetChooser: PresetChooser!
   @IBOutlet weak private var visualizationsOnSwitch: VisualizationsOnSwitch!
+
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var workDistributionView: UIView!
   @IBOutlet weak private var workDistributionOneThreadWarning: UILabel!
@@ -174,6 +176,7 @@ class ViewController: UITableViewController {
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
 
     updateThreadDependentControls()
+    updatePresetControl()
   }
 
   private func updateThreadDependentControls() {
@@ -181,10 +184,19 @@ class ViewController: UITableViewController {
     workDistributionOneThreadWarning.isHidden = engine.numProcessingThreads > 1
   }
 
+  private func updatePresetControl() {
+    presetChooser.preset = engine.preset
+  }
+
   private func updateNumEngineWorkerThreads() {
     engine.numWorkerThreads =
       Int32(numProcessingThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
     updateThreadDependentControls()
+  }
+
+  @IBAction private func presetChanged(_ sender: Any) {
+    engine.preset = presetChooser.preset
+    syncControlsToEngine()
   }
 
   @IBAction func visualizationsOnChanged(_ sender: Any) {
@@ -214,45 +226,55 @@ class ViewController: UITableViewController {
       self.engine.isAudioInputEnabled = self.isAudioInputEnabledSwitch.isOn
       self.engine.setOutputVolume(1.0, fadeDuration: fadeDuration)
       self.waitingToChangeInput = false
+      self.updatePresetControl()
     }
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
     engine.preferredBufferSize = 1 << Int(bufferSizeStepper.value)
     bufferSizeField.text = String(engine.preferredBufferSize)
+    updatePresetControl()
   }
 
   @IBAction private func numSinesChanged(_ sender: Any) {
     engine.numSines = Int32(numSinesSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func numProcessingThreadsChanged(_ sender: Any) {
     updateNumEngineWorkerThreads()
+    updatePresetControl()
   }
 
   @IBAction private func minimumLoadChanged(_ sender: Any) {
     engine.minimumLoad = Double(minimumLoadSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func numBusyThreadsChanged(_ sender: Any) {
     engine.numBusyThreads = Int32(numBusyThreadsSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func busyThreadPeriodChanged(_ sender: Any) {
     engine.busyThreadPeriod = Double(busyThreadPeriodSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func busyThreadCpuUsageChanged(_ sender: Any) {
     engine.busyThreadCpuUsage = Double(busyThreadCpuUsageSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func processInDriverThreadChanged(_ sender: Any) {
     engine.processInDriverThread = processInDriverThreadControl.selectedSegmentIndex == 1
     updateNumEngineWorkerThreads()
+    updatePresetControl()
   }
 
   @IBAction private func isWorkIntervalOnChanged(_ sender: Any) {
     engine.isWorkIntervalOn = isWorkIntervalOnSwitch.isOn
+    updatePresetControl()
   }
 
   @IBAction private func playSineBurst(_ sender: Any) {
