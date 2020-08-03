@@ -162,14 +162,17 @@ class ViewController: UITableViewController {
     numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
-    minimumLoadSlider.value = Float(engine.minimumLoad)
+
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
     busyThreadPeriodSlider.value = Float(engine.busyThreadPeriod)
     busyThreadCpuUsageSlider.value = Float(engine.busyThreadCpuUsage)
+
+    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
+    minimumLoadSlider.value = Float(engine.minimumLoad)
     processInDriverThreadControl.selectedSegmentIndex =
       engine.processInDriverThread ? 1 : 0
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
+
     updateThreadDependentControls()
   }
 
