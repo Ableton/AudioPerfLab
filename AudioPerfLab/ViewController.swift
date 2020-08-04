@@ -247,7 +247,9 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func minimumLoadChanged(_ sender: Any) {
-    engine.minimumLoad = Double(minimumLoadSlider.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.minimumLoad = Double(minimumLoadSlider.value).roundToDecimalPlaces(2)
+    minimumLoadSlider.value = Float(engine.minimumLoad)
     updatePresetControl()
   }
 
@@ -257,12 +259,18 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func busyThreadPeriodChanged(_ sender: Any) {
-    engine.busyThreadPeriod = Double(busyThreadPeriodSlider.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.busyThreadPeriod =
+      Double(busyThreadPeriodSlider.value).roundToDecimalPlaces(3)
+    busyThreadPeriodSlider.value = Float(engine.busyThreadPeriod)
     updatePresetControl()
   }
 
   @IBAction private func busyThreadCpuUsageChanged(_ sender: Any) {
-    engine.busyThreadCpuUsage = Double(busyThreadCpuUsageSlider.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.busyThreadCpuUsage =
+      Double(busyThreadCpuUsageSlider.value).roundToDecimalPlaces(2)
+    busyThreadCpuUsageSlider.value = Float(engine.busyThreadCpuUsage)
     updatePresetControl()
   }
 

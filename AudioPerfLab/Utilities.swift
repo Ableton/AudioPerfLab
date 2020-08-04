@@ -26,6 +26,13 @@ extension ClosedRange {
   }
 }
 
+extension BinaryFloatingPoint {
+  func roundToDecimalPlaces(_ decimalPlaces: Int) -> Self {
+    let factor = Int(pow(10.0, Double(decimalPlaces)))
+    return (self * Self(factor)).rounded() / Self(factor)
+  }
+}
+
 func ampToDb(_ value: Double) -> Double
 {
   return 20.0 * log10(value)
