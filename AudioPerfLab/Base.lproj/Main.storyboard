@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="uE7-8p-Myz">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17140" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="uE7-8p-Myz">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17115"/>
+        <capability name="Image references" minToolsVersion="12.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -15,7 +16,7 @@
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" canCancelContentTouches="NO" dataMode="static" style="grouped" separatorStyle="default" separatorInsetReference="fromAutomaticInsets" allowsSelection="NO" rowHeight="55" estimatedRowHeight="-1" sectionHeaderHeight="1" sectionFooterHeight="1" id="PZm-ED-GsT">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <color key="backgroundColor" systemColor="groupTableViewBackgroundColor"/>
                         <inset key="separatorInset" minX="16" minY="0.0" maxX="10" maxY="0.0"/>
                         <sections>
                             <tableViewSection headerTitle="Load" id="tCW-uX-HYR">
@@ -56,7 +57,7 @@
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <color key="backgroundColor" white="1" alpha="0.94999999999999996" colorSpace="custom" customColorSpace="calibratedWhite"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
-                                                    <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="textColor" systemColor="darkTextColor"/>
                                                     <nil key="highlightedColor"/>
                                                     <size key="shadowOffset" width="1" height="1"/>
                                                 </label>
@@ -209,17 +210,8 @@ Waves</string>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="leading" contentVerticalAlignment="center" buttonType="roundedRect" showsTouchWhenHighlighted="YES" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ebV-IW-HUR">
-                                                    <rect key="frame" x="95" y="0.0" width="36" height="55"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="40"/>
-                                                    <state key="normal" title="▶"/>
-                                                    <connections>
-                                                        <action selector="playSineBurst:" destination="L4Q-x0-BAr" eventType="touchDown" id="oAC-hC-hgL"/>
-                                                    </connections>
-                                                </button>
                                                 <slider opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3100" minValue="100" maxValue="3200" translatesAutoresizingMaskIntoConstraints="NO" id="F9G-mj-FFP" customClass="SliderWithValue" customModule="AudioPerfLab" customModuleProvider="target">
-                                                    <rect key="frame" x="137" y="13" width="224" height="30"/>
+                                                    <rect key="frame" x="95" y="13" width="266" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                                 </slider>
                                             </subviews>
@@ -410,13 +402,27 @@ Waves</string>
                         </sections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="Miq-nh-wsY"/>
-                        <barButtonItem title="❄" style="plain" id="vcD-Ik-41n" customClass="FreezeSwitch" customModule="AudioPerfLab" customModuleProvider="target">
+                        <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="Miq-nh-wsY"/>
+                        <barButtonItem style="done" systemItem="play" id="2OD-Wq-v6d">
                             <connections>
-                                <action selector="activityViewsFrozenChanged:" destination="L4Q-x0-BAr" id="QyO-GX-iRN"/>
+                                <action selector="playSineBurst:" destination="L4Q-x0-BAr" id="Zcy-gi-Hdr"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem style="plain" systemItem="flexibleSpace" id="oUf-rX-yNF"/>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="VlH-CB-ocY"/>
+                        <barButtonItem title="Preset Chooser" width="219" id="VNx-GI-XCL" userLabel="Preset Chooser" customClass="PresetChooser" customModule="AudioPerfLab">
+                            <connections>
+                                <action selector="presetChanged:" destination="L4Q-x0-BAr" id="dvH-XN-EZ0"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="bIB-Bf-9Sf"/>
+                        <barButtonItem title="Item" style="plain" id="vcD-Ik-41n" customClass="VisualizationsOnSwitch" customModule="AudioPerfLab" customModuleProvider="target">
+                            <imageReference key="image" image="EnableVisualizationsFilled" symbolScale="large"/>
+                            <inset key="largeContentSizeImageInsets" minX="0.0" minY="100" maxX="0.0" maxY="50"/>
+                            <connections>
+                                <action selector="visualizationsOnChanged:" destination="L4Q-x0-BAr" id="TOj-an-UE9"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem width="15" style="plain" systemItem="fixedSpace" id="xcc-AI-KVg"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="sOr-Mw-Zzz"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
@@ -428,7 +434,6 @@ Waves</string>
                         <outlet property="coreActivityStackView" destination="heS-GQ-vBA" id="bGS-hy-eeW"/>
                         <outlet property="driveDurationsView" destination="S6c-hK-xwh" id="UsV-pP-vHn"/>
                         <outlet property="energyUsageView" destination="zKA-IQ-0AC" id="dD1-j2-Ud6"/>
-                        <outlet property="freezeActivityViewsSwitch" destination="vcD-Ik-41n" id="I5i-3y-P2o"/>
                         <outlet property="inputMeterView" destination="hH4-iU-N6K" id="YLE-nd-ibc"/>
                         <outlet property="isAudioInputEnabledSwitch" destination="cif-A1-JDz" id="54D-vD-KNB"/>
                         <outlet property="isWorkIntervalOnSwitch" destination="mSE-gp-SAh" id="Rsk-e3-KcB"/>
@@ -437,7 +442,9 @@ Waves</string>
                         <outlet property="numBusyThreadsSlider" destination="sbz-rQ-YJs" id="1CV-ZR-xuS"/>
                         <outlet property="numProcessingThreadsSlider" destination="yOJ-8d-Twq" id="Dod-fv-vW2"/>
                         <outlet property="numSinesSlider" destination="us9-gh-B8E" id="hrc-H4-yk2"/>
+                        <outlet property="presetChooser" destination="VNx-GI-XCL" id="K8R-fg-6Jc"/>
                         <outlet property="processInDriverThreadControl" destination="pGv-lS-Bov" id="kXq-Tc-B7n"/>
+                        <outlet property="visualizationsOnSwitch" destination="vcD-Ik-41n" id="QGr-lQ-ZW8"/>
                         <outlet property="workDistributionOneThreadWarning" destination="tFd-x7-zU5" id="3EZ-gU-pem"/>
                         <outlet property="workDistributionView" destination="ea4-Da-Jde" id="6NQ-BZ-Kxp"/>
                     </connections>
@@ -469,4 +476,36 @@ Waves</string>
             <point key="canvasLocation" x="53.600000000000001" y="27.436281859070466"/>
         </scene>
     </scenes>
+    <designables>
+        <designable name="F9G-mj-FFP">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="fLx-Wo-wc4">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="sbz-rQ-YJs">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="us9-gh-B8E">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="wla-bF-Ha2">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="yOJ-8d-Twq">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+        <designable name="zUg-cQ-W1i">
+            <size key="intrinsicContentSize" width="-1" height="30"/>
+        </designable>
+    </designables>
+    <resources>
+        <image name="EnableVisualizationsFilled" width="25" height="20"/>
+        <systemColor name="darkTextColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="groupTableViewBackgroundColor">
+            <color red="0.94901960784313721" green="0.94901960784313721" blue="0.96862745098039216" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+    </resources>
 </document>

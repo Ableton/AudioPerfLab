@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Ableton AG, Berlin
+ * Copyright (c) 2019 Ableton AG, Berlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -20,20 +20,33 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-extension ClosedRange {
-  func clamp(value: Bound) -> Bound {
-    return Swift.min(Swift.max(value, lowerBound), upperBound)
-  }
-}
+import UIKit
 
-extension BinaryFloatingPoint {
-  func roundToDecimalPlaces(_ decimalPlaces: Int) -> Self {
-    let factor = Int(pow(10.0, Double(decimalPlaces)))
-    return (self * Self(factor)).rounded() / Self(factor)
-  }
-}
+class VisualizationsOnSwitch: UIBarButtonItem {
+  var isOn = true
 
-func ampToDb(_ value: Double) -> Double
-{
-  return 20.0 * log10(value)
+  static private let offImage = UIImage(named: "EnableVisualizations")!
+  static private let onImage = UIImage(named: "EnableVisualizationsFilled")!
+
+  private let button = UIButton(type: .system)
+
+  required init?(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+    button.widthAnchor.constraint(equalToConstant: 60).isActive = true
+    // Expand the tappable area
+    button.heightAnchor.constraint(equalToConstant: 44).isActive = true
+    button.setImage(VisualizationsOnSwitch.onImage, for: .normal)
+    button.addTarget(self, action: #selector(onPressed), for: .touchUpInside)
+    customView = button
+  }
+
+  @objc private func onPressed() {
+    isOn = !isOn
+    button.setImage(
+      isOn ? VisualizationsOnSwitch.onImage : VisualizationsOnSwitch.offImage,
+      for: .normal)
+    if let action = action {
+      _ = target?.perform(action, with: self)
+    }
+  }
 }

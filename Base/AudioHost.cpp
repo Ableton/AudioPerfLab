@@ -67,6 +67,28 @@ void AudioHost::stop()
   }
 }
 
+AudioHostConfig AudioHost::config() const
+{
+  return {
+    .numWorkerThreads = numWorkerThreads(),
+    .processInDriverThread = processInDriverThread(),
+    .isWorkIntervalOn = isWorkIntervalOn(),
+    .minimumLoad = minimumLoad(),
+  };
+}
+void AudioHost::setConfig(const AudioHostConfig& newConfig)
+{
+  if (newConfig != config())
+  {
+    whileStopped([&] {
+      mNumRequestedWorkerThreads = newConfig.numWorkerThreads;
+      mProcessInDriverThread = newConfig.processInDriverThread;
+      mIsWorkIntervalOn = newConfig.isWorkIntervalOn;
+      mMinimumLoad = newConfig.minimumLoad;
+    });
+  }
+}
+
 bool AudioHost::isAudioInputEnabled() const { return driver().isInputEnabled(); }
 void AudioHost::setIsAudioInputEnabled(const bool isInputEnabled)
 {

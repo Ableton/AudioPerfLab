@@ -68,6 +68,9 @@ public:
 
   BusyThreads();
 
+  BusyThreadsConfig config() const;
+  void setConfig(const BusyThreadsConfig& newConfig);
+
   int numThreads() const;
   void setNumThreads(int numThreads);
 
@@ -84,6 +87,6 @@ private:
   void rebuildThreads(int numThreads);
 
   std::vector<BusyThread> mThreads;
-  Seconds mPeriod = kDefaultBusyThreadPeriod;
-  double mThreadCpuUsage = kDefaultBusyThreadCpuUsage;
+  Seconds mPeriod = kStandardPerformanceConfig.busyThreads.period;
+  double mThreadCpuUsage = kStandardPerformanceConfig.busyThreads.cpuUsage;
 };

@@ -9,8 +9,8 @@ An app for exploring real-time audio performance on iOS devices. See [High Perfo
 # Requirements
 
 * Xcode 12 and above
-* iOS 12 and above
-* iPhone 5s and above
+* iOS 13 and above
+* iPhone 6s and above
 
 # License
 
@@ -18,9 +18,33 @@ This software is distributed under the [MIT License](./LICENSE).
 
 # Visualizations and Controls
 
-The ❄&#xFE0E; button in the toolbar freezes all visualization curves, which can be used to take a closer look at the data.
+## Toolbar
 
-⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. Measurements are collected even when frozen, so by briefly freezing, performing a test, and then unfreezing you can observe behavior without the confounding effect of drawing.
+<table>
+  <tr>
+    <td width="70px">
+        <br>
+        <p align="center"><img src="Icons/Play.png" alt="Play" height="20px"></p>
+    </td>
+    <td>Trigger a burst of sine waves to test the system's response to a sudden load increase. The number of sines can be set with the Burst Waves slider.</td>
+  </tr>
+  <tr>
+    <td>
+      <br>
+      <p align="center"><img src="Icons/PresetChooser.png" alt="Preset" height="20px"></p>
+    </td>
+    <td>Switch between presets. The <b>Standard</b> preset uses CoreAudio as intended, with no workarounds. The <b>Optimal</b> preset uses the best known workaround to boost performance.</td>
+  </tr>
+  <tr>
+    <td>
+      <br>
+      <p align="center"><img src="Icons/EnableVisualizations.png" alt="Enable visualizations" height="20px"></p>
+    </td>
+    <td>Turn visualizations on and off. Pause visualizations to take a closer look at the data.</td>
+  </tr>
+</table>
+
+⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. You can observe behavior without the confounding effect of drawing by briefly turning visualizations off, performing a test, and then turning them back on.
 
 ## Load
 
@@ -63,7 +87,7 @@ The number of sine waves to be processed by the audio threads.
 
 ### Burst Waves
 
-Pressing ▶ triggers a short burst of a configurable number of sine waves.
+Pressing &nbsp;<sub><img src="Icons/Play.png" alt="Play" height="16pt"></sub>&nbsp; in the toolbar triggers a short burst of a configurable number of sine waves.
 
 ## Busy Threads
 
@@ -115,4 +139,4 @@ When enabled on iOS 14, audio worker threads join the audio device's [workgroup 
 
 Joining the work interval informs the performance controller that worker threads contribute to meeting the audio device's deadline, giving them a performance boost.
 
-At low buffer sizes (<= 256), this boost is necessary to perform even small amounts of DSP. This can be observed by freezing visualizations, disabling busy threads, and dialing in a small number of sustained sine waves (e.g., 500). Audio will constantly drop-out unless the work interval is enabled.
+At low buffer sizes (<= 256), this boost is necessary to perform even small amounts of DSP. This can be observed by turning off visualizations, disabling busy threads, and dialing in a small number of sustained sine waves (e.g., 500). Audio will constantly drop out unless the work interval is enabled.

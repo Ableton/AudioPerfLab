@@ -20,20 +20,35 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-extension ClosedRange {
-  func clamp(value: Bound) -> Bound {
-    return Swift.min(Swift.max(value, lowerBound), upperBound)
-  }
-}
+import UIKit
 
-extension BinaryFloatingPoint {
-  func roundToDecimalPlaces(_ decimalPlaces: Int) -> Self {
-    let factor = Int(pow(10.0, Double(decimalPlaces)))
-    return (self * Self(factor)).rounded() / Self(factor)
+class PresetChooser: UIBarButtonItem {
+  var preset: PerformancePreset {
+    get {
+      return segmentedControl.selectedSegmentIndex != UISegmentedControl.noSegment
+        ? PerformancePreset(rawValue: segmentedControl.selectedSegmentIndex)!
+        : PerformancePreset.customPreset
+    }
+    set {
+      segmentedControl.selectedSegmentIndex = newValue != PerformancePreset.customPreset
+        ? newValue.rawValue : UISegmentedControl.noSegment
+    }
   }
-}
 
-func ampToDb(_ value: Double) -> Double
-{
-  return 20.0 * log10(value)
+  private let segmentedControl = UISegmentedControl(items: ["Standard", "Optimal"])
+
+  required init?(coder aDecoder: NSCoder) {
+    super.init(coder: aDecoder)
+    segmentedControl.widthAnchor.constraint(equalToConstant: 200).isActive = true
+    segmentedControl.heightAnchor.constraint(equalToConstant: 20).isActive = true
+    segmentedControl.addTarget(
+      self, action: #selector(onValueChanged), for: .valueChanged)
+    customView = segmentedControl
+  }
+
+  @objc private func onValueChanged() {
+    if let action = action {
+      _ = target?.perform(action, with: self)
+    }
+  }
 }

@@ -23,15 +23,93 @@
 #pragma once
 
 #include <chrono>
+#include <tuple>
 
-constexpr auto kDefaultNumBusyThreads = 0;
+struct BusyThreadsConfig
+{
+  int numThreads{};
+  std::chrono::duration<double> period{};
+  double cpuUsage{};
+};
 
-// These settings are tuned to ramp up CPUs without exceeding the background CPU usage
-// limit. See the README for more information.
-constexpr auto kDefaultBusyThreadPeriod = std::chrono::milliseconds{35};
-constexpr auto kDefaultBusyThreadCpuUsage = 0.5;
+inline bool operator==(const BusyThreadsConfig& lhs, const BusyThreadsConfig& rhs)
+{
+  return std::tie(lhs.numThreads, lhs.period, lhs.cpuUsage)
+         == std::tie(rhs.numThreads, rhs.period, rhs.cpuUsage);
+}
 
-constexpr auto kDefaultNumWorkerThreads = 1;
+inline bool operator!=(const BusyThreadsConfig& lhs, const BusyThreadsConfig& rhs)
+{
+  return !(lhs == rhs);
+}
+
+struct AudioHostConfig
+{
+  int numWorkerThreads{};
+  bool processInDriverThread{};
+  bool isWorkIntervalOn{};
+  double minimumLoad{};
+};
+
+inline bool operator==(const AudioHostConfig& lhs, const AudioHostConfig& rhs)
+{
+  return std::tie(lhs.numWorkerThreads, lhs.processInDriverThread, lhs.isWorkIntervalOn,
+                  lhs.minimumLoad)
+         == std::tie(rhs.numWorkerThreads, rhs.processInDriverThread,
+                     rhs.isWorkIntervalOn, rhs.minimumLoad);
+}
+
+inline bool operator!=(const AudioHostConfig& lhs, const AudioHostConfig& rhs)
+{
+  return !(lhs == rhs);
+}
+
+struct PerformanceConfig
+{
+  BusyThreadsConfig busyThreads;
+  AudioHostConfig audioHost;
+};
+
+inline bool operator==(const PerformanceConfig& lhs, const PerformanceConfig& rhs)
+{
+  return std::tie(lhs.busyThreads, lhs.audioHost)
+         == std::tie(rhs.busyThreads, rhs.audioHost);
+}
+
+inline bool operator!=(const PerformanceConfig& lhs, const PerformanceConfig& rhs)
+{
+  return !(lhs == rhs);
+}
+
+constexpr auto kStandardPerformanceConfig = PerformanceConfig{
+  BusyThreadsConfig{
+    .numThreads = 0,
+    // These settings are tuned to ramp up CPUs without exceeding the background CPU usage
+    // limit. See the README for more information.
+    .period = std::chrono::milliseconds{35},
+    .cpuUsage = 0.5,
+  },
+  AudioHostConfig{
+    .numWorkerThreads = 1,
+    .processInDriverThread = true,
+    .isWorkIntervalOn = true,
+    .minimumLoad = 0.0,
+  },
+};
+
+constexpr auto kOptimalPerformanceConfig = PerformanceConfig{
+  BusyThreadsConfig{
+    .numThreads = 1,
+    .period = kStandardPerformanceConfig.busyThreads.period,
+    .cpuUsage = kStandardPerformanceConfig.busyThreads.cpuUsage,
+  },
+  AudioHostConfig{
+    .numWorkerThreads = 2,
+    .processInDriverThread = false,
+    .isWorkIntervalOn = false,
+    .minimumLoad = kStandardPerformanceConfig.audioHost.minimumLoad,
+  },
+};
 
 constexpr auto kCacheLineSize = 128;
 constexpr auto kDefaultPreferredBufferSize = 128;

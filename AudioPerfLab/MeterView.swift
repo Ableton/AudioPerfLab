@@ -30,9 +30,8 @@ class MeterView: UIView {
 
   private static let ledSize = CGSize(width: 5, height: 5)
   private static let minPaddingBetweenLeds : CGFloat = 3.0
-  private static let ledInactiveColor = UIColor(white: 0.5, alpha: 0.5).cgColor
-  private static let ledActiveColor = UIColor(
-    red: 0.0 / 255.0, green: 122.0 / 255.0, blue: 255.0 / 255.0, alpha: 1.0).cgColor
+  private static let ledInactiveColor = UIColor.systemGray4.cgColor
+  private static let ledActiveColor = UIColor.systemBlue.cgColor
   private static let meterRangeDb = (-35.0 ... 0.0)
 
   override init(frame: CGRect) {

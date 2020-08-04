@@ -35,8 +35,15 @@ struct DriveMeasurement
   float inputPeakLevel;
 };
 
+typedef NS_ENUM(NSInteger, PerformancePreset) {
+  standardPreset,
+  optimalPreset,
+  customPreset,
+};
+
 @interface Engine : NSObject
 
+@property(nonatomic) PerformancePreset preset;
 @property(nonatomic) bool isAudioInputEnabled;
 @property(nonatomic, readonly) float outputVolume;
 @property(nonatomic) int preferredBufferSize;

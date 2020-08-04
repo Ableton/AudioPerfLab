@@ -37,7 +37,9 @@ class ViewController: UITableViewController {
   private var lastPowerLabelUpdateTime: Double?
   private var lastEnergyUsageForPowerLabel: Double?
 
-  @IBOutlet weak private var freezeActivityViewsSwitch: FreezeSwitch!
+  @IBOutlet weak private var presetChooser: PresetChooser!
+  @IBOutlet weak private var visualizationsOnSwitch: VisualizationsOnSwitch!
+
   @IBOutlet weak private var driveDurationsView: ActivityView!
   @IBOutlet weak private var workDistributionView: UIView!
   @IBOutlet weak private var workDistributionOneThreadWarning: UILabel!
@@ -69,13 +71,13 @@ class ViewController: UITableViewController {
   private static let dropoutColor = UIColor.red
   private static let threadColors = [
     UIColor.black,
-    UIColor.blue,
-    UIColor.green,
-    UIColor.magenta,
-    UIColor.orange,
-    UIColor.purple,
-    UIColor.red,
-    UIColor.yellow,
+    UIColor.systemBlue,
+    UIColor.systemGreen,
+    UIColor.systemPink,
+    UIColor.systemOrange,
+    UIColor.systemPurple,
+    UIColor.systemRed,
+    UIColor.systemYellow,
   ]
 
   override func viewDidLoad() {
@@ -99,11 +101,12 @@ class ViewController: UITableViewController {
     let percentageFormatter = { (value: Float) in return "\(Int(value * 100))%"}
     minimumLoadSlider.valueFormatter = percentageFormatter
     busyThreadCpuUsageSlider.valueFormatter = percentageFormatter
-
     busyThreadPeriodSlider.valueFormatter =
       { (value: Float) in return "\(Int(value * 1000))ms"}
 
-    initalizeControls()
+    numSinesSlider.minimumValue = Float(engine.numSines)
+
+    syncControlsToEngine()
   }
 
   private func setupDriveDurationsView() {
@@ -154,28 +157,35 @@ class ViewController: UITableViewController {
       ViewController.activityViewExtraBufferingDuration
   }
 
-  private func initalizeControls() {
+  private func syncControlsToEngine() {
     isAudioInputEnabledSwitch.isOn = engine.isAudioInputEnabled
     bufferSizeStepper.value = log2(Double(engine.preferredBufferSize))
     bufferSizeField.text = String(engine.preferredBufferSize)
     numSinesSlider.value = Float(engine.numSines)
-    numSinesSlider.minimumValue = Float(engine.numSines)
     numSinesSlider.maximumValue = Float(engine.maxNumSines)
     numBurstSinesSlider.maximumValue = Float(engine.maxNumSines)
-    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
-    minimumLoadSlider.value = Float(engine.minimumLoad)
+
     numBusyThreadsSlider.value = Float(engine.numBusyThreads)
     busyThreadPeriodSlider.value = Float(engine.busyThreadPeriod)
     busyThreadCpuUsageSlider.value = Float(engine.busyThreadCpuUsage)
+
+    numProcessingThreadsSlider.value = Float(engine.numProcessingThreads)
+    minimumLoadSlider.value = Float(engine.minimumLoad)
     processInDriverThreadControl.selectedSegmentIndex =
       engine.processInDriverThread ? 1 : 0
     isWorkIntervalOnSwitch.isOn = engine.isWorkIntervalOn
+
     updateThreadDependentControls()
+    updatePresetControl()
   }
 
   private func updateThreadDependentControls() {
     isWorkIntervalOnSwitch.isEnabled = engine.numWorkerThreads > 0
     workDistributionOneThreadWarning.isHidden = engine.numProcessingThreads > 1
+  }
+
+  private func updatePresetControl() {
+    presetChooser.preset = engine.preset
   }
 
   private func updateNumEngineWorkerThreads() {
@@ -184,9 +194,14 @@ class ViewController: UITableViewController {
     updateThreadDependentControls()
   }
 
-  @IBAction func activityViewsFrozenChanged(_ sender: Any) {
-    let isFrozen = freezeActivityViewsSwitch.isOn
-    activityViews().forEach { $0.isFrozen = isFrozen }
+  @IBAction private func presetChanged(_ sender: Any) {
+    engine.preset = presetChooser.preset
+    syncControlsToEngine()
+  }
+
+  @IBAction func visualizationsOnChanged(_ sender: Any) {
+    let areOn = visualizationsOnSwitch.isOn
+    activityViews().forEach { $0.isFrozen = !areOn }
     redrawExpandedActivityViews()
   }
 
@@ -211,45 +226,63 @@ class ViewController: UITableViewController {
       self.engine.isAudioInputEnabled = self.isAudioInputEnabledSwitch.isOn
       self.engine.setOutputVolume(1.0, fadeDuration: fadeDuration)
       self.waitingToChangeInput = false
+      self.updatePresetControl()
     }
   }
 
   @IBAction private func bufferSizeChanged(_ sender: Any) {
     engine.preferredBufferSize = 1 << Int(bufferSizeStepper.value)
     bufferSizeField.text = String(engine.preferredBufferSize)
+    updatePresetControl()
   }
 
   @IBAction private func numSinesChanged(_ sender: Any) {
-    engine.numSines = Int32(numSinesSlider!.value)
+    engine.numSines = Int32(numSinesSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func numProcessingThreadsChanged(_ sender: Any) {
     updateNumEngineWorkerThreads()
+    updatePresetControl()
   }
 
   @IBAction private func minimumLoadChanged(_ sender: Any) {
-    engine.minimumLoad = Double(minimumLoadSlider!.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.minimumLoad = Double(minimumLoadSlider.value).roundToDecimalPlaces(2)
+    minimumLoadSlider.value = Float(engine.minimumLoad)
+    updatePresetControl()
   }
 
   @IBAction private func numBusyThreadsChanged(_ sender: Any) {
-    engine.numBusyThreads = Int32(numBusyThreadsSlider!.value)
+    engine.numBusyThreads = Int32(numBusyThreadsSlider.value)
+    updatePresetControl()
   }
 
   @IBAction private func busyThreadPeriodChanged(_ sender: Any) {
-    engine.busyThreadPeriod = Double(busyThreadPeriodSlider!.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.busyThreadPeriod =
+      Double(busyThreadPeriodSlider.value).roundToDecimalPlaces(3)
+    busyThreadPeriodSlider.value = Float(engine.busyThreadPeriod)
+    updatePresetControl()
   }
 
   @IBAction private func busyThreadCpuUsageChanged(_ sender: Any) {
-    engine.busyThreadCpuUsage = Double(busyThreadCpuUsageSlider!.value)
+    // Round to allow exact comparisons with literals so that presets can be identified
+    engine.busyThreadCpuUsage =
+      Double(busyThreadCpuUsageSlider.value).roundToDecimalPlaces(2)
+    busyThreadCpuUsageSlider.value = Float(engine.busyThreadCpuUsage)
+    updatePresetControl()
   }
 
   @IBAction private func processInDriverThreadChanged(_ sender: Any) {
     engine.processInDriverThread = processInDriverThreadControl.selectedSegmentIndex == 1
     updateNumEngineWorkerThreads()
+    updatePresetControl()
   }
 
   @IBAction private func isWorkIntervalOnChanged(_ sender: Any) {
     engine.isWorkIntervalOn = isWorkIntervalOnSwitch.isOn
+    updatePresetControl()
   }
 
   @IBAction private func playSineBurst(_ sender: Any) {
@@ -464,7 +497,7 @@ class ViewController: UITableViewController {
     let startTime = displayLink.timestamp -
       ViewController.activityViewDuration - ViewController.activityViewLatency
     activityViews().forEach { $0.startTime = startTime }
-    if !freezeActivityViewsSwitch.isOn {
+    if visualizationsOnSwitch.isOn {
       inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
         displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()
