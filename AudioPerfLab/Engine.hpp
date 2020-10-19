@@ -24,7 +24,7 @@
 
 #import <UIKit/UIKit.h>
 
-#define MAX_NUM_THREADS 8
+#define MAX_NUM_THREADS 32
 struct DriveMeasurement
 {
   double hostTime;
