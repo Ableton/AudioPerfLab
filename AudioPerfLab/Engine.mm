@@ -169,7 +169,8 @@ private:
   void setup(const int numProcessingThreads)
   {
     assertRelease(
-      (numProcessingThreads + 1) <= MAX_NUM_THREADS, "Too many processing threads");
+      numProcessingThreads > 0 && (numProcessingThreads + 1) <= MAX_NUM_THREADS,
+      "Invalid number of threads");
 
     mSineBank.setNumThreads(numProcessingThreads);
     std::fill(mNumActivePartialsProcessed.begin(), mNumActivePartialsProcessed.end(), -1);
