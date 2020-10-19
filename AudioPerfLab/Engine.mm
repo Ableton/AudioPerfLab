@@ -158,13 +158,9 @@ private:
     driveMeasurement.duration =
       std::chrono::duration<double>{bufferEndTime - bufferStartTime}.count();
     driveMeasurement.numFrames = numFrames;
-    std::fill_n(driveMeasurement.numActivePartialsProcessed, MAX_NUM_THREADS, -1);
-    std::fill_n(driveMeasurement.cpuNumbers, MAX_NUM_THREADS, -1);
-    for (int i = 0; i < mHost.numWorkerThreads() + 1; ++i)
-    {
-      driveMeasurement.numActivePartialsProcessed[i] = mNumActivePartialsProcessed[i];
-      driveMeasurement.cpuNumbers[i] = mCpuNumbers[i];
-    }
+    std::copy(mNumActivePartialsProcessed.begin(), mNumActivePartialsProcessed.end(),
+              driveMeasurement.numActivePartialsProcessed);
+    std::copy(mCpuNumbers.begin(), mCpuNumbers.end(), driveMeasurement.cpuNumbers);
     driveMeasurement.inputPeakLevel = inputPeakLevel;
     mDriveMeasurements.tryPushBack(driveMeasurement);
   }
@@ -175,11 +171,8 @@ private:
     assertRelease((numWorkerThreads + 1) <= MAX_NUM_THREADS, "Too many worker threads");
 
     mSineBank.setNumThreads(numWorkerThreads + 1);
-    for (int i = 1; i <= numWorkerThreads; ++i)
-    {
-      mNumActivePartialsProcessed[i] = -1;
-      mCpuNumbers[i] = -1;
-    }
+    std::fill(mNumActivePartialsProcessed.begin(), mNumActivePartialsProcessed.end(), -1);
+    std::fill(mCpuNumbers.begin(), mCpuNumbers.end(), -1);
   }
 
   // Called at the start of the audio I/O callback with no worker threads active
