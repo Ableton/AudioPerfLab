@@ -38,12 +38,18 @@ AudioHost::AudioHost(Setup setup,
   , mRenderEnded{std::move(renderEnded)}
 {
   setupDriver(Driver::Config{});
+  mNumProcessingThreads =
+    kStandardPerformanceConfig.audioHost.numProcessingThreads.value_or(
+      mAudioWorkgroup->maxNumParallelThreads());
 }
 
 AudioHost::~AudioHost() { stop(); }
 
 Driver& AudioHost::driver() { return *mDriver; }
 const Driver& AudioHost::driver() const { return *mDriver; }
+
+SomeAudioWorkgroup& AudioHost::workgroup() { return *mAudioWorkgroup; }
+const SomeAudioWorkgroup& AudioHost::workgroup() const { return *mAudioWorkgroup; }
 
 void AudioHost::start()
 {
@@ -81,7 +87,8 @@ void AudioHost::setConfig(const AudioHostConfig& newConfig)
   if (newConfig != config())
   {
     whileStopped([&] {
-      mNumProcessingThreads = newConfig.numProcessingThreads;
+      mNumProcessingThreads =
+        newConfig.numProcessingThreads.value_or(mAudioWorkgroup->maxNumParallelThreads());
       mProcessInDriverThread = newConfig.processInDriverThread;
       mIsWorkIntervalOn = newConfig.isWorkIntervalOn;
       mMinimumLoad = newConfig.minimumLoad;

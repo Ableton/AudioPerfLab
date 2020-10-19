@@ -23,6 +23,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 #include <tuple>
 
 struct BusyThreadsConfig
@@ -43,9 +44,13 @@ inline bool operator!=(const BusyThreadsConfig& lhs, const BusyThreadsConfig& rh
   return !(lhs == rhs);
 }
 
+constexpr std::optional<int> kUseRecommendedNumThreads = std::nullopt;
+
 struct AudioHostConfig
 {
-  int numProcessingThreads{};
+  // Set to kUseRecommendedNumThreads to use the system's recommended number of threads
+  std::optional<int> numProcessingThreads;
+
   bool processInDriverThread{};
   bool isWorkIntervalOn{};
   double minimumLoad{};
@@ -90,7 +95,7 @@ constexpr auto kStandardPerformanceConfig = PerformanceConfig{
     .cpuUsage = 0.5,
   },
   AudioHostConfig{
-    .numProcessingThreads = 2,
+    .numProcessingThreads = kUseRecommendedNumThreads,
     .processInDriverThread = true,
     .isWorkIntervalOn = true,
     .minimumLoad = 0.0,
@@ -104,7 +109,7 @@ constexpr auto kOptimalPerformanceConfig = PerformanceConfig{
     .cpuUsage = kStandardPerformanceConfig.busyThreads.cpuUsage,
   },
   AudioHostConfig{
-    .numProcessingThreads = 2,
+    .numProcessingThreads = kUseRecommendedNumThreads,
     .processInDriverThread = false,
     .isWorkIntervalOn = false,
     .minimumLoad = kStandardPerformanceConfig.audioHost.minimumLoad,

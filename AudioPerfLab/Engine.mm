@@ -73,13 +73,24 @@ PerformanceConfig presetToConfig(const PerformancePreset preset)
   }
 }
 
-PerformancePreset configToPreset(const PerformanceConfig& config)
+PerformanceConfig normalize(PerformanceConfig config, const int numRecommendedThreads)
 {
-  if (config == kStandardPerformanceConfig)
+  config.audioHost.numProcessingThreads =
+    config.audioHost.numProcessingThreads.value_or(numRecommendedThreads);
+  return config;
+}
+
+PerformancePreset configToPreset(const PerformanceConfig& config,
+                                 const int numRecommendedThreads)
+{
+  const auto normalizedConfig = normalize(config, numRecommendedThreads);
+
+  if (normalizedConfig == normalize(kStandardPerformanceConfig, numRecommendedThreads))
   {
     return standardPreset;
   }
-  else if (config == kOptimalPerformanceConfig)
+  else if (normalizedConfig
+           == normalize(kOptimalPerformanceConfig, numRecommendedThreads))
   {
     return optimalPreset;
   }
@@ -248,7 +259,11 @@ private:
   EngineImpl mEngine;
 }
 
-- (PerformancePreset)preset { return configToPreset(mEngine.performanceConfig()); }
+- (PerformancePreset)preset
+{
+  return configToPreset(
+    mEngine.performanceConfig(), mEngine.host().workgroup().maxNumParallelThreads());
+}
 - (void)setPreset:(PerformancePreset)preset
 {
   mEngine.setPerformanceConfig(presetToConfig(preset));

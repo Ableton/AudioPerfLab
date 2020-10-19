@@ -63,6 +63,9 @@ public:
   Driver& driver();
   const Driver& driver() const;
 
+  SomeAudioWorkgroup& workgroup();
+  const SomeAudioWorkgroup& workgroup() const;
+
   void start();
   void stop();
 
@@ -129,5 +132,5 @@ private:
   RenderEnded mRenderEnded;
 
   bool mIsStarted{false};
-  int mNumProcessingThreads{kStandardPerformanceConfig.audioHost.numProcessingThreads};
+  int mNumProcessingThreads{-1};
 };
