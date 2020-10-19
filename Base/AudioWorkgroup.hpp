@@ -42,6 +42,16 @@ public:
   AudioWorkgroup& operator=(const AudioWorkgroup&);
   ~AudioWorkgroup();
 
+  /*! The system's recommendation for the maximum number of threads that should contribute
+   * to the workload.
+   *
+   * iOS 14, for example, recommends a thread per performance core for the audio I/O
+   * unit's workgroup.
+   *
+   * @see os_workgroup_max_parallel_threads
+   */
+  int maxNumParallelThreads() const;
+
   class ScopedMembership;
 
   /*! Join the current thread to the workgroup. */
@@ -86,6 +96,13 @@ private:
 class LegacyAudioWorkgroup
 {
 public:
+  /*! The system's recommendation for the maximum number of threads that should contribute
+   * to the workload.
+   *
+   * @see pthread_time_constraint_max_parallelism
+   */
+  int maxNumParallelThreads() const;
+
   class ScopedMembership;
 
   /*! Join the current thread to the workgroup. */
@@ -126,6 +143,11 @@ public:
                                         LegacyAudioWorkgroup::ScopedMembership>;
 
   explicit SomeAudioWorkgroup(const WorkgroupVariant& audioWorkgroup);
+
+  /*! The system's recommendation for the maximum number of threads that should contribute
+   * to the workload.
+   */
+  int maxNumParallelThreads() const;
 
   /*! Join the current thread to the workgroup. */
   ScopedMembership join();

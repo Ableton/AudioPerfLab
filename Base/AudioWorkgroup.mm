@@ -88,6 +88,19 @@ AudioWorkgroup::AudioWorkgroup(const AudioWorkgroup&) = default;
 AudioWorkgroup& AudioWorkgroup::operator=(const AudioWorkgroup&) = default;
 AudioWorkgroup::~AudioWorkgroup() = default;
 
+int AudioWorkgroup::maxNumParallelThreads() const
+{
+  if (@available(iOS 14, *))
+  {
+    // Return zero for a moved-from AudioWorkgroup so that the object is in a valid state
+    return mpWorkgroup ? os_workgroup_max_parallel_threads(mpWorkgroup, nullptr) : 0;
+  }
+  else
+  {
+    fatalError("AudioWorkgroup used prior to iOS 14");
+  }
+}
+
 AudioWorkgroup::ScopedMembership AudioWorkgroup::join()
 {
   return ScopedMembership{mpWorkgroup};
@@ -97,6 +110,7 @@ AudioWorkgroup::ScopedMembership AudioWorkgroup::join()
 extern "C" {
 int work_interval_join_port(mach_port_t port);
 int work_interval_leave();
+int pthread_time_constraint_max_parallelism(unsigned long flags);
 }
 
 LegacyAudioWorkgroup::ScopedMembership::ScopedMembership()
@@ -165,6 +179,15 @@ LegacyAudioWorkgroup::ScopedMembership::~ScopedMembership()
   }
 }
 
+int LegacyAudioWorkgroup::maxNumParallelThreads() const
+{
+  // Pass 0 rather than PTHREAD_MAX_PARALLELISM_PHYSICAL to request the logical number
+  // of cores (including hyperthreading cores). This makes LegacyAudioWorkgroup and
+  // AudioWorkgroup return the same value for maxNumParallelThreads() when running in the
+  // simulator on x86.
+  return pthread_time_constraint_max_parallelism(0);
+}
+
 LegacyAudioWorkgroup::ScopedMembership LegacyAudioWorkgroup::join()
 {
   return ScopedMembership{};
@@ -174,6 +197,12 @@ LegacyAudioWorkgroup::ScopedMembership LegacyAudioWorkgroup::join()
 SomeAudioWorkgroup::SomeAudioWorkgroup(const WorkgroupVariant& workgroup)
   : mWorkgroup{workgroup}
 {
+}
+
+int SomeAudioWorkgroup::maxNumParallelThreads() const
+{
+  return std::visit(
+    [](const auto& workgroup) { return workgroup.maxNumParallelThreads(); }, mWorkgroup);
 }
 
 SomeAudioWorkgroup::ScopedMembership SomeAudioWorkgroup::join()
