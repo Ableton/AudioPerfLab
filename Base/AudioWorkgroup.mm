@@ -36,10 +36,10 @@
  * included in a C++ TU. Additionally, this file must be Objective-C++.
  */
 
-AudioWorkgroup::ScopedMembership::ScopedMembership(const os_workgroup_t workgroup)
-  : mWorkgroup{workgroup}
+AudioWorkgroup::ScopedMembership::ScopedMembership(const os_workgroup_t pWorkgroup)
+  : mpWorkgroup{pWorkgroup}
 {
-  const auto result = os_workgroup_join(mWorkgroup, &mJoinToken);
+  const auto result = os_workgroup_join(mpWorkgroup, &mJoinToken);
   if (result != 0)
   {
     throw std::runtime_error("Couldn't join the workgroup");
@@ -48,7 +48,7 @@ AudioWorkgroup::ScopedMembership::ScopedMembership(const os_workgroup_t workgrou
 
 AudioWorkgroup::ScopedMembership::ScopedMembership(
   AudioWorkgroup::ScopedMembership&& other)
-  : mWorkgroup{std::exchange(other.mWorkgroup, nullptr)}
+  : mpWorkgroup{std::exchange(other.mpWorkgroup, nullptr)}
   , mJoinToken{other.mJoinToken}
 {
 }
@@ -58,7 +58,7 @@ AudioWorkgroup::ScopedMembership& AudioWorkgroup::ScopedMembership::operator=(
 {
   if (this != &rhs)
   {
-    mWorkgroup = std::exchange(rhs.mWorkgroup, nullptr);
+    mpWorkgroup = std::exchange(rhs.mpWorkgroup, nullptr);
     mJoinToken = rhs.mJoinToken;
   }
   return *this;
@@ -68,9 +68,9 @@ AudioWorkgroup::ScopedMembership::~ScopedMembership()
 {
   if (@available(iOS 14, *))
   {
-    if (mWorkgroup)
+    if (mpWorkgroup)
     {
-      os_workgroup_leave(mWorkgroup, &mJoinToken);
+      os_workgroup_leave(mpWorkgroup, &mJoinToken);
     }
   }
   else
@@ -79,8 +79,8 @@ AudioWorkgroup::ScopedMembership::~ScopedMembership()
   }
 }
 
-AudioWorkgroup::AudioWorkgroup(const os_workgroup_t workgroup)
-  : mWorkgroup{workgroup}
+AudioWorkgroup::AudioWorkgroup(const os_workgroup_t pWorkgroup)
+  : mpWorkgroup{pWorkgroup}
 {
 }
 
@@ -90,7 +90,7 @@ AudioWorkgroup::~AudioWorkgroup() = default;
 
 AudioWorkgroup::ScopedMembership AudioWorkgroup::join()
 {
-  return ScopedMembership{mWorkgroup};
+  return ScopedMembership{mpWorkgroup};
 }
 
 

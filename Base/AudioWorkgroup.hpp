@@ -36,7 +36,7 @@ class AudioWorkgroup
 {
 public:
   API_AVAILABLE(ios(14.0))
-  explicit AudioWorkgroup(os_workgroup_t workgroup);
+  explicit AudioWorkgroup(os_workgroup_t pWorkgroup);
 
   AudioWorkgroup(const AudioWorkgroup&);
   AudioWorkgroup& operator=(const AudioWorkgroup&);
@@ -49,7 +49,7 @@ public:
 
 private:
   DISABLE_AVAILABILITY_WARNINGS
-  os_workgroup_t mWorkgroup;
+  os_workgroup_t mpWorkgroup;
   RESTORE_WARNINGS
 };
 
@@ -71,7 +71,7 @@ private:
   explicit ScopedMembership(os_workgroup_t workgroup);
 
   DISABLE_AVAILABILITY_WARNINGS
-  os_workgroup_t mWorkgroup;
+  os_workgroup_t mpWorkgroup;
   os_workgroup_join_token_s mJoinToken;
   RESTORE_WARNINGS
 
