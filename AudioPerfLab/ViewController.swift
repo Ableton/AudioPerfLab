@@ -78,6 +78,7 @@ class ViewController: UITableViewController {
     UIColor.systemPurple,
     UIColor.systemRed,
     UIColor.systemYellow,
+    UIColor.systemTeal,
   ]
 
   override func viewDidLoad() {
@@ -364,6 +365,10 @@ class ViewController: UITableViewController {
       color: color)
   }
 
+  static func colorForThread(_ threadIndex: Int) -> UIColor {
+    return ViewController.threadColors[threadIndex % ViewController.threadColors.count]
+  }
+
   private func addWorkDistributionMeasurement(
     time: Double,
     duration bufferDuration: Double,
@@ -385,7 +390,7 @@ class ViewController: UITableViewController {
         let percent =
           Double(partialsProcessed) / Double(totalNumActivePartialsProcessed)
         let value = percent + lastValue
-        let color = ViewController.threadColors[threadIndex]
+        let color = ViewController.colorForThread(threadIndex)
         workActivityView.addSample(
           time: time,
           duration: bufferDuration,
@@ -404,7 +409,7 @@ class ViewController: UITableViewController {
     for (cpuNumber, coreActivityView) in coreActivityViews.enumerated() {
       let threadIndex = threadIndexPerCpu[cpuNumber]
       let color =
-        threadIndex != nil ? ViewController.threadColors[threadIndex!] : UIColor.white
+        threadIndex != nil ? ViewController.colorForThread(threadIndex!) : UIColor.white
       coreActivityView.addSample(
         time: time,
         duration: bufferDuration,
