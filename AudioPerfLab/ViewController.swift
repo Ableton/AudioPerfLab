@@ -105,6 +105,7 @@ class ViewController: UITableViewController {
       { (value: Float) in return "\(Int(value * 1000))ms"}
 
     numSinesSlider.minimumValue = Float(engine.numSines)
+    numProcessingThreadsSlider.maximumValue = Float(numberOfProcessors)
 
     syncControlsToEngine()
   }
