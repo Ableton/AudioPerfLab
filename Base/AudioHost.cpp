@@ -49,7 +49,7 @@ void AudioHost::start()
 {
   if (!mIsStarted)
   {
-    mSetup(mNumRequestedWorkerThreads);
+    mSetup(mNumWorkerThreads);
 
     setupWorkerThreads();
     driver().start();
@@ -81,7 +81,7 @@ void AudioHost::setConfig(const AudioHostConfig& newConfig)
   if (newConfig != config())
   {
     whileStopped([&] {
-      mNumRequestedWorkerThreads = newConfig.numWorkerThreads;
+      mNumWorkerThreads = newConfig.numWorkerThreads;
       mProcessInDriverThread = newConfig.processInDriverThread;
       mIsWorkIntervalOn = newConfig.isWorkIntervalOn;
       mMinimumLoad = newConfig.minimumLoad;
@@ -118,9 +118,9 @@ void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
 int AudioHost::numWorkerThreads() const { return int(mWorkerThreads.size()); }
 void AudioHost::setNumWorkerThreads(const int numWorkerThreads)
 {
-  if (numWorkerThreads != mNumRequestedWorkerThreads)
+  if (numWorkerThreads != mNumWorkerThreads)
   {
-    whileStopped([&] { mNumRequestedWorkerThreads = numWorkerThreads; });
+    whileStopped([&] { mNumWorkerThreads = numWorkerThreads; });
   }
 }
 
@@ -187,7 +187,7 @@ void AudioHost::setupWorkerThreads()
                 "Worker threads must be torn down before calling setupWorkerThreads()");
 
   mAreWorkerThreadsActive = true;
-  for (int i = 1; i <= mNumRequestedWorkerThreads; ++i)
+  for (int i = 1; i <= mNumWorkerThreads; ++i)
   {
     mWorkerThreads.emplace_back(&AudioHost::workerThread, this, i);
   }

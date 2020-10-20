@@ -127,5 +127,5 @@ private:
   RenderEnded mRenderEnded;
 
   bool mIsStarted{false};
-  int mNumRequestedWorkerThreads{kStandardPerformanceConfig.audioHost.numWorkerThreads};
+  int mNumWorkerThreads{kStandardPerformanceConfig.audioHost.numWorkerThreads};
 };
