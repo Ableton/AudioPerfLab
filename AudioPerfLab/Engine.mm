@@ -48,6 +48,37 @@
 namespace
 {
 
+// When all partials are active we should use roughly the maximum DSP processing power of
+// the device. This makes the best use of the range of the "Sine Waves" slider and
+// allows the "Burst Waves" slider to automatically be set to a good default.
+//
+// As a simple heuristic to estimate how many partials are needed, we duplicate a chord so
+// that it's played once for each core available for DSP. The base chord
+// (kChordNoteNumbers) needs to roughly max out a single core.
+//
+// This estimate can be improved by doing measurements when the app launches.
+int32_t estimateNumChordsToMaxOutSystem(const SomeAudioWorkgroup& workgroup)
+{
+  // maxNumParallelThreads() includes hyperthreading cores on x86 in the simulator,
+  // which don't add much processing capacity. Use numPhysicalCpus() if it's smaller to
+  // ignore hyperthreading cores.
+  return numPhysicalCpus()
+           ? std::min(workgroup.maxNumParallelThreads(), *numPhysicalCpus())
+           : workgroup.maxNumParallelThreads();
+}
+
+std::vector<float> duplicateChord(const std::vector<float>& noteNumbers,
+                                  const int numChords)
+{
+  std::vector<float> result;
+  for (int i = 0; i < numChords; ++i)
+  {
+    std::copy(noteNumbers.begin(), noteNumbers.end(), std::back_inserter(result));
+  }
+  std::sort(result.begin(), result.end());
+  return result;
+}
+
 float peakLevel(const StereoAudioBufferPtrs input, const int numFrames)
 {
   float result = 0.0;
@@ -119,9 +150,17 @@ public:
                 const uint64_t hostTime,
                 const int numFrames) { renderEnded(ioBuffer, hostTime, numFrames); }}
   {
-    const auto chordPartials = generateChord(
-      mHost.driver().sampleRate(), kAmpSmoothingDuration, kChordNoteNumbers);
-    mSineBank.setPartials(randomizePhases(chordPartials, kNumUnrandomizedPhases));
+    const auto numChordsToMaxOutSystem =
+      estimateNumChordsToMaxOutSystem(mHost.workgroup());
+
+    mNumSines = kDefaultNumSines * numChordsToMaxOutSystem;
+    const auto effectiveNumUnrandomizedPhases =
+      kNumUnrandomizedPhases * numChordsToMaxOutSystem;
+
+    const auto chordPartials =
+      generateChord(mHost.driver().sampleRate(), kAmpSmoothingDuration,
+                    duplicateChord(kChordNoteNumbers, numChordsToMaxOutSystem));
+    mSineBank.setPartials(randomizePhases(chordPartials, effectiveNumUnrandomizedPhases));
     mHost.start();
   }
 
@@ -244,7 +283,7 @@ private:
   ParallelSineBank mSineBank;
   Clock::time_point mRenderStartTime;
   FixedSPSCQueue<DriveMeasurement> mDriveMeasurements{kDriveMeasurementQueueSize};
-  std::atomic<int> mNumSines{kDefaultNumSines};
+  std::atomic<int> mNumSines{-1};
 
   std::atomic<int> mNumAdditionalSinesInBurst{0};
   std::atomic<float> mSineBurstDuration{0.0f};
