@@ -34,6 +34,7 @@
 uint64_t secondsToMachAbsoluteTime(std::chrono::duration<double> duration);
 std::chrono::duration<double> machAbsoluteTimeToSeconds(uint64_t machTime);
 
+std::string currentThreadName();
 void setCurrentThreadName(const std::string& name);
 
 //! Return the number of physical cores available (not including hyperthreading)
