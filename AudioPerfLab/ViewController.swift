@@ -190,12 +190,6 @@ class ViewController: UITableViewController {
     presetChooser.preset = engine.preset
   }
 
-  private func updateNumEngineWorkerThreads() {
-    engine.numWorkerThreads =
-      Int32(numProcessingThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
-    updateThreadDependentControls()
-  }
-
   @IBAction private func presetChanged(_ sender: Any) {
     engine.preset = presetChooser.preset
     syncControlsToEngine()
@@ -244,7 +238,8 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func numProcessingThreadsChanged(_ sender: Any) {
-    updateNumEngineWorkerThreads()
+    engine.numProcessingThreads = Int32(numProcessingThreadsSlider.value)
+    updateThreadDependentControls()
     updatePresetControl()
   }
 
@@ -278,7 +273,7 @@ class ViewController: UITableViewController {
 
   @IBAction private func processInDriverThreadChanged(_ sender: Any) {
     engine.processInDriverThread = processInDriverThreadControl.selectedSegmentIndex == 1
-    updateNumEngineWorkerThreads()
+    updateThreadDependentControls()
     updatePresetControl()
   }
 
@@ -507,14 +502,6 @@ class ViewController: UITableViewController {
       inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
         displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()
-    }
-  }
-}
-
-extension Engine {
-  var numProcessingThreads: Int {
-    get {
-      return Int(numWorkerThreads + (processInDriverThread ? 1 : 0))
     }
   }
 }

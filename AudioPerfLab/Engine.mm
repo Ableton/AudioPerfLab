@@ -97,7 +97,7 @@ class EngineImpl
 
 public:
   EngineImpl()
-    : mHost{[&](const int numWorkerThreads) { setup(numWorkerThreads); },
+    : mHost{[&](const int numProcessingThreads) { setup(numProcessingThreads); },
             [&](const StereoAudioBufferPtrs ioBuffer, const int numFrames) {
               renderStarted(ioBuffer, numFrames);
             },
@@ -166,11 +166,12 @@ private:
   }
 
   // Called with no audio threads active after app launch and setting changes
-  void setup(const int numWorkerThreads)
+  void setup(const int numProcessingThreads)
   {
-    assertRelease((numWorkerThreads + 1) <= MAX_NUM_THREADS, "Too many worker threads");
+    assertRelease(
+      (numProcessingThreads + 1) <= MAX_NUM_THREADS, "Too many processing threads");
 
-    mSineBank.setNumThreads(numWorkerThreads + 1);
+    mSineBank.setNumThreads(numProcessingThreads);
     std::fill(mNumActivePartialsProcessed.begin(), mNumActivePartialsProcessed.end(), -1);
     std::fill(mCpuNumbers.begin(), mCpuNumbers.end(), -1);
   }
@@ -197,10 +198,14 @@ private:
     }
   }
 
-  // Called by the main audio I/O thread and by worker audio threads
+  // Called by the main audio I/O thread (if processing in the driver thread is enabled)
+  // and by worker threads
   void process(const int threadIndex, const int numFrames)
   {
-    mNumActivePartialsProcessed[threadIndex] = mSineBank.process(threadIndex, numFrames);
+    const auto processingThreadIndex =
+      threadIndex - (host().processInDriverThread() ? 0 : 1);
+    mNumActivePartialsProcessed[threadIndex] =
+      mSineBank.process(processingThreadIndex, numFrames);
     mCpuNumbers[threadIndex] = cpuNumber();
   }
 
@@ -269,9 +274,11 @@ private:
 - (double)sampleRate { return mEngine.host().driver().sampleRate(); }
 
 - (int)numWorkerThreads { return mEngine.host().numWorkerThreads(); }
-- (void)setNumWorkerThreads:(int)numThreads
+
+- (int)numProcessingThreads { return mEngine.host().numProcessingThreads(); }
+- (void)setNumProcessingThreads:(int)numThreads
 {
-  mEngine.host().setNumWorkerThreads(numThreads);
+  mEngine.host().setNumProcessingThreads(numThreads);
 }
 
 - (int)numBusyThreads { return mEngine.busyThreads().numThreads(); }

@@ -45,7 +45,7 @@ inline bool operator!=(const BusyThreadsConfig& lhs, const BusyThreadsConfig& rh
 
 struct AudioHostConfig
 {
-  int numWorkerThreads{};
+  int numProcessingThreads{};
   bool processInDriverThread{};
   bool isWorkIntervalOn{};
   double minimumLoad{};
@@ -53,9 +53,9 @@ struct AudioHostConfig
 
 inline bool operator==(const AudioHostConfig& lhs, const AudioHostConfig& rhs)
 {
-  return std::tie(lhs.numWorkerThreads, lhs.processInDriverThread, lhs.isWorkIntervalOn,
-                  lhs.minimumLoad)
-         == std::tie(rhs.numWorkerThreads, rhs.processInDriverThread,
+  return std::tie(lhs.numProcessingThreads, lhs.processInDriverThread,
+                  lhs.isWorkIntervalOn, lhs.minimumLoad)
+         == std::tie(rhs.numProcessingThreads, rhs.processInDriverThread,
                      rhs.isWorkIntervalOn, rhs.minimumLoad);
 }
 
@@ -90,7 +90,7 @@ constexpr auto kStandardPerformanceConfig = PerformanceConfig{
     .cpuUsage = 0.5,
   },
   AudioHostConfig{
-    .numWorkerThreads = 1,
+    .numProcessingThreads = 2,
     .processInDriverThread = true,
     .isWorkIntervalOn = true,
     .minimumLoad = 0.0,
@@ -104,7 +104,7 @@ constexpr auto kOptimalPerformanceConfig = PerformanceConfig{
     .cpuUsage = kStandardPerformanceConfig.busyThreads.cpuUsage,
   },
   AudioHostConfig{
-    .numWorkerThreads = 2,
+    .numProcessingThreads = 2,
     .processInDriverThread = false,
     .isWorkIntervalOn = false,
     .minimumLoad = kStandardPerformanceConfig.audioHost.minimumLoad,
