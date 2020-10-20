@@ -115,7 +115,7 @@ void AudioHost::setPreferredBufferSize(const int preferredBufferSize)
   }
 }
 
-int AudioHost::numWorkerThreads() const { return int(mWorkerThreads.size()); }
+int AudioHost::numWorkerThreads() const { return mNumWorkerThreads; }
 void AudioHost::setNumWorkerThreads(const int numWorkerThreads)
 {
   if (numWorkerThreads != mNumWorkerThreads)
