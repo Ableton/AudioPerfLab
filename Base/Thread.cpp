@@ -97,8 +97,10 @@ void setThreadTimeConstraintPolicy(const pthread_t thread,
   policy.preemptible = 1;
 
   os_log(OS_LOG_DEFAULT,
-         "Setting time constraint policy: (period: %d, computation: %d, constraint: %d)",
-         policy.period, policy.computation, policy.constraint);
+         "Setting time constraint policy for %s: "
+         "(period: %d, computation: %d, constraint: %d)",
+         currentThreadName().c_str(), policy.period, policy.computation,
+         policy.constraint);
 
   const kern_return_t result = thread_policy_set(
     pthread_mach_thread_np(thread), THREAD_TIME_CONSTRAINT_POLICY,
