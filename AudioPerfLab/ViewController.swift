@@ -62,6 +62,8 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var processInDriverThreadControl: UISegmentedControl!
   @IBOutlet weak private var isWorkIntervalOnSwitch: UISwitch!
 
+  private static let defaultNumBurstSinesPercent = 0.75
+
   private static let maxEnergyViewPowerInWatts = 5.0
   private static let powerLabelUpdateInterval = 0.5
 
@@ -109,6 +111,12 @@ class ViewController: UITableViewController {
     numProcessingThreadsSlider.maximumValue = Float(numberOfProcessors)
 
     syncControlsToEngine()
+
+    // Set the default number of burst sines after syncControlsToEngine(), which sets the
+    // slider's maximum
+    numBurstSinesSlider.value =
+      (Float(engine.maxNumSines) * Float(ViewController.defaultNumBurstSinesPercent))
+        .rounded()
   }
 
   private func setupDriveDurationsView() {
