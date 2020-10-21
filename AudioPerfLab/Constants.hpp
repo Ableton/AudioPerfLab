@@ -40,7 +40,7 @@ constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
  */
 constexpr auto kNumPartialsPerProcessingChunk = 256;
 
-constexpr auto kChordNoteNumbers = {53.0f, 56.0f, 60.0f};
+constexpr auto kChordNoteNumbers = {53.0f, 56.0f, 60.0f, 65.0f};
 constexpr auto kNumUnrandomizedPhases = 15;
 
 constexpr auto kDriveMeasurementQueueSize = 1024;
