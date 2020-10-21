@@ -35,7 +35,8 @@ public:
 
   explicit VolumeFader(const T initialAmp)
     : mRampedValue{initialAmp}
-  {}
+  {
+  }
 
   void fadeTo(const T& amp, const uint64_t numFrames)
   {
