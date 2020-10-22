@@ -49,10 +49,10 @@ inline void hardwareDelay()
 {
 #if defined(__arm64__)
   // Enter a low power state until a wake-up event occurs. See the "Wait for Event
-  // mechanism and Send event" section (D1.17.1) in the ARM Architecture Reference Manual
-  // for ARMv8.
+  // mechanism and Send event" section (D1.16.1) in the ARM Architecture Reference Manual
+  // for ARMv8: https://developer.arm.com/documentation/ddi0487/fc
   //
-  // In XNU an Event Stream (D10.2.3) produces a wake-up event every
+  // In XNU an Event Stream (D11.2.3) produces a wake-up event every
   // ARM_BOARD_WFE_TIMEOUT_NS (currently 1us). In practice the instruction averages
   // 1.32us. XNU's implementation of machine_delay_until() also depends on this event
   // stream.
