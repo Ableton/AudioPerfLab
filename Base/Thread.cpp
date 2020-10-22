@@ -28,9 +28,16 @@
 #include <mach/thread_act.h>
 #include <mach/thread_policy.h>
 #include <os/log.h>
+#include <sys/sysctl.h>
 #include <system_error>
 
-static const mach_timebase_info_data_t sMachTimebaseInfo = [] {
+namespace
+{
+
+// See MAXTHREADNAMESIZE in the XNU sources. Includes the null terminating byte.
+constexpr auto kMaxThreadNameSize = 64;
+
+const mach_timebase_info_data_t sMachTimebaseInfo = [] {
   mach_timebase_info_data_t machTimebaseInfo;
   if (mach_timebase_info(&machTimebaseInfo) != KERN_SUCCESS)
   {
@@ -38,6 +45,8 @@ static const mach_timebase_info_data_t sMachTimebaseInfo = [] {
   }
   return machTimebaseInfo;
 }();
+
+} // namespace
 
 uint64_t secondsToMachAbsoluteTime(const std::chrono::duration<double> duration)
 {
@@ -52,7 +61,30 @@ std::chrono::duration<double> machAbsoluteTimeToSeconds(const uint64_t machAbsol
                                   / sMachTimebaseInfo.denom};
 }
 
-void setCurrentThreadName(const std::string& name) { pthread_setname_np(name.c_str()); }
+std::string currentThreadName()
+{
+  char str[kMaxThreadNameSize] = {};
+  const auto result = pthread_getname_np(pthread_self(), str, kMaxThreadNameSize);
+  return result == 0 ? str : "";
+}
+
+void setCurrentThreadName(const std::string& name)
+{
+  // pthread_setname_np() won't set the name if it is too long, so truncate it to be
+  // at most kMaxThreadNameSize characters long, including the null terminating byte.
+  const std::string truncatedName{name, 0, kMaxThreadNameSize - 1};
+
+  pthread_setname_np(truncatedName.c_str());
+}
+
+std::optional<int32_t> numPhysicalCpus()
+{
+  int32_t result = 0;
+  size_t size = sizeof(int32_t);
+  return sysctlbyname("hw.physicalcpu", &result, &size, nullptr, 0) == 0
+           ? std::optional<int32_t>{result}
+           : std::nullopt;
+}
 
 void setThreadTimeConstraintPolicy(const pthread_t thread,
                                    const TimeConstraintPolicy& timeConstraintPolicy)
@@ -65,8 +97,10 @@ void setThreadTimeConstraintPolicy(const pthread_t thread,
   policy.preemptible = 1;
 
   os_log(OS_LOG_DEFAULT,
-         "Setting time constraint policy: (period: %d, computation: %d, constraint: %d)",
-         policy.period, policy.computation, policy.constraint);
+         "Setting time constraint policy for %s: "
+         "(period: %d, computation: %d, constraint: %d)",
+         currentThreadName().c_str(), policy.period, policy.computation,
+         policy.constraint);
 
   const kern_return_t result = thread_policy_set(
     pthread_mach_thread_np(thread), THREAD_TIME_CONSTRAINT_POLICY,

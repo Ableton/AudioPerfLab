@@ -23,6 +23,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 #include <tuple>
 
 struct BusyThreadsConfig
@@ -43,9 +44,13 @@ inline bool operator!=(const BusyThreadsConfig& lhs, const BusyThreadsConfig& rh
   return !(lhs == rhs);
 }
 
+constexpr std::optional<int> kUseRecommendedNumThreads = std::nullopt;
+
 struct AudioHostConfig
 {
-  int numWorkerThreads{};
+  // Set to kUseRecommendedNumThreads to use the system's recommended number of threads
+  std::optional<int> numProcessingThreads;
+
   bool processInDriverThread{};
   bool isWorkIntervalOn{};
   double minimumLoad{};
@@ -53,9 +58,9 @@ struct AudioHostConfig
 
 inline bool operator==(const AudioHostConfig& lhs, const AudioHostConfig& rhs)
 {
-  return std::tie(lhs.numWorkerThreads, lhs.processInDriverThread, lhs.isWorkIntervalOn,
-                  lhs.minimumLoad)
-         == std::tie(rhs.numWorkerThreads, rhs.processInDriverThread,
+  return std::tie(lhs.numProcessingThreads, lhs.processInDriverThread,
+                  lhs.isWorkIntervalOn, lhs.minimumLoad)
+         == std::tie(rhs.numProcessingThreads, rhs.processInDriverThread,
                      rhs.isWorkIntervalOn, rhs.minimumLoad);
 }
 
@@ -90,7 +95,7 @@ constexpr auto kStandardPerformanceConfig = PerformanceConfig{
     .cpuUsage = 0.5,
   },
   AudioHostConfig{
-    .numWorkerThreads = 1,
+    .numProcessingThreads = kUseRecommendedNumThreads,
     .processInDriverThread = true,
     .isWorkIntervalOn = true,
     .minimumLoad = 0.0,
@@ -104,7 +109,7 @@ constexpr auto kOptimalPerformanceConfig = PerformanceConfig{
     .cpuUsage = kStandardPerformanceConfig.busyThreads.cpuUsage,
   },
   AudioHostConfig{
-    .numWorkerThreads = 2,
+    .numProcessingThreads = kUseRecommendedNumThreads,
     .processInDriverThread = false,
     .isWorkIntervalOn = false,
     .minimumLoad = kStandardPerformanceConfig.audioHost.minimumLoad,

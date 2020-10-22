@@ -25,7 +25,7 @@
 #include <chrono>
 #include <initializer_list>
 
-constexpr auto kDefaultNumSines = 36;
+constexpr auto kDefaultNumSines = 18;
 constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
 
 /* The number of partials taken at a time by worker threads.
@@ -40,9 +40,8 @@ constexpr auto kAmpSmoothingDuration = std::chrono::milliseconds{100};
  */
 constexpr auto kNumPartialsPerProcessingChunk = 256;
 
-// Play every note twice to increase load
-constexpr auto kChordNoteNumbers = {53.0f, 53.0f, 56.0f, 56.0f, 60.0f, 60.0f};
-constexpr auto kNumUnrandomizedPhases = 30;
+constexpr auto kChordNoteNumbers = {53.0f, 56.0f, 60.0f, 65.0f};
+constexpr auto kNumUnrandomizedPhases = 15;
 
 constexpr auto kDriveMeasurementQueueSize = 1024;
 constexpr auto kMaxNumFrames = 4096;

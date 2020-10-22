@@ -22,12 +22,15 @@
 
 #include "ParallelSineBank.hpp"
 
+#include "Base/Assert.hpp"
 #include "Constants.hpp"
 
 #include <algorithm>
 
 void ParallelSineBank::setNumThreads(const int numThreads)
 {
+  assertRelease(numThreads >= 0, "Invalid number of threads");
+
   mBuffers.resize(numThreads, StereoAudioBuffer{std::vector<float>(kMaxNumFrames, 0.0f),
                                                 std::vector<float>(kMaxNumFrames, 0.0f)});
 }
@@ -40,6 +43,9 @@ void ParallelSineBank::setPartials(std::vector<Partial> partials)
 
 void ParallelSineBank::prepare(const int numActivePartials, const int numFrames)
 {
+  assertRelease(numActivePartials >= 0, "Invalid number of active partials");
+  assertRelease(numFrames > 0 && numFrames <= kMaxNumFrames, "Invalid number of frames");
+
   mNumActivePartials = numActivePartials;
   mNumTakenPartials = 0;
 
@@ -52,6 +58,10 @@ void ParallelSineBank::prepare(const int numActivePartials, const int numFrames)
 
 int ParallelSineBank::process(const int threadIndex, const int numFrames)
 {
+  assertRelease(
+    threadIndex >= 0 && threadIndex < int(mBuffers.size()), "Invalid thread index");
+  assertRelease(numFrames > 0 && numFrames <= kMaxNumFrames, "Invalid number of frames");
+
   auto& stereoBuffer = mBuffers[threadIndex];
 
   int numActivePartialsProcessed = 0;
@@ -83,6 +93,8 @@ int ParallelSineBank::process(const int threadIndex, const int numFrames)
 
 void ParallelSineBank::mixTo(const StereoAudioBufferPtrs dest, const int numFrames)
 {
+  assertRelease(numFrames > 0 && numFrames <= kMaxNumFrames, "Invalid number of frames");
+
   const auto sumInto = [](const auto& inBuffer, auto* pOutBuffer, const int numFrames) {
     std::transform(inBuffer.begin(), inBuffer.begin() + numFrames, pOutBuffer, pOutBuffer,
                    [](const float x, const float y) { return x + y; });

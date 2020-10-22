@@ -47,7 +47,7 @@ class AudioHost
   using Clock = std::chrono::high_resolution_clock;
 
 public:
-  using Setup = std::function<void(int numWorkerThreads)>;
+  using Setup = std::function<void(int numProcessingThreads)>;
   using RenderStarted =
     std::function<void(StereoAudioBufferPtrs ioBuffer, int numFrames)>;
   using Process = std::function<void(int threadIndex, int numFrames)>;
@@ -63,6 +63,9 @@ public:
   Driver& driver();
   const Driver& driver() const;
 
+  SomeAudioWorkgroup& workgroup();
+  const SomeAudioWorkgroup& workgroup() const;
+
   void start();
   void stop();
 
@@ -76,7 +79,9 @@ public:
   void setPreferredBufferSize(const int preferredBufferSize);
 
   int numWorkerThreads() const;
-  void setNumWorkerThreads(int numWorkerThreads);
+
+  int numProcessingThreads() const;
+  void setNumProcessingThreads(int numProcessingThreads);
 
   bool processInDriverThread() const;
   void setProcessInDriverThread(bool isEnabled);
@@ -127,5 +132,5 @@ private:
   RenderEnded mRenderEnded;
 
   bool mIsStarted{false};
-  int mNumRequestedWorkerThreads{kStandardPerformanceConfig.audioHost.numWorkerThreads};
+  int mNumProcessingThreads{-1};
 };

@@ -22,8 +22,8 @@
 
 #pragma once
 
-#define DISABLE_AVAILABILITY_WARNINGS \
-  _Pragma("clang diagnostic push") \
-  _Pragma("clang diagnostic ignored \"-Wunguarded-availability-new\"")
+#define DISABLE_AVAILABILITY_WARNINGS                                                    \
+  _Pragma("clang diagnostic push")                                                       \
+    _Pragma("clang diagnostic ignored \"-Wunguarded-availability-new\"")
 
 #define RESTORE_WARNINGS _Pragma("clang diagnostic pop")

@@ -24,7 +24,7 @@
 
 #import <UIKit/UIKit.h>
 
-#define MAX_NUM_THREADS 8
+#define MAX_NUM_THREADS 32
 struct DriveMeasurement
 {
   double hostTime;
@@ -48,7 +48,8 @@ typedef NS_ENUM(NSInteger, PerformancePreset) {
 @property(nonatomic, readonly) float outputVolume;
 @property(nonatomic) int preferredBufferSize;
 @property(nonatomic, readonly) double sampleRate;
-@property(nonatomic) int numWorkerThreads;
+@property(nonatomic, readonly) int numWorkerThreads;
+@property(nonatomic) int numProcessingThreads;
 @property(nonatomic) int numBusyThreads;
 @property(nonatomic) double busyThreadPeriod;
 @property(nonatomic) double busyThreadCpuUsage;

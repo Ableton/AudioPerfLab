@@ -62,6 +62,8 @@ class ViewController: UITableViewController {
   @IBOutlet weak private var processInDriverThreadControl: UISegmentedControl!
   @IBOutlet weak private var isWorkIntervalOnSwitch: UISwitch!
 
+  private static let defaultNumBurstSinesPercent = 0.75
+
   private static let maxEnergyViewPowerInWatts = 5.0
   private static let powerLabelUpdateInterval = 0.5
 
@@ -78,6 +80,7 @@ class ViewController: UITableViewController {
     UIColor.systemPurple,
     UIColor.systemRed,
     UIColor.systemYellow,
+    UIColor.systemTeal,
   ]
 
   override func viewDidLoad() {
@@ -105,8 +108,15 @@ class ViewController: UITableViewController {
       { (value: Float) in return "\(Int(value * 1000))ms"}
 
     numSinesSlider.minimumValue = Float(engine.numSines)
+    numProcessingThreadsSlider.maximumValue = Float(numberOfProcessors)
 
     syncControlsToEngine()
+
+    // Set the default number of burst sines after syncControlsToEngine(), which sets the
+    // slider's maximum
+    numBurstSinesSlider.value =
+      (Float(engine.maxNumSines) * Float(ViewController.defaultNumBurstSinesPercent))
+        .rounded()
   }
 
   private func setupDriveDurationsView() {
@@ -188,12 +198,6 @@ class ViewController: UITableViewController {
     presetChooser.preset = engine.preset
   }
 
-  private func updateNumEngineWorkerThreads() {
-    engine.numWorkerThreads =
-      Int32(numProcessingThreadsSlider.value) - (engine.processInDriverThread ? 1 : 0)
-    updateThreadDependentControls()
-  }
-
   @IBAction private func presetChanged(_ sender: Any) {
     engine.preset = presetChooser.preset
     syncControlsToEngine()
@@ -242,7 +246,8 @@ class ViewController: UITableViewController {
   }
 
   @IBAction private func numProcessingThreadsChanged(_ sender: Any) {
-    updateNumEngineWorkerThreads()
+    engine.numProcessingThreads = Int32(numProcessingThreadsSlider.value)
+    updateThreadDependentControls()
     updatePresetControl()
   }
 
@@ -276,7 +281,7 @@ class ViewController: UITableViewController {
 
   @IBAction private func processInDriverThreadChanged(_ sender: Any) {
     engine.processInDriverThread = processInDriverThreadControl.selectedSegmentIndex == 1
-    updateNumEngineWorkerThreads()
+    updateThreadDependentControls()
     updatePresetControl()
   }
 
@@ -363,6 +368,10 @@ class ViewController: UITableViewController {
       color: color)
   }
 
+  static func colorForThread(_ threadIndex: Int) -> UIColor {
+    return ViewController.threadColors[threadIndex % ViewController.threadColors.count]
+  }
+
   private func addWorkDistributionMeasurement(
     time: Double,
     duration bufferDuration: Double,
@@ -384,7 +393,7 @@ class ViewController: UITableViewController {
         let percent =
           Double(partialsProcessed) / Double(totalNumActivePartialsProcessed)
         let value = percent + lastValue
-        let color = ViewController.threadColors[threadIndex]
+        let color = ViewController.colorForThread(threadIndex)
         workActivityView.addSample(
           time: time,
           duration: bufferDuration,
@@ -403,7 +412,7 @@ class ViewController: UITableViewController {
     for (cpuNumber, coreActivityView) in coreActivityViews.enumerated() {
       let threadIndex = threadIndexPerCpu[cpuNumber]
       let color =
-        threadIndex != nil ? ViewController.threadColors[threadIndex!] : UIColor.white
+        threadIndex != nil ? ViewController.colorForThread(threadIndex!) : UIColor.white
       coreActivityView.addSample(
         time: time,
         duration: bufferDuration,
@@ -501,14 +510,6 @@ class ViewController: UITableViewController {
       inputMeterView.levelInDb = inputMeterSmoother.smoothedLevel(
         displayTime: displayLink.timestamp)
       redrawExpandedActivityViews()
-    }
-  }
-}
-
-extension Engine {
-  var numProcessingThreads: Int {
-    get {
-      return Int(numWorkerThreads + (processInDriverThread ? 1 : 0))
     }
   }
 }
