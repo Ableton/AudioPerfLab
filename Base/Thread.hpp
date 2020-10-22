@@ -23,6 +23,7 @@
 #pragma once
 
 #include <chrono>
+#include <optional>
 #include <pthread.h>
 #include <string>
 
@@ -34,6 +35,9 @@ uint64_t secondsToMachAbsoluteTime(std::chrono::duration<double> duration);
 std::chrono::duration<double> machAbsoluteTimeToSeconds(uint64_t machTime);
 
 void setCurrentThreadName(const std::string& name);
+
+//! Return the number of physical cores available (not including hyperthreading)
+std::optional<int32_t> numPhysicalCpus();
 
 struct TimeConstraintPolicy
 {

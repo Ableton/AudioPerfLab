@@ -28,6 +28,7 @@
 #include <mach/thread_act.h>
 #include <mach/thread_policy.h>
 #include <os/log.h>
+#include <sys/sysctl.h>
 #include <system_error>
 
 static const mach_timebase_info_data_t sMachTimebaseInfo = [] {
@@ -53,6 +54,15 @@ std::chrono::duration<double> machAbsoluteTimeToSeconds(const uint64_t machAbsol
 }
 
 void setCurrentThreadName(const std::string& name) { pthread_setname_np(name.c_str()); }
+
+std::optional<int32_t> numPhysicalCpus()
+{
+  int32_t result = 0;
+  size_t size = sizeof(int32_t);
+  return sysctlbyname("hw.physicalcpu", &result, &size, nullptr, 0) == 0
+           ? std::optional<int32_t>{result}
+           : std::nullopt;
+}
 
 void setThreadTimeConstraintPolicy(const pthread_t thread,
                                    const TimeConstraintPolicy& timeConstraintPolicy)
