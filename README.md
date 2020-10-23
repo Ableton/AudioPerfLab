@@ -13,6 +13,23 @@
   <img src="Screenshot.png" alt="Screenshot" height="600">
 </p>
 
+# Table of Contents
+
+<!-- MarkdownTOC autolink="true" levels="1,2" -->
+
+- [About](#about)
+- [Recommendations](#recommendations)
+- [Requirements](#requirements)
+- [License](#license)
+- [Visualizations and Controls](#visualizations-and-controls)
+  - [Toolbar](#toolbar)
+  - [Visualizations](#visualizations)
+  - [Audio](#audio)
+  - [Busy Threads](#busy-threads)
+  - [Audio Threads](#audio-threads)
+
+<!-- /MarkdownTOC -->
+
 # About
 
 The performance controller for [Apple Silicon](https://en.wikipedia.org/wiki/Apple-designed_processors) is tasked with balancing the competing interests of performance and energy efficiency. For light workloads, the performance controller saves energy by scheduling work onto efficiency cores and running them at low clock speeds. For heavier workloads, it moves the work to performance cores and ramps up their clock speeds.
