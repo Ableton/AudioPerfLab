@@ -1,10 +1,17 @@
-# <img src="Logo.svg" alt="Logo" height="76">
-
-[![Build Status](https://travis-ci.com/Ableton/AudioPerfLab.svg?branch=master)](https://travis-ci.com/Ableton/AudioPerfLab)
-
-An app for exploring real-time audio performance on iOS devices. See [High Performance Audio on iOS](https://youtu.be/ywrLAv5WNq4) from ADC '19 for more information.
-
-<img src="Screenshot.png" alt="Screenshot" height="600">
+<a href="https://travis-ci.com/Ableton/AudioPerfLab">
+  <img src="https://travis-ci.com/Ableton/AudioPerfLab.svg?branch=master" alt="CI Status">
+</a>
+<p align="center">
+  <a href="https://github.com/Ableton/AudioPerfLab">
+    <img src="Logo.svg" alt="Logo" height="70">
+  </a>
+</p>
+<p align="center">
+  <i>An app for exploring real-time audio performance on iPhone and iPad</i>
+</p>
+<p align="center">
+  <img src="Screenshot.png" alt="Screenshot" height="600">
+</p>
 
 # Requirements
 
