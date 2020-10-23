@@ -53,21 +53,23 @@ This software is distributed under the [MIT License](./LICENSE).
 
 ⚠️ Drawing visualizations is expensive and can impact the scheduling of audio threads in surprising ways. You can observe behavior without the confounding effect of drawing by briefly turning visualizations off, performing a test, and then turning them back on.
 
-## Load
+## Visualizations
+
+### Load
 
 A graph of the amount of time taken to process each audio buffer as a percentage of the buffer duration. Drop-outs are drawn in red.
 
-## Work Distribution
+### Work Distribution
 
 A stacked area graph showing the relative number of sine waves processed per thread. Colors represent threads and the CoreAudio I/O thread is drawn in black. A solid black graph, for example, indicates that the I/O thread has processed all sines. A half black/half blue graph indicates that two threads each processed an equal number of sines.
 
 If work is not distributed evenly, threads are likely being scheduled onto cores with different clock speeds. Note that the chunk size (`kNumPartialsPerProcessingChunk`) impacts the distribution when processing a small number of sines.
 
-## Cores
+### Cores
 
 A visualization of thread activity on each CPU core. Each row represents a core and each color represents an audio thread. On iPhone 8 and up, the first four rows represent energy-efficient cores and the last two rows represent high-performance cores. The CoreAudio I/O thread is drawn in black.
 
-## Energy
+### Energy
 
 A graph of the estimated power consumption of the AudioPerfLab process in watts. This can be used to compare the energy impact of different approaches for avoiding core switching and frequency scaling (see the Minimum Load and Busy Threads sliders).
 
