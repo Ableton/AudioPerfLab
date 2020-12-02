@@ -179,14 +179,14 @@ void Driver::setOutputVolume(const float volume, const Seconds fadeDuration)
 
 std::optional<AudioWorkgroup> Driver::workgroup() const
 {
-  os_workgroup_t workgroup;
+  os_workgroup_t pWorkgroup = nullptr;
   UInt32 size = sizeof(os_workgroup_t);
   const auto result =
     AudioUnitGetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_OSWorkgroup,
-                         kAudioUnitScope_Global, 0, &workgroup, &size);
-  if (result == noErr)
+                         kAudioUnitScope_Global, 0, &pWorkgroup, &size);
+  if (result == noErr && pWorkgroup != nullptr)
   {
-    return AudioWorkgroup{workgroup};
+    return AudioWorkgroup{pWorkgroup};
   }
   else
   {

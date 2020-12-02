@@ -82,6 +82,7 @@ AudioWorkgroup::ScopedMembership::~ScopedMembership()
 AudioWorkgroup::AudioWorkgroup(const os_workgroup_t pWorkgroup)
   : mpWorkgroup{pWorkgroup}
 {
+  assertRelease(pWorkgroup != nullptr, "nullptr workgroup");
 }
 
 AudioWorkgroup::AudioWorkgroup(const AudioWorkgroup&) = default;
