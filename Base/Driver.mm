@@ -184,7 +184,7 @@ std::optional<AudioWorkgroup> Driver::workgroup() const
   const auto result =
     AudioUnitGetProperty(mpRemoteIoUnit, kAudioOutputUnitProperty_OSWorkgroup,
                          kAudioUnitScope_Global, 0, &pWorkgroup, &size);
-  if (result == noErr)
+  if (result == noErr && pWorkgroup != nullptr)
   {
     return AudioWorkgroup{pWorkgroup};
   }

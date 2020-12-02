@@ -182,14 +182,15 @@ void AudioHost::setupDriver(const Driver::Config config)
 
   if (__builtin_available(iOS 14, *))
   {
-    const auto workgroup = driver().workgroup();
-    assertRelease(workgroup != std::nullopt, "Couldn't retrieve the workgroup");
-    mAudioWorkgroup.emplace(*workgroup);
+    if (const auto maybeWorkgroup = driver().workgroup())
+    {
+      mAudioWorkgroup.emplace(*maybeWorkgroup);
+      return;
+    }
   }
-  else
-  {
-    mAudioWorkgroup.emplace(LegacyAudioWorkgroup{});
-  }
+
+  // Fallback to the legacy workgroup
+  mAudioWorkgroup.emplace(LegacyAudioWorkgroup{});
 }
 
 void AudioHost::teardownDriver()
