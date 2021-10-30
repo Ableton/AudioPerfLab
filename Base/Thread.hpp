@@ -97,8 +97,15 @@ void lowEnergyWorkUntil(const std::chrono::time_point<Clock, Rep> until)
 inline unsigned int cpuNumber()
 {
 #if defined(__arm64__)
+  // The TSD base and CPU number are stored in TPIDR_EL0 instead of TPIDRRO_EL0 on macOS
+  // 12 and up and iOS 15 and up. Prior to these versions TPIDR_EL0 is always zero, so we
+  // use TPIDR_EL0 if it's set and fallback to TPIDRRO_EL0 if not.
   uint64_t p;
-  __asm__ volatile("mrs  %[p], TPIDRRO_EL0" : [p] "=&r"(p));
+  __asm__ volatile("mrs %[p], TPIDR_EL0" : [p] "=&r"(p));
+  if (p == 0)
+  {
+    __asm__ volatile("mrs %[p], TPIDRRO_EL0" : [p] "=&r"(p));
+  }
   return static_cast<unsigned int>(p & 0x7);
 #elif defined(__arm__) && defined(_ARM_ARCH_6)
   uintptr_t p;
