@@ -92,8 +92,10 @@ void lowEnergyWorkUntil(const std::chrono::time_point<Clock, Rep> until)
   }
 }
 
-// _os_cpu_number() from XNU with volatile inline assembly to prevent code from being
-// moved out of a loop (see http://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#Volatile).
+#define __TPIDR_CPU_NUM_MASK 0x0000000000000fff
+#define __TPIDR_CPU_NUM_SHIFT 0
+
+// _os_cpu_number() from XNU with support for both older and newer macOS/iOS versions
 inline unsigned int cpuNumber()
 {
 #if defined(__arm64__)
@@ -101,12 +103,16 @@ inline unsigned int cpuNumber()
   // 12 and up and iOS 15 and up. Prior to these versions TPIDR_EL0 is always zero, so we
   // use TPIDR_EL0 if it's set and fallback to TPIDRRO_EL0 if not.
   uint64_t p;
-  __asm__ volatile("mrs %[p], TPIDR_EL0" : [p] "=&r"(p));
-  if (p == 0)
+  __asm__ __volatile__("mrs %0, TPIDR_EL0" : "=r"(p));
+  if (p != 0)
   {
-    __asm__ volatile("mrs %[p], TPIDRRO_EL0" : [p] "=&r"(p));
+    return static_cast<unsigned int>((p & __TPIDR_CPU_NUM_MASK) >> __TPIDR_CPU_NUM_SHIFT);
   }
-  return static_cast<unsigned int>(p & 0x7);
+  else
+  {
+    __asm__ __volatile__("mrs %[p], TPIDRRO_EL0" : [p] "=&r"(p));
+    return static_cast<unsigned int>(p & 0x7);
+  }
 #elif defined(__arm__) && defined(_ARM_ARCH_6)
   uintptr_t p;
   __asm__ volatile("mrc  p15, 0, %[p], c13, c0, 3" : [p] "=&r"(p));
