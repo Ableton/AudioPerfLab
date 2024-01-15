@@ -1,5 +1,5 @@
 <a href="https://travis-ci.com/Ableton/AudioPerfLab">
-  <img src="https://travis-ci.com/Ableton/AudioPerfLab.svg?branch=master" alt="CI Status">
+  <img src="https://travis-ci.com/Ableton/AudioPerfLab.svg?branch=main" alt="CI Status">
 </a>
 <p align="center">
   <a href="https://github.com/Ableton/AudioPerfLab">
